@@ -34,6 +34,6 @@ jobs:
         working-directory: ./
         run: npm install
 
-      - name: ✨ 빌드 과정을 시작
+      - name: 🏃 애플리케이션 시작
         working-directory: ./
-        run: npm run build
+        run: npm start
