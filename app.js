@@ -3,23 +3,16 @@ const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
 const path = require("path");
 const session = require("express-session");
-const nunjucks = require("nunjucks");
-const passport = require("passport");
 const dotenv = require("dotenv");
 const { sequelize } = require("./models");
 
 dotenv.config();
 const pageRouter = require("./routes/page");
-const passportConfig = requier("./passport");
 
 const app = express();
-passportConfig();
+// passportConfig();
 app.set("port", process.env.PORT || 8001);
-app.set("view engine", "html");
-nunjucks.configure("views", {
-  express: app,
-  watch: true,
-});
+
 sequelize
   .sync({ force: true })
   .then(() => {
@@ -48,6 +41,11 @@ app.use(
 );
 
 app.use("/", pageRouter);
+
+app.get("/about", (req, res) => {
+  res.send("about express");
+});
+
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
   error.status = 404;
@@ -57,7 +55,7 @@ app.use((err, req, res, next) => {
   res.locals.message = err.message;
   res.locals.error = process.env.NODE_ENV !== "production" ? err : {};
   res.status(err.status || 500);
-  res.render("error");
+  res.send(`Error: ${res.locals.message}`);
 });
 
 app.listen(app.get("port"), () => {
