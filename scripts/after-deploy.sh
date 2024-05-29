@@ -7,4 +7,4 @@ cd $REPOSITORY
 sudo /usr/bin/npm install
 
 # pm2를 사용하여 애플리케이션 시작
-sudo /usr/bin/pm2 start dist
+sudo /opt/homebrew/bin/pm2 start dist
