@@ -7,4 +7,4 @@ cd $REPOSITORY
 sudo /usr/bin/npm install
 
 # pm2를 사용하여 애플리케이션 시작
-sudo /opt/homebrew/bin/pm2 start
+sudo pm2 start app.js
