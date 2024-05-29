@@ -7,4 +7,4 @@ cd $REPOSITORY
 sudo /usr/bin/npm install
 
 # pm2를 사용하여 애플리케이션 시작
-sudo pm2 start npm -- start
+sudo pm2 restart all
