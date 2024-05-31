@@ -1,5 +1,5 @@
 #!/bin/bash
-REPOSITORY=/home/ubuntu/seninanum-be
+REPOSITORY=/home/ubuntu/build
 
 cd $REPOSITORY
 
