@@ -3,8 +3,12 @@ REPOSITORY=/home/ubuntu/build
 
 cd $REPOSITORY
 
-# npm을 사용하여 패키지 설치
-sudo /usr/bin/npm install
+# Install dependencies
+npm install
 
-# pm2를 사용하여 애플리케이션 재시작
-sudo pm2 restart all
+# Start or restart the application with PM2, updating environment variables
+pm2 start ./bin/www --name "" --update-env
+
+# Save the PM2 process list and corresponding environments
+pm2 save
+
