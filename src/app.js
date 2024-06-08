@@ -2,20 +2,17 @@
 const express = require("express");
 const morgan = require("morgan");
 const { sequelize } = require("./models");
-const kakao = require("../src/passport/kakaoStrategy");
-const passport = require("passport");
+// const kakao = require("../src/passport/kakaoStrategy");
+// const passport = require("passport");
 const path = require("path");
-require("dotenv").config();
+const cookieParser = require("cookie-parser");
+// const session = require("express-session");
+const cors = require("cors");
 
 // router
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const testRouter = require("./routes/test");
-
-// 설정
-const cookieParser = require("cookie-parser");
-const session = require("express-session");
-const cors = require("cors");
 
 const app = express();
 app.set("port", process.env.PORT || 3001);
@@ -46,40 +43,40 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      domain: " ",
-      path: "/",
-      secure: false,
-      httpOnly: false,
-    },
-  })
-);
+// app.use(
+//   session({
+//     secret: process.env.SESSION_SECRET,
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//       domain: " ",
+//       path: "/",
+//       secure: false,
+//       httpOnly: false,
+//     },
+//   })
+// );
 
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.initialize());
+// app.use(passport.session());
 
-passport.serializeUser((token, done) => {
-  done(null, token);
-});
+// passport.serializeUser((token, done) => {
+//   done(null, token);
+// });
 
-passport.deserializeUser((token, done) => {
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const userId = decoded.userId;
+// passport.deserializeUser((token, done) => {
+//   const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//   const userId = decoded.userId;
 
-  Users.findByPk(userId)
-    .then((user) => {
-      done(null, user);
-    })
-    .catch((err) => {
-      done(err);
-    });
-});
-kakao();
+//   Users.findByPk(userId)
+//     .then((user) => {
+//       done(null, user);
+//     })
+//     .catch((err) => {
+//       done(err);
+//     });
+// });
+// kakao();
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
@@ -94,7 +91,7 @@ app.use((err, req, res, next) => {
   res.locals.message = err.message;
   res.locals.error = process.env.NODE_ENV !== "production" ? err : {};
   res.status(err.status || 500);
-  res.render("error");
+  res.json("error");
 });
 
 app.listen(app.get("port"), () => {
