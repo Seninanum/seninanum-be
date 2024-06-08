@@ -21,8 +21,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Fix permissions
-        run: sudo chown -R $USER:$USER /home/runner/work/seninanum-be/seninanum-be
+      - name: 🧹 Remove node_modules and package-lock.json
+        working-directory: ./
+        run: |
+          rm -rf node_modules
+          rm -f package-lock.json
 
       - name: ✨ 패키지 설치
         working-directory: ./
