@@ -21,6 +21,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Fix permissions
+        run: sudo chown -R $USER:$USER /home/runner/work/seninanum-be/seninanum-be
+
       - name: ✨ 패키지 설치
         working-directory: ./
         run: npm install
