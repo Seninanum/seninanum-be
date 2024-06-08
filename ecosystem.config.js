@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: "app",
-      script: "./bin/www", // www 파일을 실행 스크립트로 지정
+      script: "./src/app.js",
       instances: 1,
       autorestart: true,
       watch: false,
