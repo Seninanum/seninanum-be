@@ -31,7 +31,11 @@ sequelize
 
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: [
+      "http://localhost:3000",
+      "https://api.seninanum.shop",
+      "https://seninanum.shop",
+    ],
     credentials: true,
   })
 );
