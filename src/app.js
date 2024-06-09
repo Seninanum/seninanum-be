@@ -4,11 +4,12 @@ const morgan = require("morgan");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const bodyParser = require("body-parser");
 
 // router
 const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
 const testRouter = require("./routes/test");
+const kakaoRouter = require("./routes/kakaoAuth");
 
 const app = express();
 app.set("port", process.env.PORT || 3001);
@@ -24,15 +25,43 @@ app.use(
   })
 );
 
+// // MySQL 연결 시도 및 오류 핸들링
+// connection.connect((err) => {
+//   if (err) {
+//     console.error("MySQL 연결 실패:", err.stack);
+//     return;
+//   }
+//   console.log("MySQL 연결 성공 id:", connection.threadId);
+
+//   // 쿼리 실행
+//   connection.query("SELECT * FROM member", function (error, results, fields) {
+//     if (error) {
+//       console.error("쿼리 실행 실패:", error.stack);
+//       return;
+//     }
+//     console.log("Members : ", results);
+
+//     // 연결 종료
+//     connection.end((endErr) => {
+//       if (endErr) {
+//         console.error("연결 종료 실패:", endErr.stack);
+//         return;
+//       }
+//       console.log("연결 종료 성공");
+//     });
+//   });
+// });
+
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(bodyParser.json());
 
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
 app.use("/test", testRouter);
+app.use("/kakao/oauth/token", kakaoRouter);
 
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
