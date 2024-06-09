@@ -27,16 +27,17 @@ jobs:
           rm -rf node_modules
           rm -f package-lock.json
 
+      - name: .env setting
+        run: |
+          echo "REST_API_KEY=${{ secrets.REST_API_KEY }}" >> .env
+          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
+
       - name: ✨ 패키지 설치
         working-directory: ./
         run: npm install
 
-      - name: ✨ 빌드 과정을 시작
-        working-directory: ./
-        run: npm run build
-
       - name: 📦 빌드한 코드를 압축
-        run: zip -r seni.zip ./config ./src ./public ./scripts ./appspec.yml ./.env ./ecosystem.config.js ./package.json
+        run: zip -r seni.zip ./src ./public ./scripts ./appspec.yml ./.env ./ecosystem.config.js ./package.json
 
       - name: 🌎 AWS에 접속
         uses: aws-actions/configure-aws-credentials@v1
