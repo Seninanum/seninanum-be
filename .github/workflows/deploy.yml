@@ -37,7 +37,7 @@ jobs:
         run: npm install
 
       - name: 📦 빌드한 코드를 압축
-        run: zip -r seni.zip ./src ./public ./scripts ./appspec.yml ./ecosystem.config.js ./package.json
+        run: zip -r seni.zip ./src ./public ./scripts ./appspec.yml ./ecosystem.config.js ./.env ./package.json
 
       - name: 🌎 AWS에 접속
         uses: aws-actions/configure-aws-credentials@v1
