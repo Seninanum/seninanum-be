@@ -35,7 +35,7 @@ router.get("/", async (req, res) => {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-      timeout: 5000, // 5초 타임아웃 설정
+      timeout: 5000,
     });
 
     console.log("User information response:", userResponse.data);
