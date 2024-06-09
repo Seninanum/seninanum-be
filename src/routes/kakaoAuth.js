@@ -48,12 +48,13 @@ router.get("/", async (req, res) => {
     // res.header("Authorization", `Bearer ${token}`);
     // res.json({ token });
   } catch (err) {
-    console.error("Error occurred:", err.message);
-    if (err.response) {
-      console.error("Error response data:", err.response.data);
-      console.error("Error response status:", err.response.status);
-      console.error("Error response headers:", err.response.headers);
-    }
+    console.log(err);
+    // console.error("Error occurred:", err.message);
+    // if (err.response) {
+    //   console.error("Error response data:", err.response.data);
+    //   console.error("Error response status:", err.response.status);
+    //   console.error("Error response headers:", err.response.headers);
+    // }
     res.status(500).send("Internal Server Error");
   }
 });
