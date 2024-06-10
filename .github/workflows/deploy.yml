@@ -31,6 +31,11 @@ jobs:
         run: |
           echo "REST_API_KEY=${{ secrets.REST_API_KEY }}" >> .env
           echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
 
       - name: ✨ 패키지 설치
         working-directory: ./
