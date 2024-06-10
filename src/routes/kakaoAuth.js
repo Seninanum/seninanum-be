@@ -1,17 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
-const jwt = require("jsonwebtoken");
 
 router.get("/", async (req, res) => {
   const REST_API_KEY = process.env.REST_API_KEY;
   const REDIRECT_URI = process.env.REDIRECT_URI;
-  // const JWT_SECRET = process.env.JWT_SECRET;
 
   const code = req.query.code;
 
   try {
-    console.log("Requesting access token from Kakao...");
     const tokenResponse = await axios.post(
       "https://kauth.kakao.com/oauth/token",
       null,
@@ -38,23 +35,11 @@ router.get("/", async (req, res) => {
       timeout: 5000,
     });
 
-    console.log("User information response:", userResponse.data);
-
+    console.log(userResponse.data);
     res.json(userResponse.data);
-    // const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-    //   expiresIn: "1h",
-    // });
-
-    // res.header("Authorization", `Bearer ${token}`);
-    // res.json({ token });
   } catch (err) {
     console.log(err);
     // console.error("Error occurred:", err.message);
-    // if (err.response) {
-    //   console.error("Error response data:", err.response.data);
-    //   console.error("Error response status:", err.response.status);
-    //   console.error("Error response headers:", err.response.headers);
-    // }
     res.status(500).send("Internal Server Error");
   }
 });

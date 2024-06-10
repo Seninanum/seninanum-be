@@ -4,7 +4,6 @@ require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
-const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
@@ -12,6 +11,8 @@ const bodyParser = require("body-parser");
 const indexRouter = require("./routes/index");
 const testRouter = require("./routes/test");
 const kakaoRouter = require("./routes/kakaoAuth");
+const signUpRouter = require("./routes/signup");
+const loginRouter = require("./routes/login");
 
 const app = express();
 app.set("port", process.env.PORT || 3001);
@@ -30,13 +31,14 @@ app.use(
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.json());
 
 app.use("/", indexRouter);
 app.use("/test", testRouter);
 app.use("/kakao/oauth/token", kakaoRouter);
+app.use("/signup", signUpRouter);
+app.use("/login", loginRouter);
 
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
