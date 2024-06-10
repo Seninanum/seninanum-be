@@ -24,10 +24,8 @@ router.get("/", async (req, res) => {
         },
       }
     );
-    console.log("Access token response:", tokenResponse.data);
     const accessToken = tokenResponse.data.access_token;
 
-    console.log("Requesting user information from Kakao...");
     const userResponse = await axios.get("https://kapi.kakao.com/v2/user/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -35,7 +33,6 @@ router.get("/", async (req, res) => {
       timeout: 5000,
     });
 
-    console.log(userResponse.data);
     res.json(userResponse.data);
   } catch (err) {
     console.log(err);
