@@ -8,9 +8,10 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 
 // router
-const kakaoRouter = require("./routes/kakaoAuth");
-const signUpRouter = require("./routes/signup");
-const loginRouter = require("./routes/login");
+const kakaoRouter = require("./routes/auth/kakaoAuth");
+const signUpRouter = require("./routes/auth/signup");
+const loginRouter = require("./routes/auth/login");
+const RecruitRouter = require("./routes/register/recruit");
 
 const app = express();
 app.set("port", process.env.PORT || 3001);
@@ -35,6 +36,7 @@ app.use(bodyParser.json());
 app.use("/auth", kakaoRouter);
 app.use("/auth", signUpRouter);
 app.use("/auth", loginRouter);
+app.use("/register", RecruitRouter);
 
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
