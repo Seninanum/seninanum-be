@@ -8,8 +8,6 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 
 // router
-const indexRouter = require("./routes/index");
-const testRouter = require("./routes/test");
 const kakaoRouter = require("./routes/kakaoAuth");
 const signUpRouter = require("./routes/signup");
 const loginRouter = require("./routes/login");
@@ -34,11 +32,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.json());
 
-app.use("/", indexRouter);
-app.use("/test", testRouter);
-app.use("/kakao/oauth/token", kakaoRouter);
-app.use("/signup", signUpRouter);
-app.use("/login", loginRouter);
+app.use("/auth", kakaoRouter);
+app.use("/auth", signUpRouter);
+app.use("/auth", loginRouter);
 
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);

@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 
-router.get("/", async (req, res) => {
+router.get("/kakao/token", async (req, res) => {
   const REST_API_KEY = process.env.REST_API_KEY;
   const REDIRECT_URI = process.env.REDIRECT_URI;
 

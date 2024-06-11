@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const pool = require("../database/db");
-const { generateToken } = require("../middlewares/jwt");
+const pool = require("../../database/db");
+const { generateToken } = require("../../middlewares/jwt");
 
-router.post("/", async (req, res) => {
+router.post("/login", async (req, res) => {
   const { userId } = req.body;
 
   if (!userId) {

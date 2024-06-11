@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../database/db");
 
-router.post("/", async (req, res) => {
+router.post("/signup", async (req, res) => {
   const { userId, userType, nickname, gender, birthYear, profile } = req.body;
 
   if (!userId || !userType || !nickname || !gender || !birthYear || !profile) {
