@@ -12,6 +12,7 @@ const kakaoRouter = require("./routes/auth/kakaoAuth");
 const signUpRouter = require("./routes/auth/signup");
 const loginRouter = require("./routes/auth/login");
 const RecruitRouter = require("./routes/register/recruit");
+const homeRouter = require("./routes/home");
 
 const app = express();
 app.set("port", process.env.PORT || 3001);
@@ -37,6 +38,7 @@ app.use("/auth", kakaoRouter);
 app.use("/auth", signUpRouter);
 app.use("/auth", loginRouter);
 app.use("/register", RecruitRouter);
+app.use("/home", homeRouter);
 
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
