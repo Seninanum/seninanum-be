@@ -1,14 +1,13 @@
-home.js;
 const express = require("express");
 const router = express.Router();
-const pool = require("../db");
+const pool = require("../../database/db");
 
 router.get("/:userId", async (req, res) => {
   const { userId } = req.params;
 
   try {
     const [rows] = await pool.query(
-      "SELECT userId, userType, nickname, gender, birthYear, profile FROM user WHERE userId = ?",
+      "SELECT userType FROM user WHERE userId = ?",
       [userId]
     );
 
