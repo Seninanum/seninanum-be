@@ -5,11 +5,10 @@ const pool = require("../../database/db");
 router.post("/career", async (req, res) => {
   const {
     userId,
-    profileImage,
     certificate,
     introduce,
     service,
-    meetingType,
+    method,
     priceType,
     price,
     region,
@@ -25,14 +24,13 @@ router.post("/career", async (req, res) => {
     }
 
     const [result] = await pool.query(
-      "INSERT INTO careerProfile (userId, profileImage, certificate, introduce, service, meetingType, priceType, price, region, field) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO careerProfile (userId, certificate, introduce, service, method, priceType, price, region, field) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         userId,
-        profileImage,
         certificate,
         introduce,
         service,
-        meetingType,
+        method,
         priceType,
         price,
         region,
