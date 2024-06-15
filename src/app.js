@@ -14,6 +14,9 @@ const loginRouter = require("./routes/auth/login");
 const RecruitRouter = require("./routes/register/recruit");
 const getUserTypeRouter = require("./routes/user/userType");
 
+//middleware
+const { verifyToken } = require("./middlewares/jwt");
+
 const app = express();
 app.set("port", process.env.PORT || 3001);
 
@@ -37,8 +40,8 @@ app.use(bodyParser.json());
 app.use("/auth", kakaoRouter);
 app.use("/auth", signUpRouter);
 app.use("/auth", loginRouter);
-app.use("/register", RecruitRouter);
-app.use("/user", getUserTypeRouter);
+app.use("/register", verifyToken, RecruitRouter);
+app.use("/user", verifyToken, getUserTypeRouter);
 
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
