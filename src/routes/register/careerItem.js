@@ -14,7 +14,7 @@ router.post("/career/add", async (req, res) => {
     }
 
     const [result] = await pool.query(
-      "INSERT INTO careerProfile (userId, profileId, title, period, content) VALUES (?, ?, ?, ?, ?)",
+      "INSERT INTO careerItem (userId, profileId, title, period, content) VALUES (?, ?, ?, ?, ?)",
       [userId, profileId, title, period, content]
     );
 
@@ -23,7 +23,7 @@ router.post("/career/add", async (req, res) => {
     console.log(error);
     res
       .status(500)
-      .json({ error: "An error occurred while creating the careerProfile" });
+      .json({ error: "An error occurred while creating the careerItem" });
   }
 });
 
