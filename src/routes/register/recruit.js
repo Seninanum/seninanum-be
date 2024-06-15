@@ -3,20 +3,13 @@ const router = express.Router();
 const pool = require("../../database/db");
 
 router.post("/recruit", async (req, res) => {
-  const { userId, title, content, method, priceType, price, region, field } =
-    req.body;
+  const { title, content, method, priceType, price, region, field } = req.body;
 
-  if (
-    !userId ||
-    !title ||
-    !content ||
-    !method ||
-    !priceType ||
-    !price ||
-    !field
-  ) {
+  if (!title || !content || !method || !priceType || !price || !field) {
     return res.status(400).json({ error: "값이 존재해야 합니다." });
   }
+
+  const userId = req.user.userId;
 
   try {
     const [user] = await pool.query("SELECT * FROM user WHERE userId = ?", [
