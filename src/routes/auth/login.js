@@ -16,7 +16,10 @@ router.post("/login", async (req, res) => {
     ]);
 
     if (rows.length > 0) {
-      const token = generateToken({ userId: rows[0].userId });
+      const token = generateToken({
+        userId: rows[0].userId,
+        userType: rows[0].userType,
+      });
 
       return res
         .status(200)
