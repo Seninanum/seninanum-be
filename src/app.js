@@ -13,6 +13,8 @@ const signUpRouter = require("./routes/auth/signup");
 const loginRouter = require("./routes/auth/login");
 const RecruitRouter = require("./routes/register/recruit");
 const getUserTypeRouter = require("./routes/user/userType");
+const careerRouter = require("./routes/register/career");
+const careerItemRouter = require("./routes/register/careerItem");
 
 //middleware
 const { verifyToken } = require("./middlewares/jwt");
@@ -42,6 +44,8 @@ app.use("/auth", signUpRouter);
 app.use("/auth", loginRouter);
 app.use("/register", verifyToken, RecruitRouter);
 app.use("/user", verifyToken, getUserTypeRouter);
+app.use("/career", verifyToken, careerRouter);
+app.use("/career/add", verifyToken, careerItemRouter);
 
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
