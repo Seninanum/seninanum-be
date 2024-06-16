@@ -11,7 +11,7 @@ const bodyParser = require("body-parser");
 const kakaoRouter = require("./routes/auth/kakaoAuth");
 const signUpRouter = require("./routes/auth/signup");
 const loginRouter = require("./routes/auth/login");
-const RecruitRouter = require("./routes/register/recruit");
+const RecruitRouter = require("./routes/recruit/recruit");
 const getUserTypeRouter = require("./routes/user/userType");
 
 //middleware
@@ -40,7 +40,7 @@ app.use(bodyParser.json());
 app.use("/auth", kakaoRouter);
 app.use("/auth", signUpRouter);
 app.use("/auth", loginRouter);
-app.use("/register", verifyToken, RecruitRouter);
+app.use("/recruit", verifyToken, RecruitRouter);
 app.use("/user", verifyToken, getUserTypeRouter);
 
 app.use((req, res, next) => {
