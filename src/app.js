@@ -44,8 +44,8 @@ app.use("/auth", signUpRouter);
 app.use("/auth", loginRouter);
 app.use("/register", verifyToken, RecruitRouter);
 app.use("/user", verifyToken, getUserTypeRouter);
-app.use("/career", verifyToken, careerRouter);
-app.use("/career/add", verifyToken, careerItemRouter);
+app.use("/register", verifyToken, careerRouter);
+app.use("/register", verifyToken, careerItemRouter);
 
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
