@@ -4,8 +4,17 @@ const pool = require("../../database/db");
 
 // 경력 항목 추가
 router.post("/career/add", async (req, res) => {
-  const { userId, profileId, title, period, content } = req.body;
-
+  const { title, startYear, startMonth, endYear, endMonth, content } = req.body;
+  if (
+    !title ||
+    !startYear ||
+    !startMonth ||
+    !endYear ||
+    !endMonth ||
+    !content
+  ) {
+    return res.status(400).json({ error: "값이 존재해야 합니다." });
+  }
   try {
     const [user] = await pool.query("SELECT * FROM user WHERE userId = ?", [
       userId,
@@ -15,8 +24,18 @@ router.post("/career/add", async (req, res) => {
     }
 
     const [result] = await pool.query(
-      "INSERT INTO careerItem (userId, profileId, title, period, content) VALUES (?, ?, ?, ?, ?)",
-      [userId, profileId, title, period, content]
+      "INSERT INTO careerItem (userId, profileId, title, startYear, startMonth, endYear, endMonth, period, content) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        userId,
+        profileId,
+        title,
+        startYear,
+        startMonth,
+        endYear,
+        endMonth,
+        period,
+        content,
+      ]
     );
 
     res.status(201).json({ message: "경력프로필이 등록되었습니다." });
