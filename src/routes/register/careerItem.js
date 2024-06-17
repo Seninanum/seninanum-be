@@ -44,12 +44,12 @@ router.post("/", async (req, res) => {
 });
 // 경력 항목 삭제
 router.delete("/", async (req, res) => {
-  const { userId, title } = req.body;
+  const { careerId } = req.body;
 
   try {
     const [result] = await pool.query(
-      "DELETE FROM careerItem WHERE userId = ? AND title = ?",
-      [userId, title]
+      "DELETE FROM careerItem WHERE careerId = ?",
+      [careerId]
     );
 
     if (result.affectedRows === 0) {
