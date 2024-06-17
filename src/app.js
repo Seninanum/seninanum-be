@@ -19,6 +19,7 @@ const careerItemRouter = require("./routes/register/careerItem");
 //middleware
 const { verifyToken } = require("./middlewares/jwt");
 
+// use
 const app = express();
 app.set("port", process.env.PORT || 3001);
 
