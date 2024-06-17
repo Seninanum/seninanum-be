@@ -5,14 +5,14 @@ const pool = require("../../database/db");
 router.post("/", async (req, res) => {
   const {
     userId,
-    certificate,
     introduce,
+    age,
+    field,
     service,
     method,
+    region,
     priceType,
     price,
-    region,
-    field,
   } = req.body;
 
   try {
@@ -24,18 +24,8 @@ router.post("/", async (req, res) => {
     }
 
     const [result] = await pool.query(
-      "INSERT INTO careerProfile (userId, certificate, introduce, service, method, priceType, price, region, field) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        userId,
-        certificate,
-        introduce,
-        service,
-        method,
-        priceType,
-        price,
-        region,
-        field,
-      ]
+      "INSERT INTO careerProfile (userId, introduce, age, field, service, method, region, priceType, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [userId, introduce, age, field, service, method, region, priceType, price]
     );
 
     res.status(201).json({ message: "경력프로필이 등록되었습니다." });
