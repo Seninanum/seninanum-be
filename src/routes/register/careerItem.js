@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require("../../database/db");
 
 // 경력 항목 추가
-router.post("/career/add", async (req, res) => {
+router.post("/", async (req, res) => {
   const { title, startYear, startMonth, endYear, endMonth, content } = req.body;
   if (
     !title ||
@@ -47,7 +47,7 @@ router.post("/career/add", async (req, res) => {
   }
 });
 // 경력 항목 삭제
-router.delete("/career/delete", async (req, res) => {
+router.delete("/", async (req, res) => {
   const { userId, title } = req.body;
 
   try {
@@ -70,7 +70,7 @@ router.delete("/career/delete", async (req, res) => {
 });
 
 // 경력 항목 조회
-router.get("/careers", async (req, res) => {
+router.get("/list", async (req, res) => {
   try {
     const [results] = await pool.query("SELECT * FROM careerItem");
     res.status(200).json(results);
