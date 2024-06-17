@@ -61,6 +61,8 @@ jobs:
           if [ "$ACTIVE_DEPLOYMENT_ID" != "None" ]; then
             echo "Stopping active deployment: $ACTIVE_DEPLOYMENT_ID"
             aws deploy stop-deployment --deployment-id $ACTIVE_DEPLOYMENT_ID --auto-rollback-enabled
+          else
+            echo "No active deployments to stop."
           fi
 
       - name: 🚀 AWS CodeDeploy로 배포를 시작
