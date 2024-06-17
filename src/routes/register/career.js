@@ -3,17 +3,8 @@ const router = express.Router();
 const pool = require("../../database/db");
 
 router.post("/", async (req, res) => {
-  const {
-    userId,
-    introduce,
-    age,
-    field,
-    service,
-    method,
-    region,
-    priceType,
-    price,
-  } = req.body;
+  const { introduce, age, field, service, method, region, priceType, price } =
+    req.body;
 
   try {
     const [user] = await pool.query("SELECT * FROM user WHERE userId = ?", [
