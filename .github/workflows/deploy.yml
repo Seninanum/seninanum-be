@@ -60,3 +60,21 @@ jobs:
           --deployment-config-name CodeDeployDefault.OneAtATime
           --deployment-group-name dev
           --s3-location bucket=seninanum-be,bundleType=zip,key=deploy/seni.zip
+
+      - name: ⏲️ 배포 상태 확인
+        id: check-deployment
+        run: |
+          DEPLOYMENT_ID=${{ steps.deploy.outputs.deployment_id }}
+          while true; do
+            STATUS=$(aws deploy get-deployment --deployment-id $DEPLOYMENT_ID --query "deploymentInfo.status" --output text)
+            if [ "$STATUS" == "Succeeded" ]; then
+              echo "Deployment succeeded!"
+              exit 0
+            elif [ "$STATUS" == "Failed" ] || [ "$STATUS" == "Stopped" ]; then
+              echo "Deployment failed with status: $STATUS"
+              exit 1
+            else
+              echo "Current deployment status: $STATUS"
+              sleep 30
+            fi
+          done
