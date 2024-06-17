@@ -72,7 +72,7 @@ jobs:
             --deployment-group-name dev \
             --s3-location bucket=seninanum-be,bundleType=zip,key=deploy/seni.zip \
             --query "deploymentId" --output text)
-          echo "::set-output name=deployment_id::$DEPLOYMENT_ID"
+          echo "deployment_id=$DEPLOYMENT_ID" >> $GITHUB_ENV
 
       - name: ⏲️ 배포 상태 확인
         id: check-deployment
