@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../database/db");
 
+// 경력프로필 등록
 router.post("/", async (req, res) => {
   const { introduce, age, field, service, method, region, priceType, price } =
     req.body;
