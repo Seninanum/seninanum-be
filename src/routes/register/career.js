@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../database/db");
 
-router.post("/career", async (req, res) => {
+router.post("/", async (req, res) => {
   const {
     userId,
     certificate,
