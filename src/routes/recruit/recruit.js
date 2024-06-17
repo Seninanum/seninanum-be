@@ -68,8 +68,62 @@ router.get("/list", async (req, res) => {
     console.log(error);
     res
       .status(500)
-      .json({ error: "An error occurred while fetching recruits" });
+      .json({ error: "An error occurred while fetching recruit list" });
   }
 });
 
+// 구인글 상세정보 불러오기
+router.get("/:recruitId", async (req, res) => {
+  const recruitId = req.params.recruitId;
+
+  try {
+    const [recruit] = await pool.query(
+      "select userId, title, content, method, priceType, price, region, field, createdAt from recruit where recruitId = ?",
+      [recruitId]
+    );
+
+    if (recruit.length === 0) {
+      return res.status(404).json({ error: "Recruit not found" });
+    }
+
+    const {
+      userId,
+      title,
+      content,
+      method,
+      priceType,
+      price,
+      region,
+      field,
+      createdAt,
+    } = recruit[0];
+
+    const [userInfo] = await pool.query(
+      "SELECT nickname, gender, birthYear FROM user WHERE userId=?",
+      [userId]
+    );
+    const { nickname, gender, birthyear } = userInfo[0];
+
+    const response = {
+      title,
+      content,
+      method,
+      priceType,
+      price,
+      region,
+      field,
+      createdAt,
+      nickname,
+      gender,
+      birthyear,
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching recruit detail" });
+  }
+});
 module.exports = router;
