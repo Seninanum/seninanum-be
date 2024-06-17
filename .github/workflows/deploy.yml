@@ -10,14 +10,14 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.11.0]
+        node-version: [20.x]
 
     steps:
       - name: ✅ 체크아웃 source code.
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: ⚙️ ${{ matrix.node-version }} 버전의 노드로 세팅합니다.
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -45,7 +45,7 @@ jobs:
         run: zip -r seni.zip ./src ./public ./scripts ./appspec.yml ./ecosystem.config.js ./.env ./package.json
 
       - name: 🌎 AWS에 접속
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_S3_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_S3_SECRET_ACCESS_KEY_ID }}
@@ -54,9 +54,42 @@ jobs:
       - name: 🦖 S3에 압축된 서버 코드를 업로드
         run: aws s3 cp --region ap-northeast-2 ./seni.zip s3://seninanum-be/deploy/
 
-      - name: 🚀 AWS codeDeploy로 배포를 시작
-        run: aws deploy create-deployment
-          --application-name seninanum-be
-          --deployment-config-name CodeDeployDefault.OneAtATime
-          --deployment-group-name dev
-          --s3-location bucket=seninanum-be,bundleType=zip,key=deploy/seni.zip
+      - name: 🛑 기존 활성화된 배포 중지
+        id: stop-deployment
+        run: |
+          ACTIVE_DEPLOYMENT_ID=$(aws deploy list-deployments --application-name seninanum-be --deployment-group-name dev --include-only-statuses Created Queued InProgress --query "deployments[0]" --output text)
+          if [ "$ACTIVE_DEPLOYMENT_ID" != "None" ]; then
+            echo "Stopping active deployment: $ACTIVE_DEPLOYMENT_ID"
+            aws deploy stop-deployment --deployment-id $ACTIVE_DEPLOYMENT_ID --auto-rollback-enabled
+          else
+            echo "No active deployments to stop."
+          fi
+
+      - name: 🚀 AWS CodeDeploy로 배포를 시작
+        id: deploy
+        run: |
+          DEPLOYMENT_ID=$(aws deploy create-deployment \
+            --application-name seninanum-be \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --deployment-group-name dev \
+            --s3-location bucket=seninanum-be,bundleType=zip,key=deploy/seni.zip \
+            --query "deploymentId" --output text)
+          echo "deployment_id=$DEPLOYMENT_ID" >> $GITHUB_ENV
+
+      - name: ⏲️ 배포 상태 확인
+        id: check-deployment
+        run: |
+          DEPLOYMENT_ID=${{ env.deployment_id }}
+          while true; do
+            STATUS=$(aws deploy get-deployment --deployment-id $DEPLOYMENT_ID --query "deploymentInfo.status" --output text)
+            if [ "$STATUS" == "Succeeded" ]; then
+              echo "Deployment succeeded!"
+              exit 0
+            elif [ "$STATUS" == "Failed" ] || [ "$STATUS" == "Stopped" ]; then
+              echo "Deployment failed with status: $STATUS"
+              exit 1
+            else
+              echo "Current deployment status: $STATUS"
+              sleep 30
+            fi
+          done
