@@ -34,7 +34,7 @@ router.post("/", async (req, res) => {
       "SELECT * FROM careerItem WHERE careerId = ?",
       [result.insertId]
     );
-    res.status(201).json(newCareer[0]); // 새 경력 항목
+    res.status(201).json({ career: newCareer[0] }); // 새 경력 항목
   } catch (error) {
     console.log(error);
     res
