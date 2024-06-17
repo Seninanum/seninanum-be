@@ -42,7 +42,7 @@ app.use(bodyParser.json());
 app.use("/auth", kakaoRouter);
 app.use("/auth", signUpRouter);
 app.use("/auth", loginRouter);
-app.use("/register", verifyToken, RecruitRouter);
+app.use("/recruit", verifyToken, RecruitRouter);
 app.use("/user", verifyToken, getUserTypeRouter);
 app.use("/register", verifyToken, careerRouter);
 app.use("/register", verifyToken, careerItemRouter);
