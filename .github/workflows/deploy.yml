@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: ✅ 체크아웃 source code.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: ⚙️ ${{ matrix.node-version }} 버전의 노드로 세팅합니다.
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -54,12 +54,25 @@ jobs:
       - name: 🦖 S3에 압축된 서버 코드를 업로드
         run: aws s3 cp --region ap-northeast-2 ./seni.zip s3://seninanum-be/deploy/
 
-      - name: 🚀 AWS codeDeploy로 배포를 시작
-        run: aws deploy create-deployment
-          --application-name seninanum-be
-          --deployment-config-name CodeDeployDefault.OneAtATime
-          --deployment-group-name dev
-          --s3-location bucket=seninanum-be,bundleType=zip,key=deploy/seni.zip
+      - name: 🛑 기존 활성화된 배포 중지
+        id: stop-deployment
+        run: |
+          ACTIVE_DEPLOYMENT_ID=$(aws deploy list-deployments --application-name seninanum-be --deployment-group-name dev --include-only-statuses Created Queued InProgress --query "deployments[0]" --output text)
+          if [ "$ACTIVE_DEPLOYMENT_ID" != "None" ]; then
+            echo "Stopping active deployment: $ACTIVE_DEPLOYMENT_ID"
+            aws deploy stop-deployment --deployment-id $ACTIVE_DEPLOYMENT_ID --auto-rollback-enabled
+          fi
+
+      - name: 🚀 AWS CodeDeploy로 배포를 시작
+        id: deploy
+        run: |
+          DEPLOYMENT_ID=$(aws deploy create-deployment \
+            --application-name seninanum-be \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --deployment-group-name dev \
+            --s3-location bucket=seninanum-be,bundleType=zip,key=deploy/seni.zip \
+            --query "deploymentId" --output text)
+          echo "::set-output name=deployment_id::$DEPLOYMENT_ID"
 
       - name: ⏲️ 배포 상태 확인
         id: check-deployment
