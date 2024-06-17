@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: ✅ 체크아웃 source code.
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: ⚙️ ${{ matrix.node-version }} 버전의 노드로 세팅합니다.
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
