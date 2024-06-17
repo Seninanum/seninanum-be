@@ -100,7 +100,7 @@ router.get("/:recruitId", async (req, res) => {
     } = recruit[0];
 
     const [userInfo] = await pool.query(
-      "SELECT nickname, gender, birthYear FROM user WHERE userId=?",
+      "SELECT nickname, gender, birthyear FROM user WHERE userId=?",
       [userId]
     );
     const { nickname, gender, birthyear } = userInfo[0];
