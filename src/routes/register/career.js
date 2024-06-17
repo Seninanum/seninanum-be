@@ -18,7 +18,7 @@ router.post("/", async (req, res) => {
     }
 
     const [result] = await pool.query(
-      "INSERT INTO careerProfile (userId, introduce, age, field, service, method, region, priceType, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO careerProfile (userId, introduce, age, field, service, method, region, priceType, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [userId, introduce, age, field, service, method, region, priceType, price]
     );
 
