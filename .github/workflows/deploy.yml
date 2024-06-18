@@ -25,17 +25,16 @@ jobs:
         run: |
           if (Test-Path node_modules) { Remove-Item -Recurse -Force node_modules }
           if (Test-Path package-lock.json) { Remove-Item -Force package-lock.json }
-          git update-index --chmod=+x scripts/set-env.sh
 
       - name: .env setting
         run: |
-          Add-Content -Path .env -Value "REST_API_KEY=${{ secrets.REST_API_KEY }}"
-          Add-Content -Path .env -Value "REDIRECT_URI=${{ secrets.REDIRECT_URI }}"
-          Add-Content -Path .env -Value "JWT_SECRET=${{ secrets.JWT_SECRET }}"
-          Add-Content -Path .env -Value "DB_HOST=${{ secrets.DB_HOST }}"
-          Add-Content -Path .env -Value "DB_USER=${{ secrets.DB_USER }}"
-          Add-Content -Path .env -Value "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
-          Add-Content -Path .env -Value "DB_NAME=${{ secrets.DB_NAME }}"
+          echo "REST_API_KEY=${{ secrets.REST_API_KEY }}" >> $GITHUB_ENV
+          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> $GITHUB_ENV
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> $GITHUB_ENV
+          echo "DB_USER=${{ secrets.DB_USER }}" >> $GITHUB_ENV
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
 
       - name: ✨ 패키지 설치
         run: npm install
@@ -63,7 +62,6 @@ jobs:
             aws deploy stop-deployment --deployment-id $ACTIVE_DEPLOYMENT_ID --auto-rollback-enabled
           } else {
             echo "No active deployments to stop."
-          }
 
       - name: 🚀 AWS CodeDeploy로 배포를 시작
         id: deploy
