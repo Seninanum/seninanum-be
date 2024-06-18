@@ -79,7 +79,7 @@ jobs:
       - name: ⏲️ 배포 상태 확인
         id: check-deployment
         run: |
-          DEPLOYMENT_ID=${{ env.deployment_id }}
+          DEPLOYMENT_ID=${{ steps.deploy.outputs.deployment_id }}
           while true; do
             STATUS=$(aws deploy get-deployment --deployment-id $DEPLOYMENT_ID --query "deploymentInfo.status" --output text)
             if [ "$STATUS" == "Succeeded" ]; then
