@@ -62,6 +62,7 @@ jobs:
             aws deploy stop-deployment --deployment-id $ACTIVE_DEPLOYMENT_ID --auto-rollback-enabled
           } else {
             echo "No active deployments to stop."
+          }
 
       - name: 🚀 AWS CodeDeploy로 배포를 시작
         id: deploy
