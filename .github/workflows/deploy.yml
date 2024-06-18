@@ -91,4 +91,4 @@ jobs:
               echo "Current deployment status: $STATUS"
               Start-Sleep -Seconds 30
             }
-          }
+          done
