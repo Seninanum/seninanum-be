@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-20.04
+    runs-on: windows-latest
 
     strategy:
       matrix:
@@ -22,27 +22,28 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: 🧹 Remove node_modules and package-lock.json
-        working-directory: ./
         run: |
-          rm -rf node_modules
-          rm -f package-lock.json
+          if (Test-Path node_modules) { Remove-Item -Recurse -Force node_modules }
+          if (Test-Path package-lock.json) { Remove-Item -Force package-lock.json }
+          # 실행 권한 부여
+          git update-index --chmod=+x scripts/set-env.sh
 
       - name: .env setting
         run: |
-          echo "REST_API_KEY=${{ secrets.REST_API_KEY }}" >> .env
-          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          Add-Content -Path .env -Value "REST_API_KEY=${{ secrets.REST_API_KEY }}"
+          Add-Content -Path .env -Value "REDIRECT_URI=${{ secrets.REDIRECT_URI }}"
+          Add-Content -Path .env -Value "JWT_SECRET=${{ secrets.JWT_SECRET }}"
+          Add-Content -Path .env -Value "DB_HOST=${{ secrets.DB_HOST }}"
+          Add-Content -Path .env -Value "DB_USER=${{ secrets.DB_USER }}"
+          Add-Content -Path .env -Value "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
+          Add-Content -Path .env -Value "DB_NAME=${{ secrets.DB_NAME }}"
 
       - name: ✨ 패키지 설치
-        working-directory: ./
         run: npm install
 
       - name: 📦 빌드한 코드를 압축
-        run: zip -r seni.zip ./src ./public ./scripts ./appspec.yml ./ecosystem.config.js ./.env ./package.json
+        run: |
+          Compress-Archive -Path .\src,.\public,.\scripts,.\appspec.yml,.\ecosystem.config.js,.\.env,.\package.json -DestinationPath seni.zip
 
       - name: 🌎 AWS에 접속
         uses: aws-actions/configure-aws-credentials@v4
@@ -52,44 +53,44 @@ jobs:
           aws-region: ap-northeast-2
 
       - name: 🦖 S3에 압축된 서버 코드를 업로드
-        run: aws s3 cp --region ap-northeast-2 ./seni.zip s3://seninanum-be/deploy/
+        run: aws s3 cp --region ap-northeast-2 .\seni.zip s3://seninanum-be/deploy/
 
       - name: 🛑 기존 활성화된 배포 중지
         id: stop-deployment
         run: |
-          ACTIVE_DEPLOYMENT_ID=$(aws deploy list-deployments --application-name seninanum-be --deployment-group-name dev --include-only-statuses Created Queued InProgress --query "deployments[0]" --output text)
-          if [ "$ACTIVE_DEPLOYMENT_ID" != "None" ]; then
+          $ACTIVE_DEPLOYMENT_ID = aws deploy list-deployments --application-name seninanum-be --deployment-group-name dev --include-only-statuses Created Queued InProgress --query "deployments[0]" --output text
+          if ($ACTIVE_DEPLOYMENT_ID -ne "None" -and $ACTIVE_DEPLOYMENT_ID -ne "") {
             echo "Stopping active deployment: $ACTIVE_DEPLOYMENT_ID"
             aws deploy stop-deployment --deployment-id $ACTIVE_DEPLOYMENT_ID --auto-rollback-enabled
-          else
+          } else {
             echo "No active deployments to stop."
-          fi
+          }
 
       - name: 🚀 AWS CodeDeploy로 배포를 시작
         id: deploy
         run: |
-          DEPLOYMENT_ID=$(aws deploy create-deployment \
-            --application-name seninanum-be \
-            --deployment-config-name CodeDeployDefault.OneAtATime \
-            --deployment-group-name dev \
-            --s3-location bucket=seninanum-be,bundleType=zip,key=deploy/seni.zip \
-            --query "deploymentId" --output text)
-          echo "deployment_id=$DEPLOYMENT_ID" >> $GITHUB_ENV
+          $DEPLOYMENT_ID = aws deploy create-deployment `
+            --application-name seninanum-be `
+            --deployment-config-name CodeDeployDefault.OneAtATime `
+            --deployment-group-name dev `
+            --s3-location bucket=seninanum-be,bundleType=zip,key=deploy/seni.zip `
+            --query "deploymentId" --output text
+          echo "deployment_id=$DEPLOYMENT_ID" >> $env:GITHUB_ENV
 
       - name: ⏲️ 배포 상태 확인
         id: check-deployment
         run: |
-          DEPLOYMENT_ID=${{ steps.deploy.outputs.deployment_id }}
-          while true; do
-            STATUS=$(aws deploy get-deployment --deployment-id $DEPLOYMENT_ID --query "deploymentInfo.status" --output text)
-            if [ "$STATUS" == "Succeeded" ]; then
+          $DEPLOYMENT_ID="${{ env.deployment_id }}"
+          while ($true) {
+            $STATUS = aws deploy get-deployment --deployment-id $DEPLOYMENT_ID --query "deploymentInfo.status" --output text
+            if ($STATUS -eq "Succeeded") {
               echo "Deployment succeeded!"
               exit 0
-            elif [ "$STATUS" == "Failed" ] || [ "$STATUS" == "Stopped" ]; then
+            } elseif ($STATUS -eq "Failed" -or $STATUS -eq "Stopped") {
               echo "Deployment failed with status: $STATUS"
               exit 1
-            else
+            } else {
               echo "Current deployment status: $STATUS"
-              sleep 30
-            fi
-          done
+              Start-Sleep -Seconds 30
+            }
+          }
