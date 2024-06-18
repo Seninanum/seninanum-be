@@ -25,6 +25,8 @@ jobs:
         run: |
           if (Test-Path node_modules) { Remove-Item -Recurse -Force node_modules }
           if (Test-Path package-lock.json) { Remove-Item -Force package-lock.json }
+          # 실행 권한 부여
+          git update-index --chmod=+x scripts/set-env.sh
 
       - name: .env setting
         run: |
