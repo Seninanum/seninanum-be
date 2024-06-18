@@ -25,8 +25,6 @@ jobs:
         run: |
           if (Test-Path node_modules) { Remove-Item -Recurse -Force node_modules }
           if (Test-Path package-lock.json) { Remove-Item -Force package-lock.json }
-          git update-index --chmod=+x scripts/after-deploy.sh
-          git update-index --chmod=+x scripts/debug.sh
 
       - name: .env setting
         run: |
@@ -43,7 +41,7 @@ jobs:
 
       - name: 📦 빌드한 코드를 압축
         run: |
-          Compress-Archive -Path .\src,.\public,.\scripts,.\appspec.yml,.\ecosystem.config.js,.\package.json,.\scripts\after-deploy.sh,.\scripts\debug.sh -DestinationPath seni.zip
+          Compress-Archive -Path .\src,.\public,.\scripts,.\appspec.yml,.\ecosystem.config.js,.\package.json -DestinationPath seni.zip
 
       - name: 🌎 AWS에 접속
         uses: aws-actions/configure-aws-credentials@v4
