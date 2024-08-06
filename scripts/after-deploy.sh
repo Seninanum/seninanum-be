@@ -3,12 +3,12 @@ REPOSITORY=/home/ubuntu/build
 
 cd $REPOSITORY
 
-# Remove node_modules and package-lock.json
-rm -rf node_modules
-rm -f package-lock.json
-
 # Install dependencies
 npm install
 
-# Restart the application (if needed)
-pm2 restart ecosystem.config.js --env production
+# Start or restart the application with PM2, updating environment variables
+pm2 start ./bin/www --name "" --update-env
+
+# Save the PM2 process list and corresponding environments
+pm2 save
+
