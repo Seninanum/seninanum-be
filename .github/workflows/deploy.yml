@@ -6,10 +6,10 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
+
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
         node-version: [20.x]
 
     steps:
@@ -21,16 +21,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: 🧹 Remove node_modules and package-lock.json (Windows)
-        if: runner.os == 'Windows'
+      - name: 🧹 Remove node_modules and package-lock.json
         run: |
           if (Test-Path node_modules) { Remove-Item -Recurse -Force node_modules }
           if (Test-Path package-lock.json) { Remove-Item -Force package-lock.json }
-
-      - name: 🧹 Remove node_modules and package-lock.json (Linux/Mac)
-        if: runner.os != 'Windows'
-        run: |
-          rm -rf node_modules package-lock.json
 
       - name: .env setting
         run: |
@@ -45,15 +39,9 @@ jobs:
       - name: ✨ 패키지 설치
         run: npm install
 
-      - name: 📦 빌드한 코드를 압축 (Windows)
-        if: runner.os == 'Windows'
+      - name: 📦 빌드한 코드를 압축
         run: |
           Compress-Archive -Path .\src, .\public, .\.env, .\scripts, .\appspec.yml, .\ecosystem.config.js, .\package.json -DestinationPath seni.zip
-
-      - name: 📦 빌드한 코드를 압축 (Linux/Mac)
-        if: runner.os != 'Windows'
-        run: |
-          zip -r seni.zip src public .env scripts appspec.yml ecosystem.config.js package.json
 
       - name: 🌎 AWS에 접속
         uses: aws-actions/configure-aws-credentials@v4
@@ -62,45 +50,45 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_S3_SECRET_ACCESS_KEY_ID }}
           aws-region: ap-northeast-2
 
-      - name: 🦖 S3에 압축된 서버 코드를 업로드 (Windows)
-        if: runner.os == 'Windows'
+      - name: 🦖 S3에 압축된 서버 코드를 업로드
         run: aws s3 cp --region ap-northeast-2 .\seni.zip s3://seninanum-be/deploy/
-
-      - name: 🦖 S3에 압축된 서버 코드를 업로드 (Linux/Mac)
-        if: runner.os != 'Windows'
-        run: aws s3 cp --region ap-northeast-2 seni.zip s3://seninanum-be/deploy/
 
       - name: 🛑 기존 활성화된 배포 중지
         id: stop-deployment
         run: |
-          ACTIVE_DEPLOYMENT_ID=$(aws deploy list-deployments --application-name seninanum-be --deployment-group-name dev --include-only-statuses Created Queued InProgress --query "deployments[0]" --output text)
-          if [ "$ACTIVE_DEPLOYMENT_ID" != "None" ] && [ "$ACTIVE_DEPLOYMENT_ID" != "" ]; then
+          $ACTIVE_DEPLOYMENT_ID = aws deploy list-deployments --application-name seninanum-be --deployment-group-name dev --include-only-statuses Created Queued InProgress --query "deployments[0]" --output text
+          if ($ACTIVE_DEPLOYMENT_ID -ne "None" -and $ACTIVE_DEPLOYMENT_ID -ne "") {
             echo "Stopping active deployment: $ACTIVE_DEPLOYMENT_ID"
             aws deploy stop-deployment --deployment-id $ACTIVE_DEPLOYMENT_ID --auto-rollback-enabled
-          else
+          } else {
             echo "No active deployments to stop."
-          fi
+          }
 
       - name: 🚀 AWS CodeDeploy로 배포를 시작
         id: deploy
         run: |
-          DEPLOYMENT_ID=$(aws deploy create-deployment --application-name seninanum-be --deployment-config-name CodeDeployDefault.OneAtATime --deployment-group-name dev --s3-location bucket=seninanum-be,bundleType=zip,key=deploy/seni.zip --query "deploymentId" --output text)
-          echo "deployment_id=$DEPLOYMENT_ID" >> $GITHUB_ENV
+          $DEPLOYMENT_ID = aws deploy create-deployment `
+            --application-name seninanum-be `
+            --deployment-config-name CodeDeployDefault.OneAtATime `
+            --deployment-group-name dev `
+            --s3-location bucket=seninanum-be,bundleType=zip,key=deploy/seni.zip `
+            --query "deploymentId" --output text
+          echo "deployment_id=$DEPLOYMENT_ID" >> $env:GITHUB_ENV
 
       - name: ⏲️ 배포 상태 확인
         id: check-deployment
         run: |
-          DEPLOYMENT_ID="${{ env.deployment_id }}"
-          while true; do
-            STATUS=$(aws deploy get-deployment --deployment-id $DEPLOYMENT_ID --query "deploymentInfo.status" --output text)
-            if [ "$STATUS" == "Succeeded" ]; then
+          $DEPLOYMENT_ID="${{ env.deployment_id }}"
+          while ($true) {
+            $STATUS = aws deploy get-deployment --deployment-id $DEPLOYMENT_ID --query "deploymentInfo.status" --output text
+            if ($STATUS -eq "Succeeded") {
               echo "Deployment succeeded!"
               exit 0
-            elif [ "$STATUS" == "Failed" ] || [ "$STATUS" == "Stopped" ]; then
+            } elseif ($STATUS -eq "Failed" -or $STATUS -eq "Stopped") {
               echo "Deployment failed with status: $STATUS"
               exit 1
-            else
+            } else {
               echo "Current deployment status: $STATUS"
-              sleep 30
-            fi
-          done
+              Start-Sleep -Seconds 30
+            }
+          }
