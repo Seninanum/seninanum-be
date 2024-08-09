@@ -1,14 +1,16 @@
 #!/bin/bash
 REPOSITORY=/home/ubuntu/build
 
-cd $REPOSITORY
+echo "Changing directory to $REPOSITORY"
+cd $REPOSITORY || exit
 
-# Install dependencies
+echo "Installing dependencies"
 npm install
 
-# Start or restart the application with PM2, updating environment variables
-pm2 start src/app.js --name "" --update-env
+echo "Starting the application with PM2"
+pm2 start src/app.js --name "seninanum" --update-env
 
-# Save the PM2 process list and corresponding environments
+echo "Saving PM2 process list"
 pm2 save
 
+echo "After deploy script executed successfully"
