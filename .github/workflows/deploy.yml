@@ -28,20 +28,20 @@ jobs:
 
       - name: .env setting
         run: |
-          echo "REST_API_KEY=${{ secrets.REST_API_KEY }}" > .env.production
-          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env.production
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.production
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env.production
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env.production
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env.production
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env.production
+          echo "REST_API_KEY=${{ secrets.REST_API_KEY }}" > .env
+          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
 
       - name: ✨ 패키지 설치
         run: npm install
 
       - name: 📦 빌드한 코드를 압축
         run: |
-          Compress-Archive -Path .\src,.\public, .\.env.production, .\scripts,.\appspec.yml,.\ecosystem.config.js,.\package.json -DestinationPath seni.zip
+          Compress-Archive -Path .\src, .\public, .\.env, .\scripts, .\appspec.yml, .\ecosystem.config.js, .\package.json -DestinationPath seni.zip
 
       - name: 🌎 AWS에 접속
         uses: aws-actions/configure-aws-credentials@v4
