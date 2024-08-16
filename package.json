@@ -3,8 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "pm2 start src/app.js --name 'seninanum-be'",
-    "start:dev": "pm2 start ecosystem.config.js --env development",
+    "start": "pm2 start ecosystem.config.js --env development",
     "stop": "pm2 stop all",
     "restart": "pm2 restart all",
     "delete": "pm2 delete all",
@@ -12,18 +11,18 @@
     "build": "echo \"Build process not specified\""
   },
   "dependencies": {
+    "axios": "^1.7.2",
     "cookie-parser": "~1.4.6",
     "cors": "^2.8.5",
     "debug": "~4.3.5",
+    "dotenv": "^16.4.5",
     "express": "~4.19.2",
     "http-errors": "~2.0.0",
-    "jade": "~1.11.0",
+    "pug": "^3.0.2",
     "jsonwebtoken": "^9.0.2",
     "morgan": "~1.10.0",
+    "mysql": "^2.18.1",
     "mysql2": "^3.10.0",
-    "passport": "^0.7.0",
-    "passport-kakao": "^1.0.1",
-    "sequelize": "^6.37.3",
-    "sequelize-cli": "^6.6.2"
+    "pm2": "^5.4.0"
   }
 }

@@ -28,19 +28,21 @@ jobs:
 
       - name: .env setting
         run: |
-          echo "REST_API_KEY=${{ secrets.REST_API_KEY }}" > .env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "REST_API_KEY=${{ secrets.REST_API_KEY }}" >> $GITHUB_ENV
+          echo "PRD_REDIRECT_URI=${{ secrets.PRD_REDIRECT_URI }}" >> $GITHUB_ENV
+          echo "DEV_REDIRECT_URI=${{ secrets.DEV_REDIRECT_URI }}" >> $GITHUB_ENV
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> $GITHUB_ENV
+          echo "DB_USER=${{ secrets.DB_USER }}" >> $GITHUB_ENV
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
 
       - name: ✨ 패키지 설치
         run: npm install
 
       - name: 📦 빌드한 코드를 압축
         run: |
-          Compress-Archive -Path .\src, .\public, .\.env, .\scripts, .\appspec.yml, .\ecosystem.config.js, .\package.json -DestinationPath seni.zip
+          Compress-Archive -Path .\src,.\public,.\scripts,.\appspec.yml,.\ecosystem.config.js,.\package.json -DestinationPath seni.zip
 
       - name: 🌎 AWS에 접속
         uses: aws-actions/configure-aws-credentials@v4

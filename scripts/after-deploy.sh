@@ -1,16 +1,14 @@
 #!/bin/bash
 REPOSITORY=/home/ubuntu/build
 
-echo "Changing directory to $REPOSITORY"
-cd $REPOSITORY || exit
+cd $REPOSITORY
 
-echo "Installing dependencies"
+# Remove node_modules and package-lock.json
+rm -rf node_modules
+rm -f package-lock.json
+
+# Install dependencies
 npm install
 
-echo "Starting the application with PM2"
-pm2 start src/app.js --name "seninanum" --update-env
-
-echo "Saving PM2 process list"
-pm2 save
-
-echo "After deploy script executed successfully"
+# Restart the application (if needed)
+pm2 restart ecosystem.config.js --env production
