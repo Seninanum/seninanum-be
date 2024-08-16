@@ -29,7 +29,8 @@ jobs:
       - name: .env setting
         run: |
           echo "REST_API_KEY=${{ secrets.REST_API_KEY }}" >> $GITHUB_ENV
-          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> $GITHUB_ENV
+          echo "PRD_REDIRECT_URI=${{ secrets.PRD_REDIRECT_URI }}" >> $GITHUB_ENV
+          echo "DEV_REDIRECT_URI=${{ secrets.DEV_REDIRECT_URI }}" >> $GITHUB_ENV
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
           echo "DB_HOST=${{ secrets.DB_HOST }}" >> $GITHUB_ENV
           echo "DB_USER=${{ secrets.DB_USER }}" >> $GITHUB_ENV

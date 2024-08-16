@@ -4,7 +4,10 @@ const axios = require("axios");
 
 router.get("/kakao/token", async (req, res) => {
   const REST_API_KEY = process.env.REST_API_KEY;
-  const REDIRECT_URI = process.env.REDIRECT_URI;
+  const REDIRECT_URI =
+    process.env.NODE_ENV === "development"
+      ? process.env.DEV_REDIRECT_URI
+      : process.env.PRD_REDIRECT_URI;
 
   const code = req.query.code;
 
