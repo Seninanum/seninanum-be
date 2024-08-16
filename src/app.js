@@ -23,16 +23,27 @@ const { verifyToken } = require("./middlewares/jwt");
 const app = express();
 app.set("port", process.env.PORT || 3001);
 
+// app.use(
+//   cors({
+//     origin: [
+//       "http://localhost:3000",
+//       "https://api.seninanum.shop",
+//       "https://seninanum.shop",
+//     ],
+//     credentials: true,
+//   })
+// );
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://api.seninanum.shop",
-      "https://seninanum.shop",
-    ],
+    origin: ["http://localhost:3000", "https://seninanum.shop"], // 허용할 프론트엔드 도메인
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"], // 허용할 헤더
     credentials: true,
   })
 );
+
+app.options("*", cors()); // Preflight 요청을 위한 설정
 
 app.use(morgan("dev"));
 app.use(express.json());
