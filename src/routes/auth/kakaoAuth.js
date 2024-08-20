@@ -38,8 +38,8 @@ router.get("/kakao/token", async (req, res) => {
 
     res.json(userResponse.data);
   } catch (err) {
-    console.log(err);
-    // console.error("Error occurred:", err.message);
+    // console.log(err);
+    console.error("Error occurred:", err.message);
     res.status(500).send("Internal Server Error");
   }
 });
