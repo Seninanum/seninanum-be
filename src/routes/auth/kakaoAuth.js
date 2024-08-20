@@ -38,8 +38,24 @@ router.get("/kakao/token", async (req, res) => {
 
     res.json(userResponse.data);
   } catch (err) {
-    // console.log(err);
-    console.error("Error occurred:", err.message);
+    // 오류 객체 전체를 로그에 출력
+    console.error("Error occurred:", err);
+
+    // 특정 속성들을 로그에 출력
+    console.error("Error message:", err.message); // 기본 메시지
+    console.error("Error stack:", err.stack); // 스택 추적
+    console.error("Error config:", err.config); // Axios 요청 설정 (만약 Axios 요청에서 발생한 오류라면)
+    if (err.response) {
+      console.error("Response data:", err.response.data); // 서버에서 반환된 응답 데이터
+      console.error("Response status:", err.response.status); // 서버에서 반환된 상태 코드
+      console.error("Response headers:", err.response.headers); // 서버에서 반환된 헤더
+    } else if (err.request) {
+      console.error("Request data:", err.request); // 서버에 도달하지 못한 요청 데이터
+    } else {
+      console.error("Error details:", err.message); // 요청이 설정되는 동안 발생한 오류
+    }
+
+    // 클라이언트에게 500 내부 서버 오류 응답 전송
     res.status(500).send("Internal Server Error");
   }
 });
