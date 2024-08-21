@@ -55,6 +55,11 @@ router.get("/kakao/token", async (req, res) => {
       console.error("Error details:", err.message); // 요청이 설정되는 동안 발생한 오류
     }
 
+    console.log(
+      "ENVIRONMENT>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",
+      process.env.NODE_ENV
+    );
+
     // 클라이언트에게 500 내부 서버 오류 응답 전송
     res.status(500).send("Internal Server Error");
   }
