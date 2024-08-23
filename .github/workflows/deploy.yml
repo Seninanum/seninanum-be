@@ -30,7 +30,8 @@ jobs:
         run: |
           echo "REST_API_KEY=${{ secrets.REST_API_KEY }}" >> $GITHUB_ENV
           echo "PRD_REDIRECT_URI=${{ secrets.PRD_REDIRECT_URI }}" >> $GITHUB_ENV
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+          echo "ACCESS_SECRET=${{ secrets.ACCESS_SECRET }}" >> $GITHUB_ENV
+          echo "REFRESH_SECRET=${{ secrets.REFRESH_SECRET }}" >> $GITHUB_ENV
           echo "DB_HOST=${{ secrets.DB_HOST }}" >> $GITHUB_ENV
           echo "DB_USER=${{ secrets.DB_USER }}" >> $GITHUB_ENV
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV

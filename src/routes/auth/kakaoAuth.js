@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 
-router.get("/kakao/token", async (req, res) => {
+//카카오 사용자 정보 요청
+router.get("/kakao", async (req, res) => {
   const REST_API_KEY = process.env.REST_API_KEY;
   const REDIRECT_URI =
     process.env.NODE_ENV === "development"
@@ -11,6 +12,7 @@ router.get("/kakao/token", async (req, res) => {
 
   const code = req.query.code;
 
+  // 카카오 Access Token 요청
   try {
     const tokenResponse = await axios.post(
       "https://kauth.kakao.com/oauth/token",
@@ -29,6 +31,7 @@ router.get("/kakao/token", async (req, res) => {
     );
     const accessToken = tokenResponse.data.access_token;
 
+    // 카카오 사용자 정보 요청
     const userResponse = await axios.get("https://kapi.kakao.com/v2/user/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -36,9 +39,9 @@ router.get("/kakao/token", async (req, res) => {
       timeout: 5000,
     });
 
+    //반환값
     res.json(userResponse.data);
   } catch (err) {
-    // 오류 객체 전체를 로그에 출력
     console.error("Error occurred:", err);
 
     // 특정 속성들을 로그에 출력
@@ -54,12 +57,6 @@ router.get("/kakao/token", async (req, res) => {
     } else {
       console.error("Error details:", err.message); // 요청이 설정되는 동안 발생한 오류
     }
-
-    console.log(
-      "ENVIRONMENT>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",
-      process.env.NODE_ENV
-    );
-
     // 클라이언트에게 500 내부 서버 오류 응답 전송
     res.status(500).send("Internal Server Error");
   }
