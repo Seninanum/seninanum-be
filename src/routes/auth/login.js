@@ -36,10 +36,10 @@ router.post("/login", async (req, res) => {
 
       return res
         .status(200)
-        .json({ message: "로그인 되었습니다.", accessToken, refreshToken });
+        .json({ message: "LOGIN", accessToken, refreshToken });
     } else {
       // 사용자 정보가 없음
-      return res.status(404).json({ message: "존재하지 않는 계정입니다." });
+      return res.status(200).json({ message: "SIGNUP" });
     }
   } catch (error) {
     console.error(error);
