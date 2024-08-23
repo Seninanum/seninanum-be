@@ -72,7 +72,7 @@ jobs:
             --application-name seninanum-be `
             --deployment-config-name CodeDeployDefault.OneAtATime `
             --deployment-group-name dev `
-            --s3-location bucket=seninanum-be,bundleType=zip,key=deploy/seni.zip `
+            --s3-location bucket=seninanum-be,bundleType=zip,key=seni.zip `
             --query "deploymentId" --output text
           echo "deployment_id=$DEPLOYMENT_ID" >> $env:GITHUB_ENV
 
