@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../../database/db");
+const {
+  generateAccessToken,
+  generateRefreshToken,
+} = require("../../middlewares/jwt");
 
 router.post("/signup", async (req, res) => {
   const { userId, userType, nickname, gender, birthYear, profile } = req.body;
@@ -9,10 +13,26 @@ router.post("/signup", async (req, res) => {
     return res.status(400).json({ error: "모든 값이 존재해야 합니다." });
   }
 
+  // 토큰 생성
+  const accessToken = await generateAccessToken({
+    userId,
+    userType,
+  });
+  const refreshToken = await generateRefreshToken({});
+
   try {
     const [result] = await pool.query(
-      "INSERT INTO user (userId, userType, nickname, gender, birthYear, profile) VALUES (?, ?, ?, ?, ?, ?)",
-      [userId, userType, nickname, gender, birthYear, profile]
+      "INSERT INTO user (userId, userType, nickname, gender, birthYear, profile, accessToken, refreshToken) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        userId,
+        userType,
+        nickname,
+        gender,
+        birthYear,
+        profile,
+        accessToken,
+        refreshToken,
+      ]
     );
 
     res
