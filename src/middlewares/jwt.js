@@ -10,7 +10,7 @@ if (!ACCESS_SECRET || !REFRESH_SECRET) {
 
 //Access Token 생성
 function generateAccessToken(payload) {
-  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: "30m" });
+  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: "1m" });
 }
 
 //Refresh Token 생성
@@ -28,6 +28,7 @@ function verifyToken(req, res, next) {
 
   try {
     const verificationResult = jwt.verify(accessToken, ACCESS_SECRET);
+
     req.user = verificationResult; // 유저 정보를 요청 객체에 저장
     next();
   } catch (error) {
