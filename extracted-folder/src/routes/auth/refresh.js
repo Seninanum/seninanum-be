@@ -31,7 +31,7 @@ router.post("/refresh", async (req, res) => {
         rows[0].userId,
       ]);
 
-      return res.status(200).json(newAccessToken);
+      return res.status(200).json({ accessToken: newAccessToken });
     } else {
       // 사용자 정보가 없음
       return res.status(404).json({ message: "존재하지 않는 계정입니다." });
