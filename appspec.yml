@@ -18,3 +18,5 @@ hooks:
   # AfterInstall:
   #   - location: scripts/after-deploy.sh
   #     timeout: 300
+
+  # 주석
