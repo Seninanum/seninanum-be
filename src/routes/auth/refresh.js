@@ -9,9 +9,9 @@ const { generateAccessToken } = require("../../middlewares/jwt");
 router.post("/refresh", async (req, res) => {
   const { refreshToken } = req.body;
 
-  jwt.verify(refreshToken, process.env.REFRESH_SECRET);
-
   try {
+    jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+
     // refreshToken으로 사용자 정보 조회
     const [rows] = await pool.query(
       "SELECT * FROM user WHERE refreshToken = ?",
@@ -41,7 +41,14 @@ router.post("/refresh", async (req, res) => {
       return res
         .status(401)
         .json({ message: "리프레시 토큰이 만료되었습니다." });
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      // 토큰이 유효하지 않음
+      return res
+        .status(401)
+        .json({ message: "유효하지 않은 리프레시 토큰입니다." });
     } else {
+      // 그 외의 에러 처리
+      console.error("An error occurred:", error);
       return res
         .status(500)
         .json({ error: "An error occurred while checking the refreshToken" });
