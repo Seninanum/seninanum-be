@@ -15,6 +15,6 @@ hooks:
   # BeforeInstall:
   #   - location: scripts/cleanup.sh
   #     timeout: 300
-  # AfterInstall:
-  #   - location: scripts/after-deploy.sh
-  #     timeout: 300
+  AfterInstall:
+    - location: scripts/after-deploy.sh
+      timeout: 300
