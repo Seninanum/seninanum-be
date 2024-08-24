@@ -7,14 +7,14 @@ const { generateAccessToken, verifyToken } = require("../../middlewares/jwt");
 router.post("/refresh", async (req, res) => {
   const { refreshToken } = req.body;
 
+  jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+
   try {
     // refreshToken으로 사용자 정보 조회
     const [rows] = await pool.query(
       "SELECT * FROM user WHERE refreshToken = ?",
       [refreshToken]
     );
-
-    console.log(rows);
 
     if (rows.length > 0) {
       // Access Token 생성
@@ -35,10 +35,15 @@ router.post("/refresh", async (req, res) => {
       return res.status(404).json({ message: "존재하지 않는 계정입니다." });
     }
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ error: "An error occurred while checking the refreshToken" });
+    if (error instanceof jwt.TokenExpiredError) {
+      return res
+        .status(401)
+        .json({ message: "리프레시 토큰이 만료되었습니다." });
+    } else {
+      return res
+        .status(500)
+        .json({ error: "An error occurred while checking the refreshToken" });
+    }
   }
 });
 
