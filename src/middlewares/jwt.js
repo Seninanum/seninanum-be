@@ -10,12 +10,12 @@ if (!ACCESS_SECRET || !REFRESH_SECRET) {
 
 //Access Token 생성
 function generateAccessToken(payload) {
-  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: "10s" });
+  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: "30m" });
 }
 
 //Refresh Token 생성
 function generateRefreshToken() {
-  return jwt.sign({}, REFRESH_SECRET, { expiresIn: "1m" });
+  return jwt.sign({}, REFRESH_SECRET, { expiresIn: "14d" });
 }
 
 //jwt 토큰 검증
