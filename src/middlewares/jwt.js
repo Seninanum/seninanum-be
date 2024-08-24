@@ -19,7 +19,7 @@ function generateRefreshToken() {
 }
 
 //jwt 토큰 검증
-function verifyToken(req, res, next) {
+function verifyAccessToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const accessToken = authHeader && authHeader.split(" ")[1];
 
@@ -33,7 +33,33 @@ function verifyToken(req, res, next) {
     next();
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
-      return res.status(403).json({ message: "JWT has expired" });
+      return res.status(401).json({ message: "액세스 토큰이 만료되었습니다." });
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      return res.status(403).json({ message: "Invalid JWT" });
+    } else {
+      return res.status(500).json({ message: "An unknown error occurred" });
+    }
+  }
+}
+
+//jwt 토큰 검증
+function verifyRefreshToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const refreshToken = authHeader && authHeader.split(" ")[1];
+
+  // 토큰이 없는 경우
+  if (refreshToken == null) return res.sendStatus(401);
+
+  try {
+    const verificationResult = jwt.verify(refreshToken, REFRESH_SECRET);
+
+    req.user = verificationResult; // 유저 정보를 요청 객체에 저장
+    next();
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      return res
+        .status(401)
+        .json({ message: "리프레시 토큰이 만료되었습니다." });
     } else if (error instanceof jwt.JsonWebTokenError) {
       return res.status(403).json({ message: "Invalid JWT" });
     } else {
@@ -45,5 +71,6 @@ function verifyToken(req, res, next) {
 module.exports = {
   generateAccessToken,
   generateRefreshToken,
-  verifyToken,
+  verifyAccessToken,
+  verifyRefreshToken,
 };

@@ -18,7 +18,7 @@ const careerRouter = require("./routes/register/career");
 const careerItemRouter = require("./routes/register/careerItem");
 
 //middleware
-const { verifyToken } = require("./middlewares/jwt");
+const { verifyAccessToken, verifyRefreshToken } = require("./middlewares/jwt");
 
 // use
 const app = express();
@@ -44,11 +44,11 @@ app.use(bodyParser.json());
 app.use("/auth", kakaoRouter);
 app.use("/auth", signUpRouter);
 app.use("/auth", loginRouter);
-app.use("/auth", refreshRouter);
-app.use("/recruit", verifyToken, RecruitRouter);
-app.use("/user", verifyToken, getUserTypeRouter);
-app.use("/career", verifyToken, careerRouter);
-app.use("/career/item", verifyToken, careerItemRouter);
+app.use("/auth", verifyRefreshToken, refreshRouter);
+app.use("/recruit", verifyAccessToken, RecruitRouter);
+app.use("/user", verifyAccessToken, getUserTypeRouter);
+app.use("/career", verifyAccessToken, careerRouter);
+app.use("/career/item", verifyAccessToken, careerItemRouter);
 
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../../database/db");
-const { generateAccessToken } = require("../../middlewares/jwt");
+const { generateAccessToken, verifyToken } = require("../../middlewares/jwt");
 
 // access token 재발급
 router.post("/refresh", async (req, res) => {
