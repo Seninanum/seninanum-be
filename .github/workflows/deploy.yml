@@ -58,7 +58,7 @@ jobs:
         id: stop-deployment
         run: |
           ACTIVE_DEPLOYMENT_ID=$(aws deploy list-deployments --application-name seninanum-be --deployment-group-name dev --include-only-statuses Created Queued InProgress --query "deployments[0]" --output text)
-          if [ "$ACTIVE_DEPLOYMENT_ID" != "None" ] && [ -n "$ACTIVE_DEPLOYMENT_ID" ]; then
+          if [ "$ACTIVE_DEPLOYMENT_ID" != "None" ] && [ "$ACTIVE_DEPLOYMENT_ID" != "null" ] && [ -n "$ACTIVE_DEPLOYMENT_ID" ]; then
             echo "Stopping active deployment: $ACTIVE_DEPLOYMENT_ID"
             aws deploy stop-deployment --deployment-id $ACTIVE_DEPLOYMENT_ID --auto-rollback-enabled
           else
