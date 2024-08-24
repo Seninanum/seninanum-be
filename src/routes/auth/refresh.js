@@ -7,8 +7,6 @@ const { generateAccessToken } = require("../../middlewares/jwt");
 router.post("/refresh", async (req, res) => {
   const { refreshToken } = req.body;
 
-  console.log(refreshToken);
-
   try {
     // refreshToken으로 사용자 정보 조회
     const [rows] = await pool.query(
@@ -31,7 +29,7 @@ router.post("/refresh", async (req, res) => {
         rows[0].userId,
       ]);
 
-      return res.status(200).json(newAccessToken);
+      return res.status(200).json({ accessToken: newAccessToken });
     } else {
       // 사용자 정보가 없음
       return res.status(404).json({ message: "존재하지 않는 계정입니다." });
