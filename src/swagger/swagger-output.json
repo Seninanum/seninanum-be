@@ -1,0 +1,544 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "시니나눔",
+    "description": "시니나눔 API 문서",
+    "version": "1.0.0"
+  },
+  "host": "localhost:3000",
+  "servers": [
+    {
+      "url": "http://localhost:3001"
+    }
+  ],
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "securityDefinitions": {
+    "bearerAuth": {
+      "type": "http",
+      "scheme": "bearer",
+      "in": "header",
+      "bearerFormat": "JWT"
+    }
+  },
+  "paths": {
+    "/auth/kakao": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "example": "any"
+                },
+                "userType": {
+                  "example": "any"
+                },
+                "nickname": {
+                  "example": "any"
+                },
+                "gender": {
+                  "example": "any"
+                },
+                "birthYear": {
+                  "example": "any"
+                },
+                "profile": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "refreshToken": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/recruit/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "example": "any"
+                },
+                "content": {
+                  "example": "any"
+                },
+                "method": {
+                  "example": "any"
+                },
+                "priceType": {
+                  "example": "any"
+                },
+                "price": {
+                  "example": "any"
+                },
+                "region": {
+                  "example": "any"
+                },
+                "field": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/recruit/list": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/recruit/{recruitId}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "recruitId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/user/userType": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/career/": {
+      "post": {
+        "tags": [
+          "Career"
+        ],
+        "summary": "경력 프로필 생성",
+        "description": "경력 프로필 생성하기",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Career"
+        ],
+        "summary": "경력 프로필 수정",
+        "description": "경력 프로필 수정하기",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "example": {
+                  "type": "object",
+                  "properties": {
+                    "profileId": {
+                      "type": "number",
+                      "example": 111111
+                    },
+                    "introduce": {
+                      "type": "string",
+                      "example": "소개"
+                    },
+                    "age": {
+                      "type": "string",
+                      "example": "60대"
+                    },
+                    "field": {
+                      "type": "string",
+                      "example": "경제"
+                    },
+                    "service": {
+                      "type": "string",
+                      "example": "제공할 서비스"
+                    },
+                    "method": {
+                      "type": "string",
+                      "example": "대면"
+                    },
+                    "region": {
+                      "type": "string",
+                      "example": "종로구"
+                    },
+                    "priceType": {
+                      "type": "string",
+                      "example": "시간당"
+                    },
+                    "price": {
+                      "type": "number",
+                      "example": 1000
+                    },
+                    "progressStep": {
+                      "type": "number",
+                      "example": 8
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/career/{profileId}": {
+      "get": {
+        "tags": [
+          "Career"
+        ],
+        "summary": "경력 프로필 상세항목 조회",
+        "description": "경력 프로필 상세항목 조회하기",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/career/item/": {
+      "post": {
+        "tags": [
+          "CareerItem"
+        ],
+        "summary": "경력 상세 사항 등록",
+        "description": "경력 프로필에 등록하는 경력 상세 사항",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "example": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "example": "제목"
+                    },
+                    "startYear": {
+                      "type": "number",
+                      "example": 1989
+                    },
+                    "startMonth": {
+                      "type": "number",
+                      "example": 12
+                    },
+                    "endYear": {
+                      "type": "number",
+                      "example": 2023
+                    },
+                    "endMonth": {
+                      "type": "number",
+                      "example": 12
+                    },
+                    "content": {
+                      "type": "string",
+                      "example": "내용을 입력합니다."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "CareerItem"
+        ],
+        "summary": "경력 상세 사항 삭제",
+        "description": "경력 프로필에 등록하는 경력 상세 사항",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "careerId": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/career/item/list": {
+      "get": {
+        "tags": [
+          "CareerItem"
+        ],
+        "summary": "경력 상세 사항 조회",
+        "description": "경력 프로필에 등록하는 경력 상세 사항",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  }
+}
