@@ -399,38 +399,6 @@
         ],
         "summary": "경력 상세 사항 등록",
         "description": "경력 프로필에 등록하는 경력 상세 사항",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "title": {
-                  "example": "any"
-                },
-                "startYear": {
-                  "example": "any"
-                },
-                "startMonth": {
-                  "example": "any"
-                },
-                "endYear": {
-                  "example": "any"
-                },
-                "endMonth": {
-                  "example": "any"
-                },
-                "period": {
-                  "example": "any"
-                },
-                "content": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
         "responses": {
           "201": {
             "description": "Created"
@@ -447,6 +415,55 @@
           "500": {
             "description": "Internal Server Error"
           }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "경력 제목"
+                  },
+                  "startYear": {
+                    "type": "integer",
+                    "description": "경력 시작 연도"
+                  },
+                  "startMonth": {
+                    "type": "integer",
+                    "description": "경력 시작 월"
+                  },
+                  "endYear": {
+                    "type": "integer",
+                    "description": "경력 종료 연도"
+                  },
+                  "endMonth": {
+                    "type": "integer",
+                    "description": "경력 종료 월"
+                  },
+                  "period": {
+                    "type": "string",
+                    "description": "경력 기간 (선택 사항)",
+                    "nullable": true
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "경력 상세 내용"
+                  }
+                },
+                "required": [
+                  "title",
+                  "startYear",
+                  "startMonth",
+                  "endYear",
+                  "endMonth",
+                  "content"
+                ]
+              }
+            }
+          }
         }
       },
       "delete": {
@@ -455,20 +472,6 @@
         ],
         "summary": "경력 상세 사항 삭제",
         "description": "경력 프로필에 등록하는 경력 상세 사항",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "careerId": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -484,6 +487,25 @@
           },
           "500": {
             "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "careerId": {
+                    "type": "integer",
+                    "description": "경력 항목 아이디"
+                  }
+                },
+                "required": [
+                  "careerId"
+                ]
+              }
+            }
           }
         }
       }
