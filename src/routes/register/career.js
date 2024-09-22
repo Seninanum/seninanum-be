@@ -51,15 +51,9 @@ router.get("/:profileId", async (req, res) => {
    */
   const profileId = req.params.profileId;
 
-  const userId = req.user.userId;
-
-  // userId가 careerProfile에 있으면 해당 행을 반환
-
-  // userId가 careerProfile에 없으면 새로 생성
-
   try {
     const [career] = await pool.query(
-      "select userId, introduce, age, field, service, method, region, priceType, price from careerProfile where profileId = ?",
+      "select introduce, age, field, service, method, region, priceType, price from careerProfile where profileId = ?",
       [profileId]
     );
 
@@ -67,38 +61,7 @@ router.get("/:profileId", async (req, res) => {
       return res.status(404).json({ error: "career not found" });
     }
 
-    const {
-      userId,
-      introduce,
-      age,
-      field,
-      service,
-      method,
-      region,
-      priceType,
-      price,
-    } = career[0];
-
-    const [userInfo] = await pool.query(
-      "SELECT nickname, gender, birthyear FROM user WHERE userId=?",
-      [userId]
-    );
-    const { nickname, gender, birthyear } = userInfo[0];
-
-    const response = {
-      introduce,
-      age,
-      field,
-      service,
-      method,
-      region,
-      priceType,
-      price,
-      nickname,
-      gender,
-      birthyear,
-    };
-
+    const response = career[0];
     res.status(200).json(response);
   } catch (error) {
     console.log(error);
