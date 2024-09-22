@@ -2,8 +2,12 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../database/db");
 
-// 경력프로필 등록
 router.post("/", async (req, res) => {
+  /**
+   * #swagger.tags = ['Career']
+   * #swagger.summary = '경력 프로필 등록'
+   * #swagger.description = '경력 프로필 등록하기'
+   */
   const { introduce, age, field, service, method, region, priceType, price } =
     req.body;
 
@@ -31,8 +35,12 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 경력프로필 목록 불러오기
 router.get("/list", async (req, res) => {
+  /**
+   * #swagger.tags = ['Career']
+   * #swagger.summary = '경력 프로필 조회'
+   * #swagger.description = '경력 프로필 조회하기'
+   */
   try {
     //경력프로필 정보
     const [careers] = await pool.query(
@@ -66,8 +74,14 @@ router.get("/list", async (req, res) => {
       .json({ error: "An error occurred while fetching career list" });
   }
 });
+
 // 경력프로필 상세정보 불러오기
 router.get("/:profileId", async (req, res) => {
+  /**
+   * #swagger.tags = ['Career']
+   * #swagger.summary = '경력 프로필 상세항목 조회'
+   * #swagger.description = '경력 프로필 상세항목 조회하기'
+   */
   const profileId = req.params.profileId;
 
   try {

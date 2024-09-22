@@ -17,6 +17,10 @@ const getUserTypeRouter = require("./routes/user/userType");
 const careerRouter = require("./routes/register/career");
 const careerItemRouter = require("./routes/register/careerItem");
 
+// swagger
+const swaggerUi = require("swagger-ui-express");
+const swaggerFile = require("./swagger/swagger-output.json");
+
 //middleware
 const { verifyToken } = require("./middlewares/jwt");
 
@@ -50,6 +54,12 @@ app.use("/user", verifyToken, getUserTypeRouter);
 app.use("/career", verifyToken, careerRouter);
 app.use("/career/item", verifyToken, careerItemRouter);
 
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerFile, { explorer: true })
+);
+
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
   error.status = 404;
@@ -65,5 +75,4 @@ app.use((err, req, res, next) => {
 app.listen(app.get("port"), () => {
   console.log(app.get("port"), "번 포트에서 대기중");
 });
-
 module.exports = app;

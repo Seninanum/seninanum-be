@@ -2,8 +2,12 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../database/db");
 
-// 경력 항목 추가
 router.post("/", async (req, res) => {
+  /**
+   * #swagger.tags = ['CareerItem']
+   * #swagger.summary = '경력 상세 사항 등록'
+   * #swagger.description = '경력 프로필에 등록하는 경력 상세 사항'
+   */
   const { title, startYear, startMonth, endYear, endMonth, period, content } =
     req.body;
   if (
@@ -42,8 +46,13 @@ router.post("/", async (req, res) => {
       .json({ error: "An error occurred while creating the careerItem" });
   }
 });
-// 경력 항목 삭제
+
 router.delete("/", async (req, res) => {
+  /**
+   * #swagger.tags = ['CareerItem']
+   * #swagger.summary = '경력 상세 사항 삭제'
+   * #swagger.description = '경력 프로필에 등록하는 경력 상세 사항'
+   */
   const { careerId } = req.body;
 
   try {
@@ -65,8 +74,12 @@ router.delete("/", async (req, res) => {
   }
 });
 
-// 경력 항목 조회
 router.get("/list", async (req, res) => {
+  /**
+   * #swagger.tags = ['CareerItem']
+   * #swagger.summary = '경력 상세 사항 조회'
+   * #swagger.description = '경력 프로필에 등록하는 경력 상세 사항'
+   */
   try {
     const [results] = await pool.query("SELECT * FROM careerItem");
     res.status(200).json(results);
@@ -77,4 +90,5 @@ router.get("/list", async (req, res) => {
       .json({ error: "An error occurred while fetching the career items" });
   }
 });
+
 module.exports = router;
