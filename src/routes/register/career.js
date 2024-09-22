@@ -5,9 +5,8 @@ const pool = require("../../database/db");
 
 router.post("/", async (req, res) => {
   /**
-   * #swagger.tags = ['Career']
-   * #swagger.summary = '경력 프로필 생성'
-   * #swagger.description = '경력 프로필 생성하기'
+    #swagger.tags = ['Career']
+    #swagger.summary = '경력 프로필 생성'
    */
 
   //생성되어있는 프로필이 있는지 확인
@@ -45,9 +44,8 @@ router.post("/", async (req, res) => {
 
 router.get("/:profileId", async (req, res) => {
   /**
-   * #swagger.tags = ['Career']
-   * #swagger.summary = '경력 프로필 상세항목 조회'
-   * #swagger.description = '경력 프로필 상세항목 조회하기'
+    #swagger.tags = ['Career']
+    #swagger.summary = '경력 프로필 상세항목 조회'
    */
   const profileId = req.params.profileId;
 
@@ -75,25 +73,22 @@ router.patch("/", async (req, res) => {
   /**
     #swagger.tags = ['Career']
     #swagger.summary = '경력 프로필 수정'
-    #swagger.description = '경력 프로필 수정하기'
     #swagger.parameters = [
       {
         name: 'body',
         in: 'body',
         required: true,
         schema: {
-          example: {
-            profileId: 111111,
-            introduce: "소개",
-            age: "60대",
-            field: "경제",
-            service: "제공할 서비스",
-            method: "대면",
-            region: "종로구",
-            priceType: "시간당",
-            price: 1000,
-            progressStep: 8
-          }
+          profileId: 111111,
+          introduce: "소개",
+          age: "60대",
+          field: "경제",
+          service: "제공할 서비스",
+          method: "대면",
+          region: "종로구",
+          priceType: "시간당",
+          price: 1000,
+          progressStep: 8
         },
       }
     ]

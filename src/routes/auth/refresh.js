@@ -5,8 +5,11 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { generateAccessToken } = require("../../middlewares/jwt");
 
-// access token 재발급
 router.post("/refresh", async (req, res) => {
+  /**
+    #swagger.tags = ['Auth']
+    #swagger.summary = '액세스 토큰 재발급'
+   */
   const { refreshToken } = req.body;
 
   try {

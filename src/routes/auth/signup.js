@@ -7,6 +7,11 @@ const {
 } = require("../../middlewares/jwt");
 
 router.post("/signup", async (req, res) => {
+  /**
+    #swagger.tags = ['Auth']
+    #swagger.summary = '회원가입'
+   */
+
   const { userId, userType, nickname, gender, birthYear, profile } = req.body;
 
   if (!userId || !userType || !nickname || !gender || !birthYear || !profile) {

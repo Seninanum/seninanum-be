@@ -26,6 +26,10 @@
   "paths": {
     "/auth/kakao": {
       "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "카카오 사용자 정보 요청",
         "description": "",
         "parameters": [
           {
@@ -46,6 +50,10 @@
     },
     "/auth/signup": {
       "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "회원가입",
         "description": "",
         "parameters": [
           {
@@ -91,6 +99,10 @@
     },
     "/auth/login": {
       "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "로그인",
         "description": "",
         "parameters": [
           {
@@ -121,6 +133,10 @@
     },
     "/auth/refresh": {
       "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "액세스 토큰 재발급",
         "description": "",
         "parameters": [
           {
@@ -154,6 +170,10 @@
     },
     "/recruit/": {
       "post": {
+        "tags": [
+          "Recruit"
+        ],
+        "summary": "구인글 등록",
         "description": "",
         "parameters": [
           {
@@ -208,6 +228,10 @@
     },
     "/recruit/list": {
       "get": {
+        "tags": [
+          "Recruit"
+        ],
+        "summary": "구인글 목록 불러오기",
         "description": "",
         "responses": {
           "200": {
@@ -227,6 +251,10 @@
     },
     "/recruit/{recruitId}": {
       "get": {
+        "tags": [
+          "Recruit"
+        ],
+        "summary": "구인글 상세정보 불러오기",
         "description": "",
         "parameters": [
           {
@@ -257,6 +285,10 @@
     },
     "/user/userType": {
       "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "유저 타입 불러오기",
         "description": "",
         "responses": {
           "200": {
@@ -280,7 +312,7 @@
           "Career"
         ],
         "summary": "경력 프로필 생성",
-        "description": "경력 프로필 생성하기",
+        "description": "",
         "responses": {
           "200": {
             "description": "OK"
@@ -304,7 +336,7 @@
           "Career"
         ],
         "summary": "경력 프로필 수정",
-        "description": "경력 프로필 수정하기",
+        "description": "",
         "parameters": [
           {
             "name": "body",
@@ -313,50 +345,45 @@
             "schema": {
               "type": "object",
               "properties": {
-                "example": {
-                  "type": "object",
-                  "properties": {
-                    "profileId": {
-                      "type": "number",
-                      "example": 111111
-                    },
-                    "introduce": {
-                      "type": "string",
-                      "example": "소개"
-                    },
-                    "age": {
-                      "type": "string",
-                      "example": "60대"
-                    },
-                    "field": {
-                      "type": "string",
-                      "example": "경제"
-                    },
-                    "service": {
-                      "type": "string",
-                      "example": "제공할 서비스"
-                    },
-                    "method": {
-                      "type": "string",
-                      "example": "대면"
-                    },
-                    "region": {
-                      "type": "string",
-                      "example": "종로구"
-                    },
-                    "priceType": {
-                      "type": "string",
-                      "example": "시간당"
-                    },
-                    "price": {
-                      "type": "number",
-                      "example": 1000
-                    },
-                    "progressStep": {
-                      "type": "number",
-                      "example": 8
-                    }
-                  }
+                "profileId": {
+                  "type": "number",
+                  "example": 111111
+                },
+                "introduce": {
+                  "type": "string",
+                  "example": "소개"
+                },
+                "age": {
+                  "type": "string",
+                  "example": "60대"
+                },
+                "field": {
+                  "type": "string",
+                  "example": "경제"
+                },
+                "service": {
+                  "type": "string",
+                  "example": "제공할 서비스"
+                },
+                "method": {
+                  "type": "string",
+                  "example": "대면"
+                },
+                "region": {
+                  "type": "string",
+                  "example": "종로구"
+                },
+                "priceType": {
+                  "type": "string",
+                  "example": "시간당"
+                },
+                "price": {
+                  "type": "number",
+                  "example": 1000
+                },
+                "progressStep": {
+                  "type": "number",
+                  "example": 8
                 }
               }
             }
@@ -384,7 +411,7 @@
           "Career"
         ],
         "summary": "경력 프로필 상세항목 조회",
-        "description": "경력 프로필 상세항목 조회하기",
+        "description": "",
         "parameters": [
           {
             "name": "profileId",
@@ -418,7 +445,7 @@
           "CareerItem"
         ],
         "summary": "경력 상세 사항 등록",
-        "description": "경력 프로필에 등록하는 경력 상세 사항",
+        "description": "",
         "parameters": [
           {
             "name": "body",
@@ -427,42 +454,37 @@
             "schema": {
               "type": "object",
               "properties": {
-                "example": {
-                  "type": "object",
-                  "properties": {
-                    "title": {
-                      "type": "string",
-                      "example": "제목"
-                    },
-                    "startYear": {
-                      "type": "number",
-                      "example": 1989
-                    },
-                    "startMonth": {
-                      "type": "number",
-                      "example": 12
-                    },
-                    "endYear": {
-                      "type": "number",
-                      "example": 2023
-                    },
-                    "endMonth": {
-                      "type": "number",
-                      "example": 12
-                    },
-                    "content": {
-                      "type": "string",
-                      "example": "내용을 입력합니다."
-                    }
-                  }
+                "title": {
+                  "type": "string",
+                  "example": "제목"
+                },
+                "startYear": {
+                  "type": "number",
+                  "example": 1989
+                },
+                "startMonth": {
+                  "type": "number",
+                  "example": 12
+                },
+                "endYear": {
+                  "type": "number",
+                  "example": 2023
+                },
+                "endMonth": {
+                  "type": "number",
+                  "example": 12
+                },
+                "content": {
+                  "type": "string",
+                  "example": "내용을 입력합니다."
                 }
               }
             }
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
+          "200": {
+            "description": "OK"
           },
           "400": {
             "description": "Bad Request"
@@ -483,16 +505,18 @@
           "CareerItem"
         ],
         "summary": "경력 상세 사항 삭제",
-        "description": "경력 프로필에 등록하는 경력 상세 사항",
+        "description": "",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "careerId": {
-                  "example": "any"
+                  "type": "number",
+                  "example": 1
                 }
               }
             }
@@ -517,13 +541,21 @@
         }
       }
     },
-    "/career/item/list": {
+    "/career/item/list/{profileId}": {
       "get": {
         "tags": [
           "CareerItem"
         ],
-        "summary": "경력 상세 사항 조회",
-        "description": "경력 프로필에 등록하는 경력 상세 사항",
+        "summary": "경력 상세 사항 리스트 조회",
+        "description": "",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"

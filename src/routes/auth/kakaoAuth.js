@@ -4,6 +4,11 @@ const axios = require("axios");
 
 //카카오 사용자 정보 요청
 router.get("/kakao", async (req, res) => {
+  /**
+    #swagger.tags = ['Auth']
+    #swagger.summary = '카카오 사용자 정보 요청'
+   */
+
   const REST_API_KEY = process.env.REST_API_KEY;
   const REDIRECT_URI =
     process.env.NODE_ENV === "development"

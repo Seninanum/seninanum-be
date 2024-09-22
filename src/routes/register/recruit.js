@@ -2,8 +2,11 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../database/db");
 
-// 구인글 등록
 router.post("/", async (req, res) => {
+  /**
+    #swagger.tags = ['Recruit']
+    #swagger.summary = '구인글 등록'
+   */
   const { title, content, method, priceType, price, region, field } = req.body;
 
   if (!title || !content || !method || !priceType || !price || !field) {
@@ -34,8 +37,11 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 구인글 목록 불러오기
 router.get("/list", async (req, res) => {
+  /**
+    #swagger.tags = ['Recruit']
+    #swagger.summary = '구인글 목록 불러오기'
+   */
   try {
     //구인글 정보
     const [recruits] = await pool.query(
@@ -73,8 +79,11 @@ router.get("/list", async (req, res) => {
   }
 });
 
-// 구인글 상세정보 불러오기
 router.get("/:recruitId", async (req, res) => {
+  /**
+    #swagger.tags = ['Recruit']
+    #swagger.summary = '구인글 상세정보 불러오기'
+   */
   const recruitId = req.params.recruitId;
 
   try {
