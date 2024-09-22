@@ -71,12 +71,11 @@ router.get("/:profileId", async (req, res) => {
   }
 });
 
-//patch으로 변경
 router.patch("/", async (req, res) => {
   /**
    * #swagger.tags = ['Career']
-   * #swagger.summary = '경력 프로필 등록'
-   * #swagger.description = '경력 프로필 등록하기'
+   * #swagger.summary = '경력 프로필 수정'
+   * #swagger.description = '경력 프로필 수정하기'
    */
 
   const {
@@ -89,12 +88,13 @@ router.patch("/", async (req, res) => {
     region,
     priceType,
     price,
+    progressStep,
   } = req.body;
 
   try {
     // profileId인 곳에 프로필 Update
     const [result] = await pool.query(
-      "UPDATE careerProfile SET introduce = ?, age = ?, field = ?, service = ?, method = ?, region = ?, priceType = ?, price = ? WHERE profileId = ?",
+      "UPDATE careerProfile SET introduce = ?, age = ?, field = ?, service = ?, method = ?, region = ?, priceType = ?, price = ?, progressStep = ? WHERE profileId = ?",
       [
         introduce,
         age,
@@ -104,6 +104,7 @@ router.patch("/", async (req, res) => {
         region,
         priceType,
         price,
+        progressStep,
         profileId,
       ]
     );
