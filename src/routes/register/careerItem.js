@@ -26,8 +26,17 @@ router.post("/", async (req, res) => {
     ]
    */
 
-  const { title, startYear, startMonth, endYear, endMonth, content } = req.body;
+  const {
+    profileId,
+    title,
+    startYear,
+    startMonth,
+    endYear,
+    endMonth,
+    content,
+  } = req.body;
   if (
+    !profileId ||
     !title ||
     !startYear ||
     !startMonth ||
@@ -37,25 +46,14 @@ router.post("/", async (req, res) => {
   ) {
     return res.status(400).json({ error: "값이 존재해야 합니다." });
   }
-  const userId = req.user.userId;
 
   try {
-    const [user] = await pool.query("SELECT * FROM user WHERE userId = ?", [
-      userId,
-    ]);
-    if (user.length === 0) {
-      return res.status(400).json({ error: "유효하지 않은 userId입니다." });
-    }
-
     const [result] = await pool.query(
-      "INSERT INTO careerItem (userId, title, startYear, startMonth, endYear, endMonth, content) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [userId, title, startYear, startMonth, endYear, endMonth, content]
+      "INSERT INTO careerItem (profileId, title, startYear, startMonth, endYear, endMonth, content) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [profileId, title, startYear, startMonth, endYear, endMonth, content]
     );
-    const [newCareer] = await pool.query(
-      "SELECT * FROM careerItem WHERE careerId = ?",
-      [result.insertId]
-    );
-    res.status(201).json({ career: newCareer[0] }); // 새 경력 항목
+
+    res.status(200).json({ message: "경력 항목이 추가되었습니다." }); // 새 경력 항목
   } catch (error) {
     console.log(error);
     res
@@ -91,14 +89,19 @@ router.delete("/", async (req, res) => {
   }
 });
 
-router.get("/list", async (req, res) => {
+router.get("/list/:profileId", async (req, res) => {
   /**
    * #swagger.tags = ['CareerItem']
-   * #swagger.summary = '경력 상세 사항 조회'
-   * #swagger.description = '경력 프로필에 등록하는 경력 상세 사항'
+   * #swagger.summary = '경력 상세 사항 리스트 조회'
+   * #swagger.description = '경력 프로필에 등록하는 경력 상세 사항 리스트'
    */
+
+  const profileId = req.params.profileId;
   try {
-    const [results] = await pool.query("SELECT * FROM careerItem");
+    const [results] = await pool.query(
+      "SELECT careerId, title, startYear, startMonth, endYear, endMonth, content FROM careerItem where profileId = ?",
+      [profileId]
+    );
     res.status(200).json(results);
   } catch (error) {
     console.log(error);
