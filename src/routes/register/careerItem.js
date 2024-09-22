@@ -7,34 +7,25 @@ router.post("/", async (req, res) => {
     #swagger.tags = ['CareerItem']
     #swagger.summary = '경력 상세 사항 등록'
     #swagger.description = '경력 프로필에 등록하는 경력 상세 사항'
-    #swagger.requestBody = {
+    #swagger.parameters = [
+      {
+        name: 'body',
+        in: 'body',
         required: true,
-        content: {
-            "application/json": {
-                schema: {
-                  "type": "object",
-                    properties: {
-                      title: { type: 'string', description: '경력 제목' },
-                      startYear: { type: 'integer', description: '경력 시작 연도' },
-                      startMonth: { type: 'integer', description: '경력 시작 월' },
-                      endYear: { type: 'integer', description: '경력 종료 연도' },
-                      endMonth: { type: 'integer', description: '경력 종료 월' },
-                      content: { type: 'string', description: '경력 상세 내용' }
-                    },
-                    required: ['title', 'startYear', 'startMonth', 'endYear', 'endMonth', 'content']
-                },
-                example: {
-                    "title": "경력 제목",
-                    "startYear": 1993,
-                    "startMonth": 12,
-                    "endYear": 2023,
-                    "endMonth": 12,
-                    "content": "장애 아동 사회복지사",
-                },
-            },
-        }
-    }
+        schema: {
+          example: {
+            title: "제목",
+            startYear: 1989,
+            startMonth: 12,
+            endYear: 2023,
+            endMonth: 12,
+            content: "내용을 입력합니다.",
+          }
+        },
+      }
+    ]
    */
+
   const { title, startYear, startMonth, endYear, endMonth, content } = req.body;
   if (
     !title ||
@@ -78,20 +69,6 @@ router.delete("/", async (req, res) => {
     #swagger.tags = ['CareerItem']
     #swagger.summary = '경력 상세 사항 삭제'
     #swagger.description = '경력 프로필에 등록하는 경력 상세 사항'
-    #swagger.requestBody = {
-        required: true,
-        content: {
-            "application/json": {
-                schema: {
-                  "type": "object",
-                    properties: {
-                      careerId: { type: 'integer', description: '경력 항목 아이디' },
-                    },
-                    required: ['careerId']
-                },
-            },
-        }
-    }
    */
   const { careerId } = req.body;
 

@@ -73,9 +73,30 @@ router.get("/:profileId", async (req, res) => {
 
 router.patch("/", async (req, res) => {
   /**
-   * #swagger.tags = ['Career']
-   * #swagger.summary = '경력 프로필 수정'
-   * #swagger.description = '경력 프로필 수정하기'
+    #swagger.tags = ['Career']
+    #swagger.summary = '경력 프로필 수정'
+    #swagger.description = '경력 프로필 수정하기'
+    #swagger.parameters = [
+      {
+        name: 'body',
+        in: 'body',
+        required: true,
+        schema: {
+          example: {
+            profileId: 111111,
+            introduce: "소개",
+            age: "60대",
+            field: "경제",
+            service: "제공할 서비스",
+            method: "대면",
+            region: "종로구",
+            priceType: "시간당",
+            price: 1000,
+            progressStep: 8
+          }
+        },
+      }
+    ]
    */
 
   const {
@@ -117,45 +138,5 @@ router.patch("/", async (req, res) => {
       .json({ error: "An error occurred while creating the careerProfile" });
   }
 });
-
-// router.get("/list", async (req, res) => {
-//   /**
-//    * #swagger.tags = ['Career']
-//    * #swagger.summary = '경력 프로필 조회'
-//    * #swagger.description = '경력 프로필 조회하기'
-//    */
-//   try {
-//     //경력프로필 정보
-//     const [careers] = await pool.query(
-//       "SELECT profileId, userId, introduce, age, field FROM careerProfile"
-//     );
-
-//     const careerWithUserInfo = await Promise.all(
-//       careers.map(async (career) => {
-//         const [user] = await pool.query(
-//           "SELECT nickname, gender, birthyear FROM user WHERE userId = ?",
-//           [career.userId]
-//         );
-//         const { nickname, gender, birthyear } = user[0];
-//         return {
-//           profileId: career.profileId,
-//           introduce: career.introduce,
-//           age: career.age,
-//           field: career.field,
-//           nickname,
-//           gender,
-//           birthyear,
-//         };
-//       })
-//     );
-
-//     res.status(200).json(careerWithUserInfo);
-//   } catch (error) {
-//     console.log(error);
-//     res
-//       .status(500)
-//       .json({ error: "An error occurred while fetching career list" });
-//   }
-// });
 
 module.exports = router;

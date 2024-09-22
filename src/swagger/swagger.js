@@ -3,8 +3,8 @@ const swaggerAutogen = require("swagger-autogen")();
 
 const options = {
   info: {
-    title: "TEST API Docs",
-    description: "시니나눔",
+    title: "시니나눔",
+    description: "시니나눔 API 문서",
   },
   servers: [
     {
