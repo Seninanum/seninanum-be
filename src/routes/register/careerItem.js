@@ -6,21 +6,18 @@ router.post("/", async (req, res) => {
   /**
     #swagger.tags = ['CareerItem']
     #swagger.summary = '경력 상세 사항 등록'
-    #swagger.description = '경력 프로필에 등록하는 경력 상세 사항'
     #swagger.parameters = [
       {
         name: 'body',
         in: 'body',
         required: true,
         schema: {
-          example: {
-            title: "제목",
-            startYear: 1989,
-            startMonth: 12,
-            endYear: 2023,
-            endMonth: 12,
-            content: "내용을 입력합니다.",
-          }
+          title: "제목",
+          startYear: 1989,
+          startMonth: 12,
+          endYear: 2023,
+          endMonth: 12,
+          content: "내용을 입력합니다.",
         },
       }
     ]
@@ -66,8 +63,18 @@ router.delete("/", async (req, res) => {
   /**
     #swagger.tags = ['CareerItem']
     #swagger.summary = '경력 상세 사항 삭제'
-    #swagger.description = '경력 프로필에 등록하는 경력 상세 사항'
+    #swagger.parameters = [
+      {
+        name: 'body',
+        in: 'body',
+        required: true,
+        schema: {
+          careerId: 1,
+        },
+      }
+    ]
    */
+
   const { careerId } = req.body;
 
   try {
@@ -93,7 +100,6 @@ router.get("/list/:profileId", async (req, res) => {
   /**
    * #swagger.tags = ['CareerItem']
    * #swagger.summary = '경력 상세 사항 리스트 조회'
-   * #swagger.description = '경력 프로필에 등록하는 경력 상세 사항 리스트'
    */
 
   const profileId = req.params.profileId;

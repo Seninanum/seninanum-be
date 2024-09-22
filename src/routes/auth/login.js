@@ -8,6 +8,10 @@ const {
 
 // 시니나눔 로그인 요청
 router.post("/login", async (req, res) => {
+  /**
+    #swagger.tags = ['Auth']
+    #swagger.summary = '로그인'
+   */
   const { userId } = req.body;
 
   // body 값이 없음
