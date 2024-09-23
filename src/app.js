@@ -12,10 +12,10 @@ const kakaoRouter = require("./routes/auth/kakaoAuth");
 const signUpRouter = require("./routes/auth/signup");
 const loginRouter = require("./routes/auth/login");
 const refreshRouter = require("./routes/auth/refresh");
-const RecruitRouter = require("./routes/register/recruit");
 const getUserTypeRouter = require("./routes/user/userType");
-const careerRouter = require("./routes/register/career");
-const careerItemRouter = require("./routes/register/careerItem");
+const RecruitRouter = require("./routes/recruit/recruit");
+const careerRouter = require("./routes/career/career");
+const careerItemRouter = require("./routes/career/careerItem");
 
 // swagger
 const swaggerUi = require("swagger-ui-express");
