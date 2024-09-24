@@ -288,7 +288,7 @@
         "tags": [
           "User"
         ],
-        "summary": "유저 타입 불러오기",
+        "summary": "유저 정보 불러오기",
         "description": "",
         "responses": {
           "200": {
