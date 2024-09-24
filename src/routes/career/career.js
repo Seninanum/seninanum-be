@@ -1,4 +1,3 @@
-const e = require("express");
 const express = require("express");
 const router = express.Router();
 const pool = require("../../database/db");
@@ -51,7 +50,7 @@ router.get("/:profileId", async (req, res) => {
 
   try {
     const [career] = await pool.query(
-      "select introduce, age, field, service, method, region, priceType, price from careerProfile where profileId = ?",
+      "select introduce, age, field, service, method, region, priceType, price, certificateName, certificate from careerProfile where profileId = ?",
       [profileId]
     );
 
