@@ -1,6 +1,6 @@
 const express = require("express");
-const { pool } = require("../../database/db");
 const router = express.Router();
+const pool = require("../../database/db");
 
 router.get("/userType", async (req, res) => {
   /**
@@ -16,9 +16,9 @@ router.get("/userType", async (req, res) => {
     );
 
     // career가 빈 배열일 경우 처리
-    const result = career[0];
+    let result = -1;
     if (career.length > 0) {
-      result = -1;
+      result = career[0];
     }
 
     // 응답 형식화
