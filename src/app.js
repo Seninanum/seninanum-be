@@ -15,6 +15,7 @@ const refreshRouter = require("./routes/auth/refresh");
 const getUserTypeRouter = require("./routes/user/userType");
 const RecruitRouter = require("./routes/recruit/recruit");
 const careerRouter = require("./routes/career/career");
+const careerCertificate = require("./routes/career/careerCertificate");
 const careerItemRouter = require("./routes/career/careerItem");
 
 // swagger
@@ -43,7 +44,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 
 app.use("/auth", kakaoRouter);
 app.use("/auth", signUpRouter);
@@ -52,6 +53,7 @@ app.use("/auth", refreshRouter);
 app.use("/recruit", verifyToken, RecruitRouter);
 app.use("/user", verifyToken, getUserTypeRouter);
 app.use("/career", verifyToken, careerRouter);
+app.use("/career", verifyToken, careerCertificate);
 app.use("/career/item", verifyToken, careerItemRouter);
 
 app.use(
