@@ -53,7 +53,7 @@ app.use("/auth", refreshRouter);
 app.use("/recruit", verifyToken, RecruitRouter);
 app.use("/user", verifyToken, getUserTypeRouter);
 app.use("/career", verifyToken, careerRouter);
-app.use("/career", verifyToken, careerCertificate);
+app.use("/career/certificate", verifyToken, careerCertificate);
 app.use("/career/item", verifyToken, careerItemRouter);
 
 app.use(
