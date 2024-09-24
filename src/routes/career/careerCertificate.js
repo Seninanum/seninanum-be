@@ -70,7 +70,7 @@ router.post(
   }
 );
 
-router.patch("/", async (req, res) => {
+router.delete("/", async (req, res) => {
   /**
     #swagger.tags = ['CareerCertificate']
     #swagger.summary = '경력 증명서 삭제'
@@ -90,5 +90,28 @@ router.patch("/", async (req, res) => {
       .json({ error: "An error occurred while deleting the careerItem" });
   }
 });
+
+// router.patch("/", async (req, res) => {
+//   /**
+//     #swagger.tags = ['CareerCertificate']
+//     #swagger.summary = '경력 증명서 상태 수정'
+//    */
+
+//   const profileId = req.body.profileId;
+//   const result = req.body.result;
+//   try {
+//     const result = await pool.query(
+//       "UPDATE careerProfile SET certificate = ? WHERE profileId = ?",
+//       [result, profileId]
+//     );
+//     console.log("Rows affected:", result[0].affectedRows);
+//     res.status(200).json({ message: "경력 증명서가 업데이트되었습니다." });
+//   } catch (error) {
+//     console.log(error);
+//     res
+//       .status(500)
+//       .json({ error: "An error occurred while deleting the careerItem" });
+//   }
+// });
 
 module.exports = router;
