@@ -23,7 +23,7 @@ router.post(
     }
 
     const pdfBuffer = file.buffer; // 파일 내용을 Buffer로 가져옴
-    const fileName = file.originalname; // 원본 파일 이름
+    const fileName = Buffer.from(file.originalname, "binary").toString("utf8");
 
     // Nodemailer 설정
     const transporter = nodemailer.createTransport({
