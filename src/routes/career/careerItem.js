@@ -59,7 +59,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.delete("/", async (req, res) => {
+router.delete("/:careerId", async (req, res) => {
   /**
     #swagger.tags = ['CareerItem']
     #swagger.summary = '경력 상세 사항 삭제'
@@ -75,7 +75,7 @@ router.delete("/", async (req, res) => {
     ]
    */
 
-  const { careerId } = req.body;
+  const careerId = req.params.profileId;
 
   try {
     const [result] = await pool.query(

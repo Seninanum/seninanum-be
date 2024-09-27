@@ -477,7 +477,9 @@
             "description": "Internal Server Error"
           }
         }
-      },
+      }
+    },
+    "/career/certificate/{profileId}": {
       "delete": {
         "tags": [
           "CareerCertificate"
@@ -486,16 +488,10 @@
         "description": "",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "profileId": {
-                  "example": "any"
-                }
-              }
-            }
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -574,7 +570,9 @@
             "description": "Internal Server Error"
           }
         }
-      },
+      }
+    },
+    "/career/item/{careerId}": {
       "delete": {
         "tags": [
           "CareerItem"
@@ -582,6 +580,12 @@
         "summary": "경력 상세 사항 삭제",
         "description": "",
         "parameters": [
+          {
+            "name": "careerId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
