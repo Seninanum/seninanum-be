@@ -72,12 +72,12 @@ router.post(
   }
 );
 
-router.delete("/", async (req, res) => {
+router.delete("/:profileId", async (req, res) => {
   /**
     #swagger.tags = ['CareerCertificate']
     #swagger.summary = '경력 증명서 삭제'
    */
-  const profileId = req.body.profileId;
+  const profileId = req.params.profileId;
   try {
     const result = await pool.query(
       "UPDATE careerProfile SET certificateName = ?, certificate = ? WHERE profileId = ?",
