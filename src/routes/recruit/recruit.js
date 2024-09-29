@@ -41,6 +41,39 @@ router.get("/list", async (req, res) => {
   /**
     #swagger.tags = ['Recruit']
     #swagger.summary = '구인글 목록 불러오기'
+    #swagger.parameters = [
+    [{
+        "field": "경제",
+        "list": 
+        [
+            {
+                "userId": 3518693517,
+                "title": "은퇴를 앞두고 있습니다. 앞으로의 자산 계획에 조언을 구합니다.",
+                "content": "은퇴를 앞두고 있는 60대 직장인입니다.",
+                "method": "비대면 서비스",
+                "priceType": "건당",
+                "price": 10000,
+                "region": "",
+                "field": "경제,생활"
+            },
+            {
+                "userId": 3725761489,
+                "title": "장애아동 교육분야 전문가의 조언이 필요합니다.",
+                "content": "안녕하세요? 대학생 나리입니다. ",
+                "method": "비대면 서비스",
+                "priceType": "건당",
+                "price": 40000,
+                "region": null,
+                "field": "경제,교육"
+            }
+        ]
+    },
+    {
+        "field": "입시",
+        "list": []
+    }
+        ]
+    ]
    */
   try {
     //구인글 정보
@@ -80,6 +113,10 @@ router.get("/list", async (req, res) => {
 });
 
 router.get("/filter", async (req, res) => {
+  /**
+    #swagger.tags = ['Recruit']
+    #swagger.summary = '동백 분야에 맞는 구인글 조회'
+   */
   try {
     const { field } = req.query;
 

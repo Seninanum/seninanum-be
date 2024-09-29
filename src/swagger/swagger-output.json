@@ -233,6 +233,36 @@
         ],
         "summary": "구인글 목록 불러오기",
         "description": "",
+        "parameters": [
+          {
+            "name": "   ",
+            "field": "경제",
+            "list": [
+              {
+                "userId": 3518693517,
+                "title": "은퇴를 앞두고 있습니다. 앞으로의 자산 계획에 조언을 구합니다.",
+                "content": "은퇴를 앞두고 있는 60대 직장인입니다.",
+                "method": "비대면 서비스",
+                "priceType": "건당",
+                "price": 10000,
+                "region": "",
+                "field": "경제,생활"
+              },
+              {
+                "userId": 3725761489,
+                "title": "장애아동 교육분야 전문가의 조언이 필요합니다.",
+                "content": "안녕하세요? 대학생 나리입니다. ",
+                "method": "비대면 서비스",
+                "priceType": "건당",
+                "price": 40000,
+                "region": null,
+                "field": "경제,교육"
+              }
+            ],
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -249,18 +279,17 @@
         }
       }
     },
-    "/recruit/{recruitId}": {
+    "/recruit/filter": {
       "get": {
         "tags": [
           "Recruit"
         ],
-        "summary": "구인글 상세정보 불러오기",
+        "summary": "동백 분야에 맞는 구인글 조회",
         "description": "",
         "parameters": [
           {
-            "name": "recruitId",
-            "in": "path",
-            "required": true,
+            "name": "field",
+            "in": "query",
             "type": "string"
           }
         ],
@@ -268,14 +297,14 @@
           "200": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "401": {
             "description": "Unauthorized"
           },
           "403": {
             "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
