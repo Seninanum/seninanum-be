@@ -79,61 +79,114 @@ router.get("/list", async (req, res) => {
   }
 });
 
-router.get("/:recruitId", async (req, res) => {
-  /**
-    #swagger.tags = ['Recruit']
-    #swagger.summary = '구인글 상세정보 불러오기'
-   */
-  const recruitId = req.params.recruitId;
-
+router.get("/filter", async (req, res) => {
   try {
-    const [recruit] = await pool.query(
-      "select userId, title, content, method, priceType, price, region, field, createdAt from recruit where recruitId = ?",
-      [recruitId]
-    );
+    const { field } = req.query;
 
-    if (recruit.length === 0) {
-      return res.status(404).json({ error: "Recruit not found" });
+    if (!field) {
+      console.log("Field parameter is missing");
+      return res.status(400).json({ error: "Field parameter is required" });
     }
 
-    const {
-      userId,
-      title,
-      content,
-      method,
-      priceType,
-      price,
-      region,
-      field,
-      createdAt,
-    } = recruit[0];
+    const fieldList = field.split(",").map((f) => f.trim());
 
-    const [userInfo] = await pool.query(
-      "SELECT nickname, gender, birthyear FROM user WHERE userId=?",
-      [userId]
-    );
-    const { nickname, gender, birthyear } = userInfo[0];
+    if (fieldList.length === 0) {
+      console.log("Field list is empty");
+      return res.status(400).json({ error: "At least one field is required" });
+    }
 
-    const response = {
-      title,
-      content,
-      method,
-      priceType,
-      price,
-      region,
-      field,
-      createdAt,
-      nickname,
-      gender,
-      birthyear,
-    };
+    // SQL FIND_IN_SET 조건을 사용하여 쿼리문 생성 (OR 조건으로 연결)
+    const whereClause = fieldList
+      .map(() => `FIND_IN_SET(?, field)`)
+      .join(" OR ");
+    const query = `
+      SELECT userId, title, content, method, priceType, price, region, field 
+      FROM recruit 
+      WHERE ${whereClause}
+    `;
 
-    res.status(200).json(response);
+    const recruits = await pool.query(query, fieldList);
+
+    // 필드별로 데이터를 그룹화
+    const groupedResults = fieldList.map((field) => {
+      const fieldRecruits = recruits[0].filter((recruit) => {
+        const recruitFields = recruit.field.includes(",")
+          ? recruit.field.split(",").map((f) => f.trim())
+          : [recruit.field.trim()];
+
+        // 요청된 필드 값도 trim 처리하여 비교
+        const matched = recruitFields.some(
+          (recruitField) => recruitField.trim() === field.trim()
+        );
+        return matched;
+      });
+
+      return { field, list: fieldRecruits };
+    });
+    res.status(200).json(groupedResults);
   } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching recruit detail" });
+    console.error("Error occurred: ", error.message);
+    res.status(500).json({
+      error: "An error occurred while fetching recruit data",
+    });
   }
 });
+
+// router.get("/:recruitId", async (req, res) => {
+//   /**
+//     #swagger.tags = ['Recruit']
+//     #swagger.summary = '구인글 상세정보 불러오기'
+//    */
+//   const recruitId = req.params.recruitId;
+
+//   try {
+//     const [recruit] = await pool.query(
+//       "select userId, title, content, method, priceType, price, region, field, createdAt from recruit where recruitId = ?",
+//       [recruitId]
+//     );
+
+//     if (recruit.length === 0) {
+//       return res.status(404).json({ error: "Recruit not found" });
+//     }
+
+//     const {
+//       userId,
+//       title,
+//       content,
+//       method,
+//       priceType,
+//       price,
+//       region,
+//       field,
+//       createdAt,
+//     } = recruit[0];
+
+//     const [userInfo] = await pool.query(
+//       "SELECT nickname, gender, birthyear FROM user WHERE userId=?",
+//       [userId]
+//     );
+//     const { nickname, gender, birthyear } = userInfo[0];
+
+//     const response = {
+//       title,
+//       content,
+//       method,
+//       priceType,
+//       price,
+//       region,
+//       field,
+//       createdAt,
+//       nickname,
+//       gender,
+//       birthyear,
+//     };
+
+//     res.status(200).json(response);
+//   } catch (error) {
+//     console.log(error);
+//     res
+//       .status(500)
+//       .json({ error: "An error occurred while fetching recruit detail" });
+//   }
+// });
 module.exports = router;
