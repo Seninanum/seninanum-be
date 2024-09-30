@@ -147,9 +147,10 @@ router.get("/filter", async (req, res) => {
     // 필드별로 데이터를 그룹화
     const groupedResults = fieldList.map((field) => {
       const fieldRecruits = recruits[0].filter((recruit) => {
-        const recruitFields = recruit.field.includes(",")
-          ? recruit.field.split(",").map((f) => f.trim())
-          : [recruit.field.trim()];
+        const recruitFields =
+          recruit.filed && recruit.field.includes(",")
+            ? recruit.field.split(",").map((f) => f.trim())
+            : [recruit.field.trim()];
 
         // 요청된 필드 값도 trim 처리하여 비교
         const matched = recruitFields.some(
