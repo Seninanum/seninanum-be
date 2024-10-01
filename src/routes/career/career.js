@@ -41,17 +41,17 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/:profileId", async (req, res) => {
+router.get("/", async (req, res) => {
   /**
     #swagger.tags = ['Career']
     #swagger.summary = '경력 프로필 상세항목 조회'
    */
-  const profileId = req.params.profileId;
+  const userId = req.user.userId;
 
   try {
     const [career] = await pool.query(
-      "select introduce, age, field, service, method, region, priceType, price, certificateName, certificate from careerProfile where profileId = ?",
-      [profileId]
+      "select introduce, age, field, service, method, region, priceType, price, certificateName, certificate from careerProfile where userId = ?",
+      [userId]
     );
 
     if (career.length === 0) {
