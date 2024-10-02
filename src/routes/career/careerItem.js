@@ -75,7 +75,7 @@ router.delete("/:careerId", async (req, res) => {
     ]
    */
 
-  const careerId = req.params.profileId;
+  const careerId = req.params.careerId;
 
   try {
     const [result] = await pool.query(
