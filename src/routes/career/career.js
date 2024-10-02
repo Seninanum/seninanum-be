@@ -50,7 +50,7 @@ router.get("/", async (req, res) => {
 
   try {
     const [career] = await pool.query(
-      "select introduce, age, field, service, method, region, priceType, price, certificateName, certificate from careerProfile where userId = ?",
+      "select profileId, introduce, age, field, service, method, region, priceType, price, certificateName, certificate from careerProfile where userId = ?",
       [userId]
     );
 
@@ -58,7 +58,19 @@ router.get("/", async (req, res) => {
       return res.status(404).json({ error: "career not found" });
     }
 
-    const response = career[0];
+    // 경력 상세 항목 조회
+    const profileId = career[0].profileId;
+    const [careerItems] = await pool.query(
+      "SELECT careerId, title, startYear, startMonth, endYear, endMonth, content FROM careerItem WHERE profileId = ?",
+      [profileId]
+    );
+
+    // 응답 데이터 구조
+    const response = {
+      careerProfile: career[0],
+      careerItems: careerItems,
+    };
+
     res.status(200).json(response);
   } catch (error) {
     console.log(error);
