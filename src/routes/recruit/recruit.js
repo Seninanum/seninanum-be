@@ -129,18 +129,14 @@ router.get("/filter", async (req, res) => {
       return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
     }
 
+    if (rows.length === 0 || !rows[0].field) {
+      return res
+        .status(400)
+        .json({ error: "사용자 경력프로필 필드에 값이 없습니다." });
+    }
+
     const field = rows[0].field;
-
-    if (!field) {
-      return res.status(400).json({ error: "User's field is required" });
-    }
-
     const fieldList = field.split(",").map((f) => f.trim());
-
-    if (fieldList.length === 0) {
-      console.log("Field list is empty");
-      return res.status(400).json({ error: "At least one field is required" });
-    }
 
     // SQL FIND_IN_SET 조건을 사용하여 쿼리문 생성 (OR 조건으로 연결)
     const whereClause = fieldList
@@ -174,7 +170,7 @@ router.get("/filter", async (req, res) => {
   } catch (error) {
     console.error("Error occurred: ", error.message);
     res.status(500).json({
-      error: "An error occurred while fetching recruit data",
+      error: "구인글 정보를 불러오는 데에 실패하였습니다.",
     });
   }
 });
