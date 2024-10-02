@@ -233,6 +233,29 @@
         ],
         "summary": "구인글 목록 불러오기",
         "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/recruit/filter": {
+      "get": {
+        "tags": [
+          "Recruit"
+        ],
+        "summary": "동백 분야에 맞는 구인글 조회",
+        "description": "",
         "parameters": [
           {
             "name": "   ",
@@ -267,36 +290,6 @@
           "200": {
             "description": "OK"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/recruit/filter": {
-      "get": {
-        "tags": [
-          "Recruit"
-        ],
-        "summary": "동백 분야에 맞는 구인글 조회",
-        "description": "",
-        "parameters": [
-          {
-            "name": "field",
-            "in": "query",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
           "400": {
             "description": "Bad Request"
           },
@@ -305,6 +298,43 @@
           },
           "403": {
             "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/recruit/{recruitId}": {
+      "get": {
+        "tags": [
+          "Recruit"
+        ],
+        "summary": "구인글 상세정보 불러오기",
+        "description": "",
+        "parameters": [
+          {
+            "name": "recruitId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -383,6 +413,30 @@
           }
         }
       },
+      "get": {
+        "tags": [
+          "Career"
+        ],
+        "summary": "경력 프로필 상세항목 조회",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
       "patch": {
         "tags": [
           "Career"
@@ -450,40 +504,6 @@
           },
           "403": {
             "description": "Forbidden"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/career/{profileId}": {
-      "get": {
-        "tags": [
-          "Career"
-        ],
-        "summary": "경력 프로필 상세항목 조회",
-        "description": "",
-        "parameters": [
-          {
-            "name": "profileId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
