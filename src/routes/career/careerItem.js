@@ -96,25 +96,4 @@ router.delete("/:careerId", async (req, res) => {
   }
 });
 
-router.get("/list/:profileId", async (req, res) => {
-  /**
-   * #swagger.tags = ['CareerItem']
-   * #swagger.summary = '경력 상세 사항 리스트 조회'
-   */
-
-  const profileId = req.params.profileId;
-  try {
-    const [results] = await pool.query(
-      "SELECT careerId, title, startYear, startMonth, endYear, endMonth, content FROM careerItem where profileId = ?",
-      [profileId]
-    );
-    res.status(200).json(results);
-  } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching the career items" });
-  }
-});
-
 module.exports = router;
