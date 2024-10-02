@@ -143,8 +143,11 @@ router.get("/filter", async (req, res) => {
       .map(() => `FIND_IN_SET(?, field)`)
       .join(" OR ");
     const query = `
-      SELECT recruitId, title, content, method, priceType, price, region, field 
+      SELECT recruit.recruitId, recruit.title, recruit.content, recruit.method, recruit.priceType, 
+             recruit.price, recruit.region, recruit.field, user.userId, user.nickname, 
+             user.birthyear
       FROM recruit 
+      JOIN user ON recruit.userId = user.userId
       WHERE ${whereClause}
     `;
 
