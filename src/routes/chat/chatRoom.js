@@ -11,6 +11,13 @@ router.post("/create", async (req, res) => {
   const { opponentId } = req.body;
   const userId = req.user.userId;
 
+  // opponentId와 userId가 같으면 경고 메시지 반환
+  if (opponentId === userId) {
+    return res.status(400).json({
+      message: "잘못된 접근입니다.",
+    });
+  }
+
   // 방 이름
   const [roomNames] = await pool.query("SELECT * FROM user WHERE userId = ?", [
     userId,
@@ -20,8 +27,8 @@ router.post("/create", async (req, res) => {
   // 생성되어있는 방이 있는지 확인
   try {
     const [existingChatroom] = await pool.query(
-      "SELECT * FROM chatRoom WHERE memberId = ? AND opponentId = ?",
-      [userId, opponentId]
+      "SELECT * FROM chatRoom WHERE memberId = ? OR opponentId = ?",
+      [userId, userId]
     );
 
     if (existingChatroom.length === 0) {
