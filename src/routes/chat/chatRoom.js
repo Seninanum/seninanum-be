@@ -32,16 +32,20 @@ router.post("/create", async (req, res) => {
       );
 
       // 생성된 채팅방의 ID 반환
-      const chatRoomId = result.insertId;
-      return res
-        .status(200)
-        .json({ chatRoomId, message: "채팅방이 생성되었습니다." });
+      return res.status(200).json({
+        chatRoomId: result.insertId,
+        memberId: userId,
+        opponentId: opponentId,
+        message: "채팅방이 생성되었습니다.",
+      });
     }
     // 기존에 생성되어있던 채팅방 ID 반환
-    const chatRoomId = existingChatroom[0].chatRoomId;
-    return res
-      .status(200)
-      .json({ chatRoomId, message: "기존 채팅방이 반환되었습니다." });
+    return res.status(200).json({
+      chatRoomId: existingChatroom[0].chatRoomId,
+      memberId: existingChatroom[0].memberId,
+      opponentId: existingChatroom[0].opponentId,
+      message: "기존 채팅방이 반환되었습니다.",
+    });
   } catch (error) {
     console.log(error);
     res
