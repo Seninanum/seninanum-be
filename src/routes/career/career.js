@@ -145,4 +145,45 @@ router.patch("/", async (req, res) => {
   }
 });
 
+router.get("/list", async (req, res) => {
+  /**
+    #swagger.tags = ['Career']
+    #swagger.summary = '경력프로필 목록 불러오기'
+    
+   */
+  try {
+    //경력프로필 정보
+    const [careers] = await pool.query(
+      "SELECT profileId, userId, introduce, field FROM careerProfile"
+    );
+
+    // 각 경력프로필에 대해 user 정보를 병합
+    const careerWithUserInfo = await Promise.all(
+      careers.map(async (career) => {
+        const [user] = await pool.query(
+          "SELECT nickname, gender, birthyear, profile FROM user WHERE userId = ?",
+          [career.userId]
+        );
+        const { nickname, gender, birthyear, profile } = user[0];
+        return {
+          profileId: career.profileId,
+          introduce: career.introduce,
+          field: career.field,
+          nickname,
+          gender,
+          birthyear,
+          profile,
+        };
+      })
+    );
+
+    res.status(200).json(careerWithUserInfo);
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "경력프로필 정보를 불러오는 데에 실패했습니다." });
+  }
+});
+
 module.exports = router;
