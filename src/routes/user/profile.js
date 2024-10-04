@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
     );
 
     // 응답 형식화
-    res.status(200).json(profile);
+    res.status(200).json(profile[0]);
   } catch (error) {
     console.error("Error fetching user profile:", error);
     res
