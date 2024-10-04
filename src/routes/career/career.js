@@ -44,7 +44,7 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   /**
     #swagger.tags = ['Career']
-    #swagger.summary = '경력 프로필 상세항목 조회'
+    #swagger.summary = '내 경력 프로필 조회'
    */
   const userId = req.user.userId;
 
@@ -183,6 +183,89 @@ router.get("/list", async (req, res) => {
     res
       .status(500)
       .json({ error: "경력프로필 정보를 불러오는 데에 실패했습니다." });
+  }
+});
+
+router.get("/:profileId", async (req, res) => {
+  /**
+    #swagger.tags = ['Career']
+    #swagger.summary = '경력프로필 상세조회'
+    #swagger.parameters = [
+      {
+    "introduce": "",
+    "age": "초등,유아,중등",
+    "field": "돌봄,생활,입시",
+    "service": null,
+    "method": "비대면",
+    "region": null,
+    "price": null,
+    "priceType": null,
+    "nickname": "신주현",
+    "gender": "여성",
+    "birthyear": "2001",
+    "profile": "http://img1.kakaocdn.net/thumb/R640x640.q70/?fname=http://t1.kakaocdn.net/account_images/default_profile.jpeg",
+    "careerItems": []
+    }
+    ]
+   */
+  const profileId = req.params.profileId;
+
+  try {
+    const [career] = await pool.query(
+      "select userId, introduce, age, field, service, method, region, price, priceType from careerProfile where profileId = ?",
+      [profileId]
+    );
+
+    if (career.length === 0) {
+      return res.status(404).json({ error: "경력프로필이 조회되지 않습니다." });
+    }
+
+    const {
+      userId,
+      introduce,
+      age,
+      field,
+      service,
+      method,
+      region,
+      price,
+      priceType,
+    } = career[0];
+
+    const [userInfo] = await pool.query(
+      "SELECT nickname, gender, birthyear, profile FROM user WHERE userId=?",
+      [userId]
+    );
+    const { nickname, gender, birthyear, profile } = userInfo[0];
+
+    // 경력 상세 항목 조회
+    const [careerItems] = await pool.query(
+      "SELECT careerId, title, startYear, startMonth, endYear, endMonth, content FROM careerItem WHERE profileId = ?",
+      [profileId]
+    );
+
+    const response = {
+      introduce,
+      age,
+      field,
+      service,
+      method,
+      region,
+      price,
+      priceType,
+      nickname,
+      gender,
+      birthyear,
+      profile,
+      careerItems: careerItems,
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching recruit detail" });
   }
 });
 
