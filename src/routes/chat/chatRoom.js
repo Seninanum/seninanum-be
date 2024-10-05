@@ -8,8 +8,33 @@ router.post("/create", async (req, res) => {
     #swagger.summary = '채팅 방 생성'
   */
 
-  const { opponentId } = req.body;
+  // 나리는 경력프로필 아이디, 동백은 구인글 아이디
+  const { contentId } = req.body;
   const userId = req.user.userId;
+
+  let opponentId;
+  // 상대방 유저 아이디 가져오기
+  if (req.user.userType === "dong") {
+    const [opponents] = await pool.query(
+      "SELECT userId FROM recruit WHERE recruitId = ?",
+      [contentId]
+    );
+    if (opponents.length > 0) {
+      opponentId = opponents[0].userId;
+    } else {
+      return res.status(404).json({ message: "상대방을 찾을 수 없습니다." });
+    }
+  } else {
+    const [opponents] = await pool.query(
+      "SELECT userId FROM careerProfile WHERE profileId = ?",
+      [contentId]
+    );
+    if (opponents.length > 0) {
+      opponentId = opponents[0].userId;
+    } else {
+      return res.status(404).json({ message: "상대방을 찾을 수 없습니다." });
+    }
+  }
 
   // opponentId와 userId가 같으면 경고 메시지 반환
   if (opponentId === userId) {
