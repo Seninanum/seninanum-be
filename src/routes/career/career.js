@@ -269,4 +269,72 @@ router.get("/:profileId", async (req, res) => {
   }
 });
 
+router.post("/filter", async (req, res) => {
+  /**
+    #swagger.tags = ['Career']
+    #swagger.summary = '나리 필터링에 맞는 경력프로필 조회'
+   */
+
+  try {
+    const { method, priceType, price, region, field } = req.body;
+
+    // 필수 필터 조건 확인
+    if (!method || !priceType || !price || !field) {
+      return res.status(400).json({ error: "모든 필터 조건이 필요합니다." });
+    }
+
+    // 배열로 변환
+    const userFieldsArray = Array.isArray(field) ? field : field.split(",");
+    // 사용자가 보낸 필드들을 정렬
+    const userFieldsSorted = userFieldsArray
+      .map((f) => f.trim())
+      .sort()
+      .join(",");
+
+    // 경력 프로필 정보 가져오기
+    const [careers] = await pool.query(
+      "SELECT profileId, userId, introduce, field FROM careerProfile WHERE method = ? AND priceType = ? AND price = ? AND region = ?",
+      [method, priceType, price, region]
+    );
+
+    // 필드 비교
+    const filteredCareers = careers.filter((career) => {
+      const profileFieldsSorted = career.field
+        .split(",")
+        .map((f) => f.trim())
+        .sort()
+        .join(",");
+      return userFieldsSorted === profileFieldsSorted;
+    });
+
+    // 각 경력 프로필에 대해 사용자 정보를 병합
+    const careerWithUserInfo = await Promise.all(
+      filteredCareers.map(async (career) => {
+        const [user] = await pool.query(
+          "SELECT nickname, gender, birthyear, profile FROM user WHERE userId = ?",
+          [career.userId]
+        );
+        const { nickname, gender, birthyear, profile } = user[0];
+        return {
+          profileId: career.profileId,
+          introduce: career.introduce,
+          field: career.field,
+          nickname,
+          gender,
+          birthyear,
+          profile,
+        };
+      })
+    );
+
+    // 필터링된 결과 반환
+    res.status(200).json(careerWithUserInfo);
+  } catch (error) {
+    console.error("Error occurred: ", error.message);
+    res
+      .status(500)
+      .json({ error: "경력 프로필 정보를 불러오는 데 실패했습니다." });
+  }
+});
+
 module.exports = router;
