@@ -44,7 +44,7 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   /**
     #swagger.tags = ['Career']
-    #swagger.summary = '경력 프로필 상세항목 조회'
+    #swagger.summary = '내 경력 프로필 조회'
    */
   const userId = req.user.userId;
 
@@ -142,6 +142,198 @@ router.patch("/", async (req, res) => {
     res
       .status(500)
       .json({ error: "An error occurred while creating the careerProfile" });
+  }
+});
+
+router.get("/list", async (req, res) => {
+  /**
+    #swagger.tags = ['Career']
+    #swagger.summary = '경력프로필 목록 불러오기'
+    
+   */
+  try {
+    //경력프로필 정보
+    const [careers] = await pool.query(
+      "SELECT profileId, userId, introduce, field FROM careerProfile"
+    );
+
+    // 각 경력프로필에 대해 user 정보를 병합
+    const careerWithUserInfo = await Promise.all(
+      careers.map(async (career) => {
+        const [user] = await pool.query(
+          "SELECT nickname, gender, birthyear, profile FROM user WHERE userId = ?",
+          [career.userId]
+        );
+        const { nickname, gender, birthyear, profile } = user[0];
+        return {
+          profileId: career.profileId,
+          introduce: career.introduce,
+          field: career.field,
+          nickname,
+          gender,
+          birthyear,
+          profile,
+        };
+      })
+    );
+
+    res.status(200).json(careerWithUserInfo);
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "경력프로필 정보를 불러오는 데에 실패했습니다." });
+  }
+});
+
+router.get("/:profileId", async (req, res) => {
+  /**
+    #swagger.tags = ['Career']
+    #swagger.summary = '경력프로필 상세조회'
+    #swagger.parameters = [
+      {
+    "introduce": "",
+    "age": "초등,유아,중등",
+    "field": "돌봄,생활,입시",
+    "service": null,
+    "method": "비대면",
+    "region": null,
+    "price": null,
+    "priceType": null,
+    "nickname": "신주현",
+    "gender": "여성",
+    "birthyear": "2001",
+    "profile": "http://img1.kakaocdn.net/thumb/R640x640.q70/?fname=http://t1.kakaocdn.net/account_images/default_profile.jpeg",
+    "careerItems": []
+    }
+    ]
+   */
+  const profileId = req.params.profileId;
+
+  try {
+    const [career] = await pool.query(
+      "select userId, introduce, age, field, service, method, region, price, priceType from careerProfile where profileId = ?",
+      [profileId]
+    );
+
+    if (career.length === 0) {
+      return res.status(404).json({ error: "경력프로필이 조회되지 않습니다." });
+    }
+
+    const {
+      userId,
+      introduce,
+      age,
+      field,
+      service,
+      method,
+      region,
+      price,
+      priceType,
+    } = career[0];
+
+    const [userInfo] = await pool.query(
+      "SELECT nickname, gender, birthyear, profile FROM user WHERE userId=?",
+      [userId]
+    );
+    const { nickname, gender, birthyear, profile } = userInfo[0];
+
+    // 경력 상세 항목 조회
+    const [careerItems] = await pool.query(
+      "SELECT careerId, title, startYear, startMonth, endYear, endMonth, content FROM careerItem WHERE profileId = ?",
+      [profileId]
+    );
+
+    const response = {
+      introduce,
+      age,
+      field,
+      service,
+      method,
+      region,
+      price,
+      priceType,
+      nickname,
+      gender,
+      birthyear,
+      profile,
+      careerItems: careerItems,
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching recruit detail" });
+  }
+});
+
+router.post("/filter", async (req, res) => {
+  /**
+    #swagger.tags = ['Career']
+    #swagger.summary = '나리 필터링에 맞는 경력프로필 조회'
+   */
+
+  try {
+    const { method, priceType, price, region, field } = req.body;
+
+    // 필수 필터 조건 확인
+    if (!method || !priceType || !price || !field) {
+      return res.status(400).json({ error: "모든 필터 조건이 필요합니다." });
+    }
+
+    // 배열로 변환
+    const userFieldsArray = Array.isArray(field) ? field : field.split(",");
+    // 사용자가 보낸 필드들을 정렬
+    const userFieldsSorted = userFieldsArray
+      .map((f) => f.trim())
+      .sort()
+      .join(",");
+
+    // 경력 프로필 정보 가져오기
+    const [careers] = await pool.query(
+      "SELECT profileId, userId, introduce, field FROM careerProfile WHERE method = ? AND priceType = ? AND price = ? AND region = ?",
+      [method, priceType, price, region]
+    );
+
+    // 필드 비교
+    const filteredCareers = careers.filter((career) => {
+      const profileFieldsSorted = career.field
+        .split(",")
+        .map((f) => f.trim())
+        .sort()
+        .join(",");
+      return userFieldsSorted === profileFieldsSorted;
+    });
+
+    // 각 경력 프로필에 대해 사용자 정보를 병합
+    const careerWithUserInfo = await Promise.all(
+      filteredCareers.map(async (career) => {
+        const [user] = await pool.query(
+          "SELECT nickname, gender, birthyear, profile FROM user WHERE userId = ?",
+          [career.userId]
+        );
+        const { nickname, gender, birthyear, profile } = user[0];
+        return {
+          profileId: career.profileId,
+          introduce: career.introduce,
+          field: career.field,
+          nickname,
+          gender,
+          birthyear,
+          profile,
+        };
+      })
+    );
+
+    // 필터링된 결과 반환
+    res.status(200).json(careerWithUserInfo);
+  } catch (error) {
+    console.error("Error occurred: ", error.message);
+    res
+      .status(500)
+      .json({ error: "경력 프로필 정보를 불러오는 데 실패했습니다." });
   }
 });
 
