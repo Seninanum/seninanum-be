@@ -24,7 +24,7 @@ router.post("/", async (req, res) => {
    */
 
   const {
-    profileId,
+    careerProfileId,
     title,
     startYear,
     startMonth,
@@ -33,7 +33,7 @@ router.post("/", async (req, res) => {
     content,
   } = req.body;
   if (
-    !profileId ||
+    !careerProfileId ||
     !title ||
     !startYear ||
     !startMonth ||
@@ -45,9 +45,17 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    const [result] = await pool.query(
-      "INSERT INTO careerItem (profileId, title, startYear, startMonth, endYear, endMonth, content) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [profileId, title, startYear, startMonth, endYear, endMonth, content]
+    await pool.query(
+      "INSERT INTO careerItem (careerProfileId, title, startYear, startMonth, endYear, endMonth, content) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [
+        careerProfileId,
+        title,
+        startYear,
+        startMonth,
+        endYear,
+        endMonth,
+        content,
+      ]
     );
 
     res.status(200).json({ message: "경력 항목이 추가되었습니다." }); // 새 경력 항목
