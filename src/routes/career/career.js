@@ -8,30 +8,31 @@ router.post("/", async (req, res) => {
     #swagger.summary = '경력 프로필 생성'
    */
 
-  //생성되어있는 프로필이 있는지 확인
-  const userId = req.user.userId;
+  // 생성되어있는 프로필이 있는지 확인
+  const profileId = req.user.profileId;
   try {
     const [existingProfile] = await pool.query(
-      "SELECT * FROM careerProfile WHERE userId = ?",
-      [userId]
+      "SELECT * FROM careerProfile WHERE profileId = ?",
+      [profileId]
     );
+
     if (existingProfile.length === 0) {
       // 프로필 새로 생성
       const [result] = await pool.query(
-        "INSERT INTO careerProfile (userId, introduce, age, field, service, method, region, priceType, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [userId, null, null, null, null, null, null, null, null]
+        "INSERT INTO careerProfile (profileId, introduce, age, field, service, method, region, priceType, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [profileId, null, null, null, null, null, null, null, null]
       );
       // 생성된 프로필의 ID 반환
-      const profileId = result.insertId;
+      const careerProfileId = result.insertId;
       return res
         .status(201)
-        .json({ profileId, message: "새 프로필이 생성되었습니다." });
+        .json({ careerProfileId, message: "새 프로필이 생성되었습니다." });
     } else {
       // 기존 프로필 ID 반환
-      const profileId = existingProfile[0].profileId;
+      const careerProfileId = existingProfile[0].careerProfileId;
       return res
         .status(200)
-        .json({ profileId, message: "기존 프로필이 반환되었습니다." });
+        .json({ careerProfileId, message: "기존 프로필이 반환되었습니다." });
     }
   } catch (error) {
     console.log(error);
