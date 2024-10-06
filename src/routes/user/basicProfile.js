@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../database/db");
 
-router.get("/", async (req, res) => {
+router.get("/profile", async (req, res) => {
   /**
       #swagger.tags = ['Profile']
       #swagger.summary = '유저 기본정보 불러오기'
@@ -25,19 +25,19 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.patch("/", async (req, res) => {
+router.patch("/profile", async (req, res) => {
   /**
       #swagger.tags = ['User']
       #swagger.summary = '유저 기본정보 수정'
      */
   const { nickname, gender, birthYear, profile } = req.body;
-  const user = req.user;
+  const profileId = req.user.profileId;
 
   try {
     // 기존 값을 유지하면서 필요한 부분만 업데이트
     const [currentProfile] = await pool.query(
-      "SELECT nickname, gender, birthYear, profile FROM user WHERE userId = ?",
-      [user.userId]
+      "SELECT nickname, gender, birthYear, profile FROM profile WHERE profileId = ?",
+      [profileId]
     );
 
     // 수정할 값이 있으면 해당 값으로 덮어씀
@@ -47,13 +47,13 @@ router.patch("/", async (req, res) => {
     const updatedProfile = profile || currentProfile[0].profile;
 
     const [updateResult] = await pool.query(
-      "UPDATE user SET nickname = ?, gender = ?, birthYear = ?, profile = ? WHERE userId = ?",
+      "UPDATE profile SET nickname = ?, gender = ?, birthYear = ?, profile = ? WHERE profileId = ?",
       [
         updatedNickname,
         updatedGender,
         updatedBirthYear,
         updatedProfile,
-        user.userId,
+        profileId,
       ]
     );
 
