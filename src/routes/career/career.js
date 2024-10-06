@@ -156,19 +156,19 @@ router.get("/list", async (req, res) => {
   try {
     //경력프로필 정보
     const [careers] = await pool.query(
-      "SELECT profileId, userId, introduce, field FROM careerProfile"
+      "SELECT careerProfileId, profileId, introduce, field FROM careerProfile"
     );
 
     // 각 경력프로필에 대해 user 정보를 병합
     const careerWithUserInfo = await Promise.all(
       careers.map(async (career) => {
         const [user] = await pool.query(
-          "SELECT nickname, gender, birthyear, profile FROM user WHERE userId = ?",
-          [career.userId]
+          "SELECT nickname, gender, birthyear, profile FROM profile WHERE profileId = ?",
+          [career.profileId]
         );
         const { nickname, gender, birthyear, profile } = user[0];
         return {
-          profileId: career.profileId,
+          profileId: career.careerProfileId,
           introduce: career.introduce,
           field: career.field,
           nickname,
