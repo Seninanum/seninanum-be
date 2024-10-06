@@ -7,12 +7,13 @@ router.get("/userType", async (req, res) => {
     #swagger.tags = ['User']
     #swagger.summary = '유저 정보 불러오기'
    */
-  const user = req.user;
+  const profileId = req.user.profileId;
+  const userType = req.user.userType;
 
   try {
     const [career] = await pool.query(
       "SELECT progressStep FROM careerProfile WHERE profileId = ?",
-      [user.profileId]
+      [profileId]
     );
 
     // career가 빈 배열일 경우 처리
@@ -21,8 +22,10 @@ router.get("/userType", async (req, res) => {
       result = career[0];
     }
 
+    console.log(req.user);
+
     // 응답 형식화
-    res.json({ userType: user.userType, career: result });
+    res.json({ userType: userType, career: result });
   } catch (error) {
     console.error("Error fetching user type:", error);
     res
