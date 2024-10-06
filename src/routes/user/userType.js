@@ -11,8 +11,8 @@ router.get("/userType", async (req, res) => {
 
   try {
     const [career] = await pool.query(
-      "SELECT progressStep FROM careerProfile WHERE userid = ?",
-      [user.userId]
+      "SELECT progressStep FROM careerProfile WHERE profileId = ?",
+      [user.profileId]
     );
 
     // career가 빈 배열일 경우 처리
