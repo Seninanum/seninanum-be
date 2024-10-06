@@ -8,49 +8,50 @@ router.post("/create", async (req, res) => {
     #swagger.summary = '채팅 방 생성'
   */
 
-  const { opponentId } = req.body;
-  const userId = req.user.userId;
+  const { oppProfileId } = req.body;
+  const myProfileId = req.user.profileId;
 
-  // opponentId와 userId가 같으면 경고 메시지 반환
-  if (opponentId === userId) {
+  // id가 같으면 경고 메시지 반환
+  if (oppProfileId == myProfileId) {
     return res.status(400).json({
       message: "잘못된 접근입니다.",
     });
   }
 
   // 방 이름
-  const [roomNames] = await pool.query("SELECT * FROM user WHERE userId = ?", [
-    userId,
-  ]);
+  const [roomNames] = await pool.query(
+    "SELECT * FROM profile WHERE profileId = ?",
+    [myProfileId]
+  );
   const roomName = roomNames[0].nickname;
 
   // 생성되어있는 방이 있는지 확인
   try {
     const [existingChatroom] = await pool.query(
       "SELECT * FROM chatRoom WHERE memberId = ? OR opponentId = ?",
-      [userId, userId]
+      [myProfileId, myProfileId]
     );
 
     if (existingChatroom.length === 0) {
       // 새로 프로필 생성
       const [result] = await pool.query(
         "INSERT INTO chatRoom (roomName, roomStatus, memberId, opponentId) VALUES (?, ?, ?, ?)",
-        [roomName, "ACTIVE", userId, opponentId]
+        [roomName, "ACTIVE", myProfileId, oppProfileId]
       );
 
       // 생성된 채팅방의 ID 반환
       return res.status(200).json({
         chatRoomId: result.insertId,
-        memberId: userId,
-        opponentId: opponentId,
+        memberId: myProfileId,
+        opponentId: oppProfileId,
         message: "채팅방이 생성되었습니다.",
       });
     }
     // 기존에 생성되어있던 채팅방 ID 반환
     return res.status(200).json({
       chatRoomId: existingChatroom[0].chatRoomId,
-      memberId: existingChatroom[0].memberId,
-      opponentId: existingChatroom[0].opponentId,
+      memberId: existingChatroom[0].myProfileId,
+      opponentId: existingChatroom[0].oppProfileId,
       message: "기존 채팅방이 반환되었습니다.",
     });
   } catch (error) {

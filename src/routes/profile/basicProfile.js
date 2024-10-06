@@ -7,12 +7,12 @@ router.get("/", async (req, res) => {
       #swagger.tags = ['Profile']
       #swagger.summary = '유저 기본정보 불러오기'
      */
-  const user = req.user;
+  const profileId = req.user.profileId;
 
   try {
     const [profile] = await pool.query(
-      "SELECT nickname, gender, birthYear, profile FROM profile WHERE userId = ?",
-      [user.userId]
+      "SELECT nickname, gender, birthYear, profile FROM profile WHERE profileId = ?",
+      [profileId]
     );
 
     // 응답 형식화
