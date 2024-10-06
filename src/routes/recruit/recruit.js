@@ -13,22 +13,14 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: "값이 존재해야 합니다." });
   }
 
-  const userId = req.user.userId;
-
+  const profileId = req.user.profileId;
   try {
-    const [user] = await pool.query("SELECT * FROM user WHERE userId = ?", [
-      userId,
-    ]);
-    if (user.length === 0) {
-      return res.status(400).json({ error: "유효하지 않은 userId입니다." });
-    }
-
-    const [result] = await pool.query(
-      "INSERT INTO recruit (userId, title, content, method, priceType, price, region, field) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [userId, title, content, method, priceType, price, region, field]
+    await pool.query(
+      "INSERT INTO recruit (profileId, title, content, method, priceType, price, region, field) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [profileId, title, content, method, priceType, price, region, field]
     );
 
-    res.status(201).json({ message: "구인글이 등록되었습니다." });
+    res.status(200).json({ message: "구인글이 등록되었습니다." });
   } catch (error) {
     console.log(error);
     res
@@ -119,23 +111,20 @@ router.get("/filter", async (req, res) => {
     ]
    */
   try {
-    const userId = req.user.userId;
-    const [rows] = await pool.query(
-      "SELECT field FROM careerProfile WHERE userId = ?",
-      [userId]
+    const profileId = req.user.profileId;
+    const [fields] = await pool.query(
+      "SELECT field FROM careerProfile WHERE profileId = ?",
+      [profileId]
     );
 
-    if (userId === 0) {
-      return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
-    }
-
-    if (rows.length === 0 || !rows[0].field) {
+    if (fields.length === 0 || !fields[0].field) {
       return res
         .status(400)
-        .json({ error: "사용자 경력프로필 필드에 값이 없습니다." });
+        .json({ error: "경력프로필에 설정된 분야가 없습니다." });
     }
 
-    const field = rows[0].field;
+    // 분야 리스트
+    const field = fields[0].field;
     const fieldList = field.split(",").map((f) => f.trim());
 
     // SQL FIND_IN_SET 조건을 사용하여 쿼리문 생성 (OR 조건으로 연결)
@@ -143,14 +132,11 @@ router.get("/filter", async (req, res) => {
       .map(() => `FIND_IN_SET(?, field)`)
       .join(" OR ");
     const query = `
-      SELECT recruit.recruitId, recruit.title, recruit.content, recruit.method, recruit.priceType, 
-             recruit.price, recruit.region, recruit.field, user.userId, user.nickname, 
-             user.birthyear
-      FROM recruit 
-      JOIN user ON recruit.userId = user.userId
+      SELECT recruit.recruitId, recruit.title, recruit.content, recruit.method, recruit.priceType, recruit.price, recruit.region, recruit.field, profile.profileId, profile.nickname, profile.birthyear
+      FROM recruit
+      JOIN profile ON recruit.profileId = profile.profileId
       WHERE ${whereClause}
     `;
-
     const recruits = await pool.query(query, fieldList);
 
     // 필드별로 데이터를 그룹화

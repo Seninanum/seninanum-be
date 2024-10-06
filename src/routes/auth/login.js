@@ -20,15 +20,19 @@ router.post("/login", async (req, res) => {
   }
 
   try {
-    const [rows] = await pool.query("SELECT * FROM user WHERE userId = ?", [
+    const [user] = await pool.query("SELECT * FROM user WHERE userId = ?", [
       userId,
     ]);
+    const [profile] = await pool.query(
+      "SELECT * FROM profile WHERE userId = ?",
+      [userId]
+    );
 
-    if (rows.length > 0) {
+    if (user.length > 0 && profile.length > 0) {
       // 토큰 생성
       const accessToken = generateAccessToken({
-        userId: rows[0].userId,
-        userType: rows[0].userType,
+        profileId: profile[0].profileId,
+        userType: user[0].userType,
       });
       const refreshToken = generateRefreshToken({});
 

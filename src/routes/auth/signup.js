@@ -26,23 +26,19 @@ router.post("/signup", async (req, res) => {
   const refreshToken = await generateRefreshToken({});
 
   try {
-    const [result] = await pool.query(
-      "INSERT INTO user (userId, userType, nickname, gender, birthYear, profile, accessToken, refreshToken) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        userId,
-        userType,
-        nickname,
-        gender,
-        birthYear,
-        profile,
-        accessToken,
-        refreshToken,
-      ]
+    // 카카오 로그인
+    await pool.query(
+      "INSERT INTO user (userId, accessToken, refreshToken) VALUES (?, ?, ?)",
+      [userId, accessToken, refreshToken]
     );
 
-    res
-      .status(201)
-      .json({ message: "User created successfully", userId: result.userId });
+    // 기본 프로필 정보
+    await pool.query(
+      "INSERT INTO profile (userId, userType, nickname, gender, birthYear, profile) VALUES (?, ?, ?, ?, ?, ?)",
+      [userId, userType, nickname, gender, birthYear, profile]
+    );
+
+    res.status(200).json({ message: "카카오 회원가입 완료" });
   } catch (error) {
     console.error(error);
     res

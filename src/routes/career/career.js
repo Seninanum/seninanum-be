@@ -8,30 +8,31 @@ router.post("/", async (req, res) => {
     #swagger.summary = '경력 프로필 생성'
    */
 
-  //생성되어있는 프로필이 있는지 확인
-  const userId = req.user.userId;
+  // 생성되어있는 프로필이 있는지 확인
+  const profileId = req.user.profileId;
   try {
     const [existingProfile] = await pool.query(
-      "SELECT * FROM careerProfile WHERE userId = ?",
-      [userId]
+      "SELECT * FROM careerProfile WHERE profileId = ?",
+      [profileId]
     );
+
     if (existingProfile.length === 0) {
       // 프로필 새로 생성
       const [result] = await pool.query(
-        "INSERT INTO careerProfile (userId, introduce, age, field, service, method, region, priceType, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [userId, null, null, null, null, null, null, null, null]
+        "INSERT INTO careerProfile (profileId, introduce, age, field, service, method, region, priceType, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [profileId, null, null, null, null, null, null, null, null]
       );
       // 생성된 프로필의 ID 반환
-      const profileId = result.insertId;
+      const careerProfileId = result.insertId;
       return res
         .status(201)
-        .json({ profileId, message: "새 프로필이 생성되었습니다." });
+        .json({ careerProfileId, message: "새 프로필이 생성되었습니다." });
     } else {
       // 기존 프로필 ID 반환
-      const profileId = existingProfile[0].profileId;
+      const careerProfileId = existingProfile[0].careerProfileId;
       return res
         .status(200)
-        .json({ profileId, message: "기존 프로필이 반환되었습니다." });
+        .json({ careerProfileId, message: "기존 프로필이 반환되었습니다." });
     }
   } catch (error) {
     console.log(error);
@@ -46,28 +47,29 @@ router.get("/", async (req, res) => {
     #swagger.tags = ['Career']
     #swagger.summary = '내 경력 프로필 조회'
    */
-  const userId = req.user.userId;
+
+  const profileId = req.user.profileId;
 
   try {
-    const [career] = await pool.query(
-      "select profileId, introduce, age, field, service, method, region, priceType, price, certificateName, certificate from careerProfile where userId = ?",
-      [userId]
+    // 경력 프로필 존재 여부 확인
+    const [careerProfile] = await pool.query(
+      "SELECT careerProfileId FROM careerProfile WHERE profileId = ?",
+      [profileId]
     );
-
-    if (career.length === 0) {
-      return res.status(404).json({ error: "career not found" });
+    if (careerProfile.length === 0) {
+      return res.status(404).json({ error: "경력프로필이 존재하지 않음" });
     }
 
     // 경력 상세 항목 조회
-    const profileId = career[0].profileId;
+    const careerProfileId = careerProfile[0].careerProfileId;
     const [careerItems] = await pool.query(
-      "SELECT careerId, title, startYear, startMonth, endYear, endMonth, content FROM careerItem WHERE profileId = ?",
-      [profileId]
+      "SELECT careerId, title, startYear, startMonth, endYear, endMonth, content FROM careerItem WHERE careerProfileId = ?",
+      [careerProfileId]
     );
 
     // 응답 데이터 구조
     const response = {
-      careerProfile: career[0],
+      careerProfile: careerProfileId,
       careerItems: careerItems,
     };
 
@@ -106,7 +108,7 @@ router.patch("/", async (req, res) => {
    */
 
   const {
-    profileId,
+    careerProfileId,
     introduce,
     age,
     field,
@@ -120,8 +122,8 @@ router.patch("/", async (req, res) => {
 
   try {
     // profileId인 곳에 프로필 Update
-    const [result] = await pool.query(
-      "UPDATE careerProfile SET introduce = ?, age = ?, field = ?, service = ?, method = ?, region = ?, priceType = ?, price = ?, progressStep = ? WHERE profileId = ?",
+    await pool.query(
+      "UPDATE careerProfile SET introduce = ?, age = ?, field = ?, service = ?, method = ?, region = ?, priceType = ?, price = ?, progressStep = ? WHERE careerProfileId = ?",
       [
         introduce,
         age,
@@ -132,11 +134,11 @@ router.patch("/", async (req, res) => {
         priceType,
         price,
         progressStep,
-        profileId,
+        careerProfileId,
       ]
     );
 
-    res.status(201).json({ message: "경력프로필이 업데이트 되었습니다." });
+    res.status(200).json({ message: "경력프로필이 업데이트 되었습니다." });
   } catch (error) {
     console.log(error);
     res
