@@ -38,15 +38,15 @@ router.get("/list", async (req, res) => {
   try {
     //구인글 정보
     const [recruits] = await pool.query(
-      "SELECT recruitId, userId, title, content, method, region, field FROM recruit"
+      "SELECT recruitId, profileId, title, content, method, region, field FROM recruit"
     );
 
     // 각 recruit에 대해 user 정보를 병합
     const recruitWithUserInfo = await Promise.all(
       recruits.map(async (recruit) => {
         const [user] = await pool.query(
-          "SELECT nickname, gender, birthyear FROM user WHERE userId = ?",
-          [recruit.userId]
+          "SELECT nickname, gender, birthyear FROM profile WHERE profileId = ?",
+          [recruit.profileId]
         );
         const { nickname, gender, birthyear } = user[0];
         return {
