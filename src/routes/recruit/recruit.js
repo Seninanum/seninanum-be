@@ -29,13 +29,45 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.delete("/:recruitId", async (req, res) => {
+  /**
+    #swagger.tags = ['Recruit']
+    #swagger.summary = '구인글 삭제'
+   */
+  const profileId = req.user.profileId;
+  const recruitId = req.params.recruitId;
+
+  try {
+    // 해당 구인글이 현재 사용자가 작성한 것인지 확인
+    const [recruit] = await pool.query(
+      "SELECT recruitId FROM recruit WHERE profileId = ? AND recruitId = ?",
+      [profileId, recruitId]
+    );
+
+    if (recruit.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "구인글을 찾을 수 없거나 삭제 권한이 없습니다." });
+    }
+
+    await pool.query("DELETE FROM recruit WHERE recruitId = ?", [recruitId]);
+
+    res.status(200).json({ message: "구인글이 성공적으로 삭제되었습니다." });
+  } catch (error) {
+    console.error("Error deleting recruit:", error);
+    res
+      .status(500)
+      .json({ error: "구인글을 삭제하는 중 오류가 발생했습니다." });
+  }
+});
+
 router.get("/mylist/:recruitId", async (req, res) => {
   /**
     #swagger.tags = ['Recruit']
     #swagger.summary = '내 구인글 상세정보 조회'
    */
   const profileId = req.user.profileId;
-  const recruitId = req.params.recruitId; // 조회할 구인글 ID
+  const recruitId = req.params.recruitId;
 
   try {
     const [recruit] = await pool.query(
