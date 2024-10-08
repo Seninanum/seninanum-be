@@ -29,10 +29,64 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/mylist/:recruitId", async (req, res) => {
+  /**
+    #swagger.tags = ['Recruit']
+    #swagger.summary = '내 구인글 상세정보 조회'
+   */
+  const profileId = req.user.profileId;
+  const recruitId = req.params.recruitId; // 조회할 구인글 ID
+
+  try {
+    const [recruit] = await pool.query(
+      "SELECT recruitId, title, content, method, priceType, price, region, field, createdAt FROM recruit WHERE profileId = ? AND recruitId = ?",
+      [profileId, recruitId]
+    );
+
+    if (recruit.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "해당 구인글을 찾을 수 없습니다." });
+    }
+
+    res.status(200).json(recruit[0]);
+  } catch (error) {
+    console.error("Error fetching recruit detail:", error);
+    res
+      .status(500)
+      .json({ error: "구인글 상세정보를 불러오는 중 오류가 발생했습니다." });
+  }
+});
+
+router.get("/mylist", async (req, res) => {
+  /**
+    #swagger.tags = ['Recruit']
+    #swagger.summary = '내 구인글 목록 조회'
+   */
+  const profileId = req.user.profileId;
+  try {
+    const [recruits] = await pool.query(
+      "SELECT recruitId, title, content, method, region, field FROM recruit WHERE profileId = ?",
+      [profileId]
+    );
+
+    if (recruits.length === 0) {
+      return res.status(404).json({ message: "구인글이 없습니다." });
+    }
+
+    res.status(200).json(recruits);
+  } catch (error) {
+    console.error("Error fetching user's recruit list:", error);
+    res
+      .status(500)
+      .json({ error: "구인글 목록을 불러오는 중 오류가 발생했습니다." });
+  }
+});
+
 router.get("/list", async (req, res) => {
   /**
     #swagger.tags = ['Recruit']
-    #swagger.summary = '구인글 목록 불러오기'
+    #swagger.summary = '구인글 전체 목록 불러오기'
     
    */
   try {
@@ -41,7 +95,7 @@ router.get("/list", async (req, res) => {
       "SELECT recruitId, profileId, title, content, method, region, field FROM recruit"
     );
 
-    // 각 recruit에 대해 user 정보를 병합
+    // 각 recruit에 대해 user 정보를 병합0
     const recruitWithUserInfo = await Promise.all(
       recruits.map(async (recruit) => {
         const [user] = await pool.query(
@@ -221,4 +275,5 @@ router.get("/:recruitId", async (req, res) => {
       .json({ error: "An error occurred while fetching recruit detail" });
   }
 });
+
 module.exports = router;
