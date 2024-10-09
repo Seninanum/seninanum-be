@@ -98,6 +98,10 @@ router.get("/list", async (req, res) => {
           opponentId: opponentId,
           createdAt: room.createdAt,
         };
+
+        // 마지막으로 보낸 메세지
+        // 마지막으로 보낸 메세지 시간
+        // 안 읽은 메세지 개수
       })
     );
 
