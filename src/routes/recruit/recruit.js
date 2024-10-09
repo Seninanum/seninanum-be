@@ -143,10 +143,6 @@ router.get("/mylist", async (req, res) => {
       [profileId]
     );
 
-    if (recruits.length === 0) {
-      return res.status(404).json({ message: "구인글이 없습니다." });
-    }
-
     res.status(200).json(recruits);
   } catch (error) {
     console.error("Error fetching user's recruit list:", error);
@@ -167,8 +163,12 @@ router.get("/list", async (req, res) => {
     const [recruits] = await pool.query(
       "SELECT recruitId, profileId, title, content, method, region, field FROM recruit"
     );
+    if (recruits.length === 0) {
+      // 구인글이 없을 경우 빈 배열 반환
+      return res.status(200).json([]);
+    }
 
-    // 각 recruit에 대해 user 정보를 병합0
+    // 각 recruit에 대해 user 정보를 병합
     const recruitWithUserInfo = await Promise.all(
       recruits.map(async (recruit) => {
         const [user] = await pool.query(
