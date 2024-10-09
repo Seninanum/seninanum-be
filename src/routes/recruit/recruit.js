@@ -29,10 +29,133 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.delete("/:recruitId", async (req, res) => {
+  /**
+    #swagger.tags = ['Recruit']
+    #swagger.summary = '구인글 삭제'
+   */
+  const profileId = req.user.profileId;
+  const recruitId = req.params.recruitId;
+
+  try {
+    // 해당 구인글이 현재 사용자가 작성한 것인지 확인
+    const [recruit] = await pool.query(
+      "SELECT recruitId FROM recruit WHERE profileId = ? AND recruitId = ?",
+      [profileId, recruitId]
+    );
+
+    if (recruit.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "구인글을 찾을 수 없거나 삭제 권한이 없습니다." });
+    }
+
+    await pool.query("DELETE FROM recruit WHERE recruitId = ?", [recruitId]);
+
+    res.status(200).json({ message: "구인글이 성공적으로 삭제되었습니다." });
+  } catch (error) {
+    console.error("Error deleting recruit:", error);
+    res
+      .status(500)
+      .json({ error: "구인글을 삭제하는 중 오류가 발생했습니다." });
+  }
+});
+
+router.put("/:recruitId", async (req, res) => {
+  /**
+    #swagger.tags = ['Recruit']
+    #swagger.summary = '내 구인글 수정'
+   */
+  const profileId = req.user.profileId;
+  const recruitId = req.params.recruitId;
+  const { title, content, method, priceType, price, region, field } = req.body;
+
+  if (!title || !content || !method || !priceType || !price || !field) {
+    return res.status(400).json({ error: "모든 필드를 입력해야 합니다." });
+  }
+
+  try {
+    // 해당 구인글이 현재 사용자가 작성한 것인지 확인
+    const [recruit] = await pool.query(
+      "SELECT recruitId FROM recruit WHERE profileId = ? AND recruitId = ?",
+      [profileId, recruitId]
+    );
+
+    if (recruit.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "구인글을 찾을 수 없거나 수정 권한이 없습니다." });
+    }
+
+    // 구인글 수정 쿼리
+    await pool.query(
+      "UPDATE recruit SET title = ?, content = ?, method = ?, priceType = ?, price = ?, region = ?, field = ? WHERE recruitId = ?",
+      [title, content, method, priceType, price, region, field, recruitId]
+    );
+
+    res.status(200).json({ message: "구인글이 성공적으로 수정되었습니다." });
+  } catch (error) {
+    console.error("Error updating recruit:", error);
+    res
+      .status(500)
+      .json({ error: "구인글을 수정하는 중 오류가 발생했습니다." });
+  }
+});
+
+router.get("/mylist/:recruitId", async (req, res) => {
+  /**
+    #swagger.tags = ['Recruit']
+    #swagger.summary = '내 구인글 상세정보 조회'
+   */
+  const profileId = req.user.profileId;
+  const recruitId = req.params.recruitId;
+
+  try {
+    const [recruit] = await pool.query(
+      "SELECT recruitId, title, content, method, priceType, price, region, field, createdAt FROM recruit WHERE profileId = ? AND recruitId = ?",
+      [profileId, recruitId]
+    );
+
+    if (recruit.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "해당 구인글을 찾을 수 없습니다." });
+    }
+
+    res.status(200).json(recruit[0]);
+  } catch (error) {
+    console.error("Error fetching recruit detail:", error);
+    res
+      .status(500)
+      .json({ error: "구인글 상세정보를 불러오는 중 오류가 발생했습니다." });
+  }
+});
+
+router.get("/mylist", async (req, res) => {
+  /**
+    #swagger.tags = ['Recruit']
+    #swagger.summary = '내 구인글 목록 조회'
+   */
+  const profileId = req.user.profileId;
+  try {
+    const [recruits] = await pool.query(
+      "SELECT recruitId, title, content, method, region, field FROM recruit WHERE profileId = ?",
+      [profileId]
+    );
+
+    res.status(200).json(recruits);
+  } catch (error) {
+    console.error("Error fetching user's recruit list:", error);
+    res
+      .status(500)
+      .json({ error: "구인글 목록을 불러오는 중 오류가 발생했습니다." });
+  }
+});
+
 router.get("/list", async (req, res) => {
   /**
     #swagger.tags = ['Recruit']
-    #swagger.summary = '구인글 목록 불러오기'
+    #swagger.summary = '구인글 전체 목록 불러오기'
     
    */
   try {
@@ -40,6 +163,10 @@ router.get("/list", async (req, res) => {
     const [recruits] = await pool.query(
       "SELECT recruitId, profileId, title, content, method, region, field FROM recruit"
     );
+    if (recruits.length === 0) {
+      // 구인글이 없을 경우 빈 배열 반환
+      return res.status(200).json([]);
+    }
 
     // 각 recruit에 대해 user 정보를 병합
     const recruitWithUserInfo = await Promise.all(
@@ -221,4 +348,5 @@ router.get("/:recruitId", async (req, res) => {
       .json({ error: "An error occurred while fetching recruit detail" });
   }
 });
+
 module.exports = router;
