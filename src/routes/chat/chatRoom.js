@@ -83,14 +83,16 @@ router.get("/list", async (req, res) => {
           room.memberId === myProfileId ? room.opponentId : room.memberId;
 
         // 방 이름 (상대방 닉네임)
-        const [roomNames] = await pool.query(
-          "SELECT nickname FROM profile WHERE profileId = ?",
+        const [profiles] = await pool.query(
+          "SELECT * FROM profile WHERE profileId = ?",
           [opponentId]
         );
-        const roomName = roomNames[0]?.nickname || "Unknown";
+        const roomName = profiles[0]?.nickname || "Unknown";
+        const profile = profiles[0]?.profile;
 
         return {
           chatRoomId: room.chatRoomId,
+          profile: profile,
           roomName: roomName,
           roomStatus: room.roomStatus,
           opponentId: opponentId,
