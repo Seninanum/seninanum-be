@@ -24,7 +24,7 @@ router.post("/refresh", async (req, res) => {
     if (rows.length > 0) {
       // Access Token 생성
       const newAccessToken = generateAccessToken({
-        userId: rows[0].userId,
+        profileId: rows[0].profileId,
         userType: rows[0].userType,
       });
 

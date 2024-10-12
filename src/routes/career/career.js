@@ -210,11 +210,12 @@ router.get("/:profileId", async (req, res) => {
     }
     ]
    */
-  const profileId = req.params.profileId;
+  const careerProfileId = req.params.careerProfileId;
+  const profileId = req.user.profileId;
 
   try {
     const [career] = await pool.query(
-      "select userId, introduce, age, field, service, method, region, price, priceType from careerProfile where profileId = ?",
+      "SELECT * FROM careerProfile WHERE profileId = ?",
       [profileId]
     );
 
@@ -222,28 +223,19 @@ router.get("/:profileId", async (req, res) => {
       return res.status(404).json({ error: "경력프로필이 조회되지 않습니다." });
     }
 
-    const {
-      userId,
-      introduce,
-      age,
-      field,
-      service,
-      method,
-      region,
-      price,
-      priceType,
-    } = career[0];
+    const { introduce, age, field, service, method, region, price, priceType } =
+      career[0];
 
     const [userInfo] = await pool.query(
-      "SELECT nickname, gender, birthyear, profile FROM user WHERE userId=?",
-      [userId]
+      "SELECT nickname, gender, birthyear, profile FROM profile WHERE profileId = ?",
+      [profileId]
     );
     const { nickname, gender, birthyear, profile } = userInfo[0];
 
     // 경력 상세 항목 조회
     const [careerItems] = await pool.query(
-      "SELECT careerId, title, startYear, startMonth, endYear, endMonth, content FROM careerItem WHERE profileId = ?",
-      [profileId]
+      "SELECT careerId, title, startYear, startMonth, endYear, endMonth, content FROM careerItem WHERE careerProfileId = ?",
+      [careerProfileId]
     );
 
     const response = {
@@ -295,7 +287,7 @@ router.post("/filter", async (req, res) => {
 
     // 경력 프로필 정보 가져오기
     const [careers] = await pool.query(
-      "SELECT profileId, userId, introduce, field FROM careerProfile WHERE method = ? AND priceType = ? AND price = ? AND region = ?",
+      "SELECT profileId, careerProfileId, introduce, field FROM careerProfile WHERE method = ? AND priceType = ? AND price = ? AND region = ?",
       [method, priceType, price, region]
     );
 
@@ -312,13 +304,13 @@ router.post("/filter", async (req, res) => {
     // 각 경력 프로필에 대해 사용자 정보를 병합
     const careerWithUserInfo = await Promise.all(
       filteredCareers.map(async (career) => {
-        const [user] = await pool.query(
-          "SELECT nickname, gender, birthyear, profile FROM user WHERE userId = ?",
-          [career.userId]
+        const [userProfile] = await pool.query(
+          "SELECT nickname, gender, birthyear, profile FROM profile WHERE profileId = ?",
+          [career.profileId]
         );
-        const { nickname, gender, birthyear, profile } = user[0];
+        const { nickname, gender, birthyear, profile } = userProfile[0];
         return {
-          profileId: career.profileId,
+          careerProfileId: career.careerProfileId,
           introduce: career.introduce,
           field: career.field,
           nickname,
