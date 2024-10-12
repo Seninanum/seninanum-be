@@ -12,13 +12,14 @@ const kakaoRouter = require("./routes/auth/kakaoAuth");
 const signUpRouter = require("./routes/auth/signup");
 const loginRouter = require("./routes/auth/login");
 const refreshRouter = require("./routes/auth/refresh");
-const getUserTypeRouter = require("./routes/user/userType");
-const getUserProfileRouter = require("./routes/user/basicProfile");
-const RecruitRouter = require("./routes/recruit/recruit");
+const userTypeRouter = require("./routes/user/userType");
+const userProfileRouter = require("./routes/user/basicProfile");
+const recruitRouter = require("./routes/recruit/recruit");
 const careerRouter = require("./routes/career/career");
-const careerCertificate = require("./routes/career/careerCertificate");
+const careerCertificateRouter = require("./routes/career/careerCertificate");
 const careerItemRouter = require("./routes/career/careerItem");
 const chatRouter = require("./routes/chat/chatRoom");
+const profileRouter = require("./routes/profile/basicProfile");
 
 // swagger
 const swaggerUi = require("swagger-ui-express");
@@ -52,11 +53,12 @@ app.use("/auth", kakaoRouter);
 app.use("/auth", signUpRouter);
 app.use("/auth", loginRouter);
 app.use("/auth", refreshRouter);
-app.use("/recruit", verifyToken, RecruitRouter);
-app.use("/user", verifyToken, getUserTypeRouter);
-app.use("/user", verifyToken, getUserProfileRouter);
+app.use("/recruit", verifyToken, recruitRouter);
+app.use("/user", verifyToken, userTypeRouter);
+app.use("/user", verifyToken, userProfileRouter);
+app.use("/profile", verifyToken, profileRouter);
 app.use("/career", verifyToken, careerRouter);
-app.use("/career/certificate", verifyToken, careerCertificate);
+app.use("/career/certificate", verifyToken, careerCertificateRouter);
 app.use("/career/item", verifyToken, careerItemRouter);
 app.use("/chatroom", verifyToken, chatRouter);
 
