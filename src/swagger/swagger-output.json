@@ -586,6 +586,37 @@
         }
       }
     },
+    "/profile/{profileId}": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "summary": "유저 기본정보 불러오기",
+        "description": "",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/career/": {
       "post": {
         "tags": [

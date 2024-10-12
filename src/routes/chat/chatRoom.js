@@ -28,7 +28,7 @@ router.post("/create", async (req, res) => {
     if (existingChatroom.length === 0) {
       // 새로 프로필 생성
       const [result] = await pool.query(
-        "INSERT INTO chatRoom (roomStatus, memberId, opponentId) VALUES (?, ?, ?, ?)",
+        "INSERT INTO chatRoom (roomStatus, memberId, opponentId) VALUES (?, ?, ?)",
         ["ACTIVE", myProfileId, oppProfileId]
       );
 
