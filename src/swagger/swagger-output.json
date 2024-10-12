@@ -85,8 +85,8 @@
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
+          "200": {
+            "description": "OK"
           },
           "400": {
             "description": "Bad Request"
@@ -208,8 +208,8 @@
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
+          "200": {
+            "description": "OK"
           },
           "400": {
             "description": "Bad Request"
@@ -226,13 +226,21 @@
         }
       }
     },
-    "/recruit/list": {
-      "get": {
+    "/recruit/{recruitId}": {
+      "delete": {
         "tags": [
           "Recruit"
         ],
-        "summary": "구인글 목록 불러오기",
+        "summary": "구인글 삭제",
         "description": "",
+        "parameters": [
+          {
+            "name": "recruitId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -243,47 +251,56 @@
           "403": {
             "description": "Forbidden"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "500": {
             "description": "Internal Server Error"
           }
         }
-      }
-    },
-    "/recruit/filter": {
-      "get": {
+      },
+      "put": {
         "tags": [
           "Recruit"
         ],
-        "summary": "동백 분야에 맞는 구인글 조회",
+        "summary": "내 구인글 수정",
         "description": "",
         "parameters": [
           {
-            "name": "   ",
-            "field": "경제",
-            "list": [
-              {
-                "userId": 3518693517,
-                "title": "은퇴를 앞두고 있습니다. 앞으로의 자산 계획에 조언을 구합니다.",
-                "content": "은퇴를 앞두고 있는 60대 직장인입니다.",
-                "method": "비대면 서비스",
-                "priceType": "건당",
-                "price": 10000,
-                "region": "",
-                "field": "경제,생활"
-              },
-              {
-                "userId": 3725761489,
-                "title": "장애아동 교육분야 전문가의 조언이 필요합니다.",
-                "content": "안녕하세요? 대학생 나리입니다. ",
-                "method": "비대면 서비스",
-                "priceType": "건당",
-                "price": 40000,
-                "region": null,
-                "field": "경제,교육"
-              }
-            ],
-            "in": "query",
+            "name": "recruitId",
+            "in": "path",
+            "required": true,
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "example": "any"
+                },
+                "content": {
+                  "example": "any"
+                },
+                "method": {
+                  "example": "any"
+                },
+                "priceType": {
+                  "example": "any"
+                },
+                "price": {
+                  "example": "any"
+                },
+                "region": {
+                  "example": "any"
+                },
+                "field": {
+                  "example": "any"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -306,9 +323,7 @@
             "description": "Internal Server Error"
           }
         }
-      }
-    },
-    "/recruit/{recruitId}": {
+      },
       "get": {
         "tags": [
           "Recruit"
@@ -342,6 +357,142 @@
         }
       }
     },
+    "/recruit/mylist/{recruitId}": {
+      "get": {
+        "tags": [
+          "Recruit"
+        ],
+        "summary": "내 구인글 상세정보 조회",
+        "description": "",
+        "parameters": [
+          {
+            "name": "recruitId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/recruit/mylist": {
+      "get": {
+        "tags": [
+          "Recruit"
+        ],
+        "summary": "내 구인글 목록 조회",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/recruit/list": {
+      "get": {
+        "tags": [
+          "Recruit"
+        ],
+        "summary": "구인글 전체 목록 불러오기",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/recruit/filter": {
+      "get": {
+        "tags": [
+          "Recruit"
+        ],
+        "summary": "동백 분야에 맞는 구인글 조회",
+        "description": "",
+        "parameters": [
+          {
+            "name": "   ",
+            "field": "경제",
+            "list": [
+              {
+                "userId": 12345678,
+                "title": "은퇴를 앞두고 있습니다. 앞으로의 자산 계획에 조언을 구합니다.",
+                "content": "은퇴를 앞두고 있는 60대 직장인입니다.",
+                "method": "비대면 서비스",
+                "priceType": "건당",
+                "price": 10000,
+                "region": "",
+                "field": "경제,생활"
+              },
+              {
+                "userId": 12345678,
+                "title": "장애아동 교육분야 전문가의 조언이 필요합니다.",
+                "content": "안녕하세요? 대학생 나리입니다. ",
+                "method": "비대면 서비스",
+                "priceType": "건당",
+                "price": 40000,
+                "region": null,
+                "field": "경제,교육"
+              }
+            ],
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/user/userType": {
       "get": {
         "tags": [
@@ -365,16 +516,63 @@
         }
       }
     },
-    "/user/profile/": {
+    "/user/profile": {
       "get": {
         "tags": [
-          "User"
+          "Profile"
         ],
         "summary": "유저 기본정보 불러오기",
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "User"
+        ],
+        "summary": "유저 기본정보 수정",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nickname": {
+                  "example": "any"
+                },
+                "gender": {
+                  "example": "any"
+                },
+                "birthYear": {
+                  "example": "any"
+                },
+                "profile": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"
@@ -417,7 +615,7 @@
         "tags": [
           "Career"
         ],
-        "summary": "경력 프로필 상세항목 조회",
+        "summary": "내 경력 프로필 조회",
         "description": "",
         "responses": {
           "200": {
@@ -496,8 +694,135 @@
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/career/list": {
+      "get": {
+        "tags": [
+          "Career"
+        ],
+        "summary": "경력프로필 목록 불러오기",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/career/{profileId}": {
+      "get": {
+        "tags": [
+          "Career"
+        ],
+        "summary": "경력프로필 상세조회",
+        "description": "",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "   {   introduce: ,   age: 초등,유아,중등,   field: 돌봄,생활,입시,   service: null,   method: 비대면,   region: null,   price: null,   priceType: null,   nickname: 신주현,   gender: 여성,   birthyear: 2001,   profile: http://img1.kakaocdn.net/thumb/R640x640.q70/?fname=http://t1.kakaocdn.net/account_images/default_profile.jpeg,   careerItems: ",
+            "introduce": "",
+            "age": "초등,유아,중등",
+            "field": "돌봄,생활,입시",
+            "service": null,
+            "method": "비대면",
+            "region": null,
+            "price": null,
+            "priceType": null,
+            "nickname": "신주현",
+            "gender": "여성",
+            "birthyear": "2001",
+            "profile": "http://img1.kakaocdn.net/thumb/R640x640.q70/?fname=http://t1.kakaocdn.net/account_images/default_profile.jpeg",
+            "careerItems": [],
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/career/filter": {
+      "post": {
+        "tags": [
+          "Career"
+        ],
+        "summary": "나리 필터링에 맞는 경력프로필 조회",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "method": {
+                  "example": "any"
+                },
+                "priceType": {
+                  "example": "any"
+                },
+                "price": {
+                  "example": "any"
+                },
+                "region": {
+                  "example": "any"
+                },
+                "field": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"
@@ -692,21 +1017,53 @@
         }
       }
     },
-    "/career/item/list/{profileId}": {
-      "get": {
+    "/chatroom/create": {
+      "post": {
         "tags": [
-          "CareerItem"
+          "Chatroom"
         ],
-        "summary": "경력 상세 사항 리스트 조회",
+        "summary": "채팅 방 생성",
         "description": "",
         "parameters": [
           {
-            "name": "profileId",
-            "in": "path",
-            "required": true,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "oppProfileId": {
+                  "example": "any"
+                }
+              }
+            }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/chatroom/list": {
+      "get": {
+        "tags": [
+          "Chatroom"
+        ],
+        "summary": "채팅 방 목록 조회",
+        "description": "",
         "responses": {
           "200": {
             "description": "OK"
@@ -716,6 +1073,9 @@
           },
           "403": {
             "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
