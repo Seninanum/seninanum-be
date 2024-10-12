@@ -7,7 +7,7 @@ router.get("/:profileId", async (req, res) => {
       #swagger.tags = ['Profile']
       #swagger.summary = '유저 기본정보 불러오기'
      */
-  const { profileId } = req.params.profileId;
+  const profileId = req.params.profileId;
 
   try {
     const [profile] = await pool.query(
