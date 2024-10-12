@@ -188,6 +188,7 @@ router.get("/list", async (req, res) => {
   }
 });
 
+//수정!!! profileId careerProfileId로 변경하기
 router.get("/:profileId", async (req, res) => {
   /**
     #swagger.tags = ['Career']
@@ -210,7 +211,7 @@ router.get("/:profileId", async (req, res) => {
     }
     ]
    */
-  const careerProfileId = req.params.careerProfileId;
+  const careerProfileId = req.params.profileId;
   const profileId = req.user.profileId;
 
   try {
