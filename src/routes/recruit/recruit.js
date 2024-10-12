@@ -327,6 +327,7 @@ router.get("/:recruitId", async (req, res) => {
     const { nickname, gender, birthyear } = userInfo[0];
 
     const response = {
+      profileId,
       title,
       content,
       method,
