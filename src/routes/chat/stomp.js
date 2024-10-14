@@ -8,9 +8,20 @@ module.exports = function (server) {
     heartbeat: [0, 0], // 하트비트 설정
   });
 
-  // 클라이언트가 구독할 때
+  // // 클라이언트가 구독할 때
+  // stompServer.on("subscribe", (subscription, headers) => {
+  //   console.log(`Client subscribed to ${headers}`);
+  // });
   stompServer.on("subscribe", (subscription, headers) => {
-    console.log(`Client subscribed to ${headers.destination}`);
+    try {
+      if (headers && headers.destination) {
+        console.log(`Client subscribed to ${headers.destination}`);
+      } else {
+        throw new Error("Destination is undefined");
+      }
+    } catch (error) {
+      console.error("Error processing subscription:", error.message);
+    }
   });
 
   // 클라이언트가 연결할 때
@@ -18,24 +29,29 @@ module.exports = function (server) {
     console.log(`Client connected with session ID: ${sessionId}`);
   });
 
-  // 클라이언트가 메시지를 보낼 때
+  // // 클라이언트가 메시지를 보낼 때
+  // stompServer.on("message", (msg, headers) => {
+  //   console.log("headers 데이터 >>>>>>>>>>>>", headers);
+  //   console.log(`Received message on ${headers.destination}: ${msg}`);
+
+  //   const destination = headers.destination; // 메시지가 보내진 경로
+  //   const messageBody = JSON.parse(msg); // 메시지 본문 (chatMessage, senderId, receiverId 등)
+
+  //   if (destination.startsWith("/app/chat/")) {
+  //     // 경로가 "/app/chat/{roomId}"로 시작하는 경우
+  //     const roomId = destination.split("/")[3]; // roomId 추출
+
+  //     // 해당 roomId에 있는 모든 클라이언트에게 메시지 브로드캐스트
+  //     stompServer.send(
+  //       `/topic/chat/${roomId}`,
+  //       headers,
+  //       JSON.stringify(messageBody)
+  //     );
+  //   }
+  // });
   stompServer.on("message", (msg, headers) => {
-    console.log(`Received message on ${headers.destination}: ${msg}`);
-
-    const destination = headers.destination; // 메시지가 보내진 경로
-    const messageBody = JSON.parse(msg); // 메시지 본문 (chatMessage, senderId, receiverId 등)
-
-    if (destination.startsWith("/app/chat/")) {
-      // 경로가 "/app/chat/{roomId}"로 시작하는 경우
-      const roomId = destination.split("/")[3]; // roomId 추출
-
-      // 해당 roomId에 있는 모든 클라이언트에게 메시지 브로드캐스트
-      stompServer.send(
-        `/topic/chat/${roomId}`,
-        headers,
-        JSON.stringify(messageBody)
-      );
-    }
+    console.log("Headers received:", headers); // headers 전체를 로그로 출력
+    console.log(`Received message on ${headers}: ${msg}`);
   });
 
   // 클라이언트가 연결을 끊을 때
