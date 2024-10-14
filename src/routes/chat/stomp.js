@@ -16,7 +16,8 @@ module.exports = function (server) {
   });
 
   // 클라이언트가 연결할 때
-  stompServer.on("connect", (sessionId, headers) => {
+  stompServer.on("connected", (sessionId, headers) => {
+    console.log(">>>>>headers", headers);
     console.log(`Client connected with session ID: ${sessionId}`);
   });
 
@@ -43,6 +44,7 @@ module.exports = function (server) {
   stompServer.on("message", (msg, headers) => {
     console.log("Headers received:", headers); // headers 전체를 로그로 출력
     console.log(`Received message on ${headers}: ${msg}`);
+    console.log(">>>>>>>>>.", msg.headers);
   });
 
   // 클라이언트가 연결을 끊을 때
