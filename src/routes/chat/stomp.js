@@ -22,11 +22,13 @@ module.exports = function (server) {
 
   // 클라이언트가 메시지를 보낼 때
   stompServer.on("send", (dest, frame) => {
-    console.log(`Destination: ${JSON.stringify(dest)}`);
-    console.log(`Message Frame: ${JSON.stringify(frame)}`);
+    // console.log(`Destination: ${JSON.stringify(dest)}`);
+    // Destination: {"frame":{"headers":{"destination":"/app/chat/11","content-length":68,"bytes_message":true},"body":"{\"chatMessage\":\"d\",\"senderId\":8,\"receiverId\":7,\"publishType\":\"USER\"}"},"dest":"/app/chat/11"}
 
-    // const destination = headers.destination; // 메시지가 보내진 경로
-    // const messageBody = JSON.parse(msg); // 메시지 본문 (chatMessage, senderId, receiverId 등)
+    const destination = dest.frame.headers.destination; // 메시지가 보내진 경로
+    const messageBody = JSON.parse(dest.body); // 메시지 본문
+
+    console.log(destination, messageBody);
 
     // if (destination.startsWith("/app/chat/")) {
     //   // 경로가 "/app/chat/{roomId}"로 시작하는 경우
