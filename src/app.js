@@ -18,7 +18,8 @@ const recruitRouter = require("./routes/recruit/recruit");
 const careerRouter = require("./routes/career/career");
 const careerCertificateRouter = require("./routes/career/careerCertificate");
 const careerItemRouter = require("./routes/career/careerItem");
-const chatRouter = require("./routes/chat/chatRoom");
+const chatRoomRouter = require("./routes/chat/chatRoom");
+const chatRouter = require("./routes/chat/chat");
 const profileRouter = require("./routes/profile/basicProfile");
 
 // swagger
@@ -60,7 +61,8 @@ app.use("/profile", verifyToken, profileRouter);
 app.use("/career", verifyToken, careerRouter);
 app.use("/career/certificate", verifyToken, careerCertificateRouter);
 app.use("/career/item", verifyToken, careerItemRouter);
-app.use("/chatroom", verifyToken, chatRouter);
+app.use("/chatroom", verifyToken, chatRoomRouter);
+app.use("/chat", verifyToken, chatRouter);
 
 app.use(
   "/api-docs",
