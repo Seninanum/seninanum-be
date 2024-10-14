@@ -5,7 +5,7 @@ module.exports = function (server) {
   const stompServer = new StompServer({
     server: server, // Express HTTP 서버와 통합
     path: "/meet", // WebSocket 엔드포인트
-    heartbeat: [4000, 4000], // 하트비트 설정
+    heartbeat: [0, 0], // 하트비트 설정
   });
 
   // 클라이언트가 구독할 때
