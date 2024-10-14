@@ -24,15 +24,21 @@ module.exports = function (server) {
   });
 
   // 클라이언트가 메시지를 보낼 때
-  stompServer.on("send", (dest, frame) => {
+  stompServer.on("send", async (dest, frame) => {
     const destination = dest.frame.headers.destination; // 메시지가 보내진 경로
     const messageBody = JSON.parse(dest.frame.body); // 메시지 본문
-    const roomId = destination.split('/').pop();
+    const roomId = destination.split("/").pop();
 
     // DB에 저장
     await pool.query(
       "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
-      [roomId, messageBody.senderId, messageBody.chatMessage, messageBody.publishType, 1]
+      [
+        roomId,
+        messageBody.senderId,
+        messageBody.chatMessage,
+        messageBody.publishType,
+        1,
+      ]
     );
 
     // 메세지 전달
