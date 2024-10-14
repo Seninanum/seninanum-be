@@ -20,6 +20,7 @@ module.exports = function (server) {
 
   // 클라이언트가 메시지를 보낼 때
   stompServer.on("message", (msg, headers) => {
+    console.log("headers 데이터 >>>>>>>>>>>>", headers);
     console.log(`Received message on ${headers.destination}: ${msg}`);
 
     const destination = headers.destination; // 메시지가 보내진 경로
