@@ -172,10 +172,10 @@ router.get("/list", async (req, res) => {
     const recruitWithUserInfo = await Promise.all(
       recruits.map(async (recruit) => {
         const [user] = await pool.query(
-          "SELECT nickname, gender, birthyear FROM profile WHERE profileId = ?",
+          "SELECT nickname, gender, birthyear, profile FROM profile WHERE profileId = ?",
           [recruit.profileId]
         );
-        const { nickname, gender, birthyear } = user[0];
+        const { nickname, gender, birthyear, profile } = user[0];
         return {
           recruitId: recruit.recruitId,
           title: recruit.title,
@@ -186,6 +186,7 @@ router.get("/list", async (req, res) => {
           nickname,
           gender,
           birthyear,
+          profile,
         };
       })
     );
