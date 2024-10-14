@@ -5,7 +5,7 @@ const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
 const cors = require("cors");
-const bodyParser = require("body-parser");
+const http = require("http"); // http 모듈을 임포트
 
 // router
 const kakaoRouter = require("./routes/auth/kakaoAuth");
