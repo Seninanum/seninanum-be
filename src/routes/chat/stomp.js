@@ -20,10 +20,22 @@ module.exports = function (server) {
 
   // 클라이언트가 메시지를 보낼 때
   stompServer.on("message", (msg, headers) => {
-    console.log(`Received message: ${msg}`);
+    console.log(`Received message on ${headers.destination}: ${msg}`);
 
-    // 메시지를 전송한 클라이언트 외에 모든 구독자에게 메시지를 브로드캐스트
-    stompServer.send(headers.destination, headers, msg);
+    const destination = headers.destination; // 메시지가 보내진 경로
+    const messageBody = JSON.parse(msg); // 메시지 본문 (chatMessage, senderId, receiverId 등)
+
+    if (destination.startsWith("/app/chat/")) {
+      // 경로가 "/app/chat/{roomId}"로 시작하는 경우
+      const roomId = destination.split("/")[3]; // roomId 추출
+
+      // 해당 roomId에 있는 모든 클라이언트에게 메시지 브로드캐스트
+      stompServer.send(
+        `/topic/chat/${roomId}`,
+        headers,
+        JSON.stringify(messageBody)
+      );
+    }
   });
 
   // 클라이언트가 연결을 끊을 때
