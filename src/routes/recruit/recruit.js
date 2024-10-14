@@ -61,6 +61,36 @@ router.delete("/:recruitId", async (req, res) => {
   }
 });
 
+router.post("/close", async (req, res) => {
+  /**
+    #swagger.tags = ['Recruit']
+    #swagger.summary = '구인글 마감'
+   */
+  const { recruitId } = req.body;
+
+  if (!recruitId) {
+    return res.status(400).json({ error: "recruitId가 필요합니다." });
+  }
+
+  try {
+    const [result] = await pool.query(
+      `UPDATE recruit 
+       SET status = '마감' 
+       WHERE recruitId = ?`,
+      [recruitId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "해당 구인글을 찾을 수 없습니다." });
+    }
+
+    res.status(200).json({ message: "구인글이 마감되었습니다." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "구인글 마감 중 오류가 발생했습니다." });
+  }
+});
+
 router.put("/:recruitId", async (req, res) => {
   /**
     #swagger.tags = ['Recruit']
@@ -137,12 +167,30 @@ router.get("/mylist", async (req, res) => {
     #swagger.summary = '내 구인글 목록 조회'
    */
   const profileId = req.user.profileId;
-  try {
-    const [recruits] = await pool.query(
-      "SELECT recruitId, title, content, method, region, field FROM recruit WHERE profileId = ?",
-      [profileId]
-    );
+  const { status } = req.query;
 
+  // 해당 사용자의 모든 구인글을 조회
+  let query = `
+    SELECT recruitId, title, content, method, region, field, status 
+    FROM recruit 
+    WHERE profileId = ?`;
+
+  const params = [profileId]; // 쿼리의 첫 번째 파라미터는 profileId
+
+  // status가 쿼리 파라미터로 전달된 경우
+  if (status) {
+    if (status !== "모집중" && status !== "마감") {
+      return res
+        .status(400)
+        .json({ error: "status는 '모집중' 또는 '마감'이어야 합니다." });
+    }
+    // 기본 쿼리에 status 필터 추가
+    query += " AND status = ?";
+    params.push(status); // 두 번째 파라미터로 status 값 추가
+  }
+
+  try {
+    const [recruits] = await pool.query(query, params);
     res.status(200).json(recruits);
   } catch (error) {
     console.error("Error fetching user's recruit list:", error);
