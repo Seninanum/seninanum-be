@@ -5,20 +5,22 @@ const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
 const cors = require("cors");
-const bodyParser = require("body-parser");
+const http = require("http"); // http 모듈을 임포트
 
 // router
 const kakaoRouter = require("./routes/auth/kakaoAuth");
 const signUpRouter = require("./routes/auth/signup");
 const loginRouter = require("./routes/auth/login");
 const refreshRouter = require("./routes/auth/refresh");
-const getUserTypeRouter = require("./routes/user/userType");
-const getUserProfileRouter = require("./routes/user/basicProfile");
-const RecruitRouter = require("./routes/recruit/recruit");
+const userTypeRouter = require("./routes/user/userType");
+const userProfileRouter = require("./routes/user/basicProfile");
+const recruitRouter = require("./routes/recruit/recruit");
 const careerRouter = require("./routes/career/career");
-const careerCertificate = require("./routes/career/careerCertificate");
+const careerCertificateRouter = require("./routes/career/careerCertificate");
 const careerItemRouter = require("./routes/career/careerItem");
-const chatRouter = require("./routes/chat/chatRoom");
+const chatRoomRouter = require("./routes/chat/chatRoom");
+const chatRouter = require("./routes/chat/chat");
+const profileRouter = require("./routes/profile/basicProfile");
 
 // swagger
 const swaggerUi = require("swagger-ui-express");
@@ -52,13 +54,15 @@ app.use("/auth", kakaoRouter);
 app.use("/auth", signUpRouter);
 app.use("/auth", loginRouter);
 app.use("/auth", refreshRouter);
-app.use("/recruit", verifyToken, RecruitRouter);
-app.use("/user", verifyToken, getUserTypeRouter);
-app.use("/user", verifyToken, getUserProfileRouter);
+app.use("/recruit", verifyToken, recruitRouter);
+app.use("/user", verifyToken, userTypeRouter);
+app.use("/user", verifyToken, userProfileRouter);
+app.use("/profile", verifyToken, profileRouter);
 app.use("/career", verifyToken, careerRouter);
-app.use("/career/certificate", verifyToken, careerCertificate);
+app.use("/career/certificate", verifyToken, careerCertificateRouter);
 app.use("/career/item", verifyToken, careerItemRouter);
-app.use("/chatroom", verifyToken, chatRouter);
+app.use("/chatroom", verifyToken, chatRoomRouter);
+app.use("/chat", verifyToken, chatRouter);
 
 app.use(
   "/api-docs",
@@ -78,7 +82,13 @@ app.use((err, req, res, next) => {
   res.json("error");
 });
 
-app.listen(app.get("port"), () => {
-  console.log(app.get("port"), "번 포트에서 대기중");
+// 서버 실행 (서버 객체 생성)
+const server = http.createServer(app);
+
+// STOMP 서버 통합 (stomp.js에서 생성한 stompServer 사용)
+require("./routes/chat/stomp")(server);
+
+// 서버 리스닝 시작
+server.listen(app.get("port"), () => {
+  console.log(app.get("port"), "번 포트에서 서버가 실행 중입니다.");
 });
-module.exports = app;

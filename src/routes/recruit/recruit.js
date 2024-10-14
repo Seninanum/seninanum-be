@@ -210,7 +210,7 @@ router.get("/filter", async (req, res) => {
         "list": 
         [
             {
-                "userId": 3518693517,
+                "userId": 12345678,
                 "title": "은퇴를 앞두고 있습니다. 앞으로의 자산 계획에 조언을 구합니다.",
                 "content": "은퇴를 앞두고 있는 60대 직장인입니다.",
                 "method": "비대면 서비스",
@@ -220,7 +220,7 @@ router.get("/filter", async (req, res) => {
                 "field": "경제,생활"
             },
             {
-                "userId": 3725761489,
+                "userId": 12345678,
                 "title": "장애아동 교육분야 전문가의 조언이 필요합니다.",
                 "content": "안녕하세요? 대학생 나리입니다. ",
                 "method": "비대면 서비스",
@@ -301,7 +301,7 @@ router.get("/:recruitId", async (req, res) => {
 
   try {
     const [recruit] = await pool.query(
-      "select userId, title, content, method, priceType, price, region, field, createdAt from recruit where recruitId = ?",
+      "select profileId, title, content, method, priceType, price, region, field, createdAt from recruit where recruitId = ?",
       [recruitId]
     );
 
@@ -310,7 +310,7 @@ router.get("/:recruitId", async (req, res) => {
     }
 
     const {
-      userId,
+      profileId,
       title,
       content,
       method,
@@ -322,12 +322,13 @@ router.get("/:recruitId", async (req, res) => {
     } = recruit[0];
 
     const [userInfo] = await pool.query(
-      "SELECT nickname, gender, birthyear FROM user WHERE userId=?",
-      [userId]
+      "SELECT nickname, gender, birthyear FROM profile WHERE profileId=?",
+      [profileId]
     );
     const { nickname, gender, birthyear } = userInfo[0];
 
     const response = {
+      profileId,
       title,
       content,
       method,

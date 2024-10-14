@@ -28,7 +28,7 @@ router.post("/create", async (req, res) => {
     if (existingChatroom.length === 0) {
       // 새로 프로필 생성
       const [result] = await pool.query(
-        "INSERT INTO chatRoom (roomStatus, memberId, opponentId) VALUES (?, ?, ?, ?)",
+        "INSERT INTO chatRoom (roomStatus, memberId, opponentId) VALUES (?, ?, ?)",
         ["ACTIVE", myProfileId, oppProfileId]
       );
 
@@ -78,7 +78,7 @@ router.get("/list", async (req, res) => {
     // 사용자 기준으로 응답값 수정
     const modifiedChatrooms = await Promise.all(
       existingChatroom.map(async (room) => {
-        // myProfileId가 memberId와 같은지 확인
+        // 상대방 Id
         const opponentId =
           room.memberId === myProfileId ? room.opponentId : room.memberId;
 
@@ -95,7 +95,7 @@ router.get("/list", async (req, res) => {
           profile: profile,
           roomName: roomName,
           roomStatus: room.roomStatus,
-          opponentId: opponentId,
+          // opponentId: opponentId,
           createdAt: room.createdAt,
         };
 
