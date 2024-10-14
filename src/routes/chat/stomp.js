@@ -29,6 +29,8 @@ module.exports = function (server) {
     const messageBody = JSON.parse(dest.frame.body); // 메시지 본문
     const roomId = destination.split("/").pop();
 
+    console.log("확인 >>>> ", destination, messageBody, roomId);
+
     // DB에 저장
     await pool.query(
       "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
