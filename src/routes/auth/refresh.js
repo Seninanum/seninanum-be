@@ -25,7 +25,7 @@ router.post("/refresh", async (req, res) => {
       [user[0].userId]
     );
 
-    if (rows.length > 0) {
+    if (profile.length > 0) {
       // Access Token 생성
       const newAccessToken = generateAccessToken({
         profileId: profile[0].profileId,
@@ -35,7 +35,7 @@ router.post("/refresh", async (req, res) => {
       // DB에 저장
       await pool.query("UPDATE user SET accessToken = ? WHERE userId = ?", [
         newAccessToken,
-        rows[0].userId,
+        user[0].userId,
       ]);
 
       return res.status(200).json({ accessToken: newAccessToken });
