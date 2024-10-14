@@ -61,6 +61,36 @@ router.delete("/:recruitId", async (req, res) => {
   }
 });
 
+router.post("/close", async (req, res) => {
+  /**
+    #swagger.tags = ['Recruit']
+    #swagger.summary = '구인글 마감'
+   */
+  const { recruitId } = req.body;
+
+  if (!recruitId) {
+    return res.status(400).json({ error: "recruitId가 필요합니다." });
+  }
+
+  try {
+    const [result] = await pool.query(
+      `UPDATE recruit 
+       SET status = '마감' 
+       WHERE recruitId = ?`,
+      [recruitId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "해당 구인글을 찾을 수 없습니다." });
+    }
+
+    res.status(200).json({ message: "구인글이 마감되었습니다." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "구인글 마감 중 오류가 발생했습니다." });
+  }
+});
+
 router.put("/:recruitId", async (req, res) => {
   /**
     #swagger.tags = ['Recruit']
