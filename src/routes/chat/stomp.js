@@ -4,7 +4,7 @@ module.exports = function (server) {
   // STOMP 서버 설정
   const stompServer = new StompServer({
     server: server, // Express HTTP 서버와 통합
-    debug: console.log,
+    // debug: console.log,
     path: "/meet", // WebSocket 엔드포인트
     heartbeat: [0, 0], // 하트비트 설정
   });
@@ -22,7 +22,8 @@ module.exports = function (server) {
 
   // 클라이언트가 메시지를 보낼 때
   stompServer.on("send", (dest, frame) => {
-    console.log(`Received message on ${dest}: ${frame}`);
+    console.log(`Destination: ${JSON.stringify(dest)}`);
+    console.log(`Message Frame: ${JSON.stringify(frame)}`);
 
     // const destination = headers.destination; // 메시지가 보내진 경로
     // const messageBody = JSON.parse(msg); // 메시지 본문 (chatMessage, senderId, receiverId 등)
