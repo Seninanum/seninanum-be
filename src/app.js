@@ -80,7 +80,13 @@ app.use((err, req, res, next) => {
   res.json("error");
 });
 
-app.listen(app.get("port"), () => {
-  console.log(app.get("port"), "번 포트에서 대기중");
+// 서버 실행 (서버 객체 생성)
+const server = http.createServer(app);
+
+// STOMP 서버 통합 (stomp.js에서 생성한 stompServer 사용)
+require("./routes/chat/stomp")(server);
+
+// 서버 리스닝 시작
+server.listen(app.get("port"), () => {
+  console.log(app.get("port"), "번 포트에서 서버가 실행 중입니다.");
 });
-module.exports = app;

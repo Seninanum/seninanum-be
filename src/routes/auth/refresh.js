@@ -16,16 +16,20 @@ router.post("/refresh", async (req, res) => {
     jwt.verify(refreshToken, process.env.REFRESH_SECRET);
 
     // refreshToken으로 사용자 정보 조회
-    const [rows] = await pool.query(
+    const [user] = await pool.query(
       "SELECT * FROM user WHERE refreshToken = ?",
       [refreshToken]
+    );
+    const [profile] = await pool.query(
+      "SELECT * FROM profile WHERE userId = ?",
+      [user[0].userId]
     );
 
     if (rows.length > 0) {
       // Access Token 생성
       const newAccessToken = generateAccessToken({
-        profileId: rows[0].profileId,
-        userType: rows[0].userType,
+        profileId: profile[0].profileId,
+        userType: profile[0].userType,
       });
 
       // DB에 저장
