@@ -18,24 +18,32 @@ module.exports = function (server) {
     console.log(`Client connected with session ID: ${sessionId}`);
   });
 
-  // 클라이언트가 메시지를 보낼 때
+  // // 클라이언트가 메시지를 보낼 때
+  // stompServer.on("message", (msg, headers) => {
+  //   console.log("headers 데이터 >>>>>>>>>>>>", headers);
+  //   console.log(`Received message on ${headers.destination}: ${msg}`);
+
+  //   const destination = headers.destination; // 메시지가 보내진 경로
+  //   const messageBody = JSON.parse(msg); // 메시지 본문 (chatMessage, senderId, receiverId 등)
+
+  //   if (destination.startsWith("/app/chat/")) {
+  //     // 경로가 "/app/chat/{roomId}"로 시작하는 경우
+  //     const roomId = destination.split("/")[3]; // roomId 추출
+
+  //     // 해당 roomId에 있는 모든 클라이언트에게 메시지 브로드캐스트
+  //     stompServer.send(
+  //       `/topic/chat/${roomId}`,
+  //       headers,
+  //       JSON.stringify(messageBody)
+  //     );
+  //   }
+  // });
   stompServer.on("message", (msg, headers) => {
-    console.log("headers 데이터 >>>>>>>>>>>>", headers);
-    console.log(`Received message on ${headers.destination}: ${msg}`);
-
-    const destination = headers.destination; // 메시지가 보내진 경로
-    const messageBody = JSON.parse(msg); // 메시지 본문 (chatMessage, senderId, receiverId 등)
-
-    if (destination.startsWith("/app/chat/")) {
-      // 경로가 "/app/chat/{roomId}"로 시작하는 경우
-      const roomId = destination.split("/")[3]; // roomId 추출
-
-      // 해당 roomId에 있는 모든 클라이언트에게 메시지 브로드캐스트
-      stompServer.send(
-        `/topic/chat/${roomId}`,
-        headers,
-        JSON.stringify(messageBody)
-      );
+    console.log("Headers received:", headers); // headers 전체를 로그로 출력
+    if (headers && headers.destination) {
+      console.log(`Received message on ${headers.destination}: ${msg}`);
+    } else {
+      console.error("Destination is missing in the headers");
     }
   });
 
