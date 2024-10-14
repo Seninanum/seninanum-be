@@ -10,29 +10,14 @@ module.exports = function (server) {
   });
 
   // // 클라이언트가 구독할 때
-  // stompServer.on("subscribe", (subscription, headers) => {
-  //   console.log(`Client subscribed to ${headers}`);
-  // });
   stompServer.on("subscribe", (subscription, headers) => {
-    try {
-      if (headers && headers.destination) {
-        console.log(`Client subscribed to ${headers.destination}`);
-      } else {
-        throw new Error("Destination is undefined");
-      }
-    } catch (error) {
-      console.error("Error processing subscription:", error.message);
-    }
+    console.log(subscription);
+    console.log(`Client subscribed to ${headers}`);
   });
 
   // 클라이언트가 연결할 때
   stompServer.on("connect", (sessionId, headers) => {
     console.log(`Client connected with session ID: ${sessionId}`);
-  });
-
-  stompServer.subscribe("/**", function (msg, headers) {
-    var topic = headers.destination;
-    console.log(topic, "->", msg);
   });
 
   // // 클라이언트가 메시지를 보낼 때
