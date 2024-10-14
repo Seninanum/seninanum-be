@@ -4,6 +4,7 @@ module.exports = function (server) {
   // STOMP 서버 설정
   const stompServer = new StompServer({
     server: server, // Express HTTP 서버와 통합
+    debug: console.log,
     path: "/meet", // WebSocket 엔드포인트
     heartbeat: [0, 0], // 하트비트 설정
   });
@@ -27,6 +28,11 @@ module.exports = function (server) {
   // 클라이언트가 연결할 때
   stompServer.on("connect", (sessionId, headers) => {
     console.log(`Client connected with session ID: ${sessionId}`);
+  });
+
+  stompServer.subscribe("/**", function (msg, headers) {
+    var topic = headers.destination;
+    console.log(topic, "->", msg);
   });
 
   // // 클라이언트가 메시지를 보낼 때
