@@ -10,7 +10,7 @@ module.exports = function (server) {
 
   // 클라이언트가 구독할 때
   stompServer.on("subscribe", (subscription, headers) => {
-    console.log(`Client subscribed to ${headers.destination}`);
+    console.log(`Client subscribed to ${headers}`);
   });
 
   // 클라이언트가 연결할 때
@@ -40,11 +40,7 @@ module.exports = function (server) {
   // });
   stompServer.on("message", (msg, headers) => {
     console.log("Headers received:", headers); // headers 전체를 로그로 출력
-    if (headers && headers.destination) {
-      console.log(`Received message on ${headers.destination}: ${msg}`);
-    } else {
-      console.error("Destination is missing in the headers");
-    }
+    console.log(`Received message on ${headers}: ${msg}`);
   });
 
   // 클라이언트가 연결을 끊을 때
