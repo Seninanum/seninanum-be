@@ -8,9 +8,20 @@ module.exports = function (server) {
     heartbeat: [0, 0], // 하트비트 설정
   });
 
-  // 클라이언트가 구독할 때
+  // // 클라이언트가 구독할 때
+  // stompServer.on("subscribe", (subscription, headers) => {
+  //   console.log(`Client subscribed to ${headers}`);
+  // });
   stompServer.on("subscribe", (subscription, headers) => {
-    console.log(`Client subscribed to ${headers}`);
+    try {
+      if (headers && headers.destination) {
+        console.log(`Client subscribed to ${headers.destination}`);
+      } else {
+        throw new Error("Destination is undefined");
+      }
+    } catch (error) {
+      console.error("Error processing subscription:", error.message);
+    }
   });
 
   // 클라이언트가 연결할 때
