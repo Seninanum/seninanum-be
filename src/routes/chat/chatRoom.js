@@ -94,7 +94,7 @@ router.get("/list", async (req, res) => {
         // 마지막으로 보낸 메세지 시간
         // 안 읽은 메세지 개수 ?
         const [message] = await pool.query(
-          "SELECT * FROM chatMessage WHERE chatRoomId = ? ORDER BY chatRoomId DESC LIMIT 1",
+          "SELECT * FROM chatMessage WHERE chatRoomId = ? ORDER BY chatMessageId DESC LIMIT 1",
           [room.chatRoomId]
         );
 
