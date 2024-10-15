@@ -26,7 +26,7 @@ router.post("/", async (req, res) => {
 
 // 구인글 지원 취소
 router.delete("/", async (req, res) => {
-  const { applicationId } = req.body;
+  const { applicationId } = req.query; // req.query로 수정
 
   if (!applicationId) {
     return res.status(400).json({ error: "applicationId가 필요합니다." });
