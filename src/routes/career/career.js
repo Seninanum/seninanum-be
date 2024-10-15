@@ -211,8 +211,8 @@ router.get("/:profileId", async (req, res) => {
     }
     ]
    */
-  const careerProfileId = req.params.profileId;
-  const profileId = req.user.profileId;
+  const profileId = req.params.profileId;
+  // const profileId = req.user.profileId;
 
   try {
     const [career] = await pool.query(
