@@ -21,6 +21,7 @@ const careerItemRouter = require("./routes/career/careerItem");
 const chatRoomRouter = require("./routes/chat/chatRoom");
 const chatRouter = require("./routes/chat/chat");
 const profileRouter = require("./routes/profile/basicProfile");
+const applicationRouter = require("./routes/application/application");
 
 // swagger
 const swaggerUi = require("swagger-ui-express");
@@ -63,6 +64,7 @@ app.use("/career/certificate", verifyToken, careerCertificateRouter);
 app.use("/career/item", verifyToken, careerItemRouter);
 app.use("/chatroom", verifyToken, chatRoomRouter);
 app.use("/chat", verifyToken, chatRouter);
+app.use("/application", verifyToken, applicationRouter);
 
 app.use(
   "/api-docs",

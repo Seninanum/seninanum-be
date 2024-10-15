@@ -346,6 +346,7 @@ router.get("/:recruitId", async (req, res) => {
     #swagger.summary = '구인글 상세정보 불러오기'
    */
   const recruitId = req.params.recruitId;
+  const userProfileId = req.user.profileId;
 
   try {
     const [recruit] = await pool.query(
@@ -375,6 +376,16 @@ router.get("/:recruitId", async (req, res) => {
     );
     const { nickname, gender, birthyear } = userInfo[0];
 
+    // 해당 구인글에 대해 사용자가 지원했는지 여부 확인
+    const [application] = await pool.query(
+      `SELECT COUNT(*) AS hasApplied 
+       FROM application 
+       WHERE recruitId = ? AND profileId = ?`,
+      [recruitId, userProfileId]
+    );
+
+    const hasApplied = application[0].hasApplied > 0 ? 1 : 0; // 1이면 지원한 상태, 0이면 미지원
+
     const response = {
       profileId,
       title,
@@ -388,6 +399,7 @@ router.get("/:recruitId", async (req, res) => {
       nickname,
       gender,
       birthyear,
+      hasApplied,
     };
 
     res.status(200).json(response);
