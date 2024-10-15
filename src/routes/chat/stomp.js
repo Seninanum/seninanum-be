@@ -68,6 +68,7 @@ module.exports = function (server) {
             .split(".")[0]; // '2024-10-14T21:08:58'
           console.log("createdAt>>>>>>>>", createdAt, typeof createdAt);
           messageBody.createdAt = createdAt.trim();
+          messageBody.chatMessageId = result.insertId;
         }
 
         // 확인용
