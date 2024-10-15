@@ -24,45 +24,66 @@ module.exports = function (server) {
   });
 
   // 클라이언트가 메시지를 보낼 때
-  stompServer.on("send", async (dest, frame) => {
-    const destination = dest?.frame?.headers?.destination; // 메시지가 보내진 경로
-
-    if (!destination) {
-      console.error("Error: destination is undefined");
-      return; // destination이 없으면 함수 종료
-    }
-    const messageBody = JSON.parse(dest.frame.body); // 메시지 본문
+  stompServer.on("send", async (message) => {
+    console.log("message>>>>>>", message); //확인용
+    const destination = message.dest; // 메시지가 보내진 경로
+    const messageBody = JSON.parse(message.frame.body);
     const roomId = destination.split("/").pop();
 
-    console.log("확인 >>>> ", destination, messageBody, roomId);
+    // 디코딩
+    const binaryMessage = new Uint8Array(
+      Object.values(messageBody.chatMessage)
+    );
+    const decodedMessage = new TextDecoder().decode(binaryMessage);
 
     try {
-      // DB에 저장
-      await pool.query(
-        "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
-        [
-          roomId,
-          messageBody.senderId,
-          messageBody.chatMessage,
-          messageBody.publishType,
-          1,
-        ]
-      );
+      let result;
+      if (message.frame.headers.destination) {
+        // DB에 저장
+        [result] = await pool.query(
+          "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
+          [
+            roomId,
+            messageBody.senderId,
+            decodedMessage,
+            messageBody.publishType,
+            1,
+          ]
+        );
+      }
+
+      // 쿼리 결과가 없는 경우에도 코드가 계속 실행되도록 수정
+      if (!result || !result.insertId) {
+        console.warn("DB 저장에 실패했거나, result 값이 없습니다.");
+      } else {
+        // 방금 저장한 행의 createdAt 값을 조회
+        const [createdAtResult] = await pool.query(
+          "SELECT createdAt FROM chatMessage WHERE chatMessageId = ?",
+          [result.insertId]
+        );
+
+        // 메세지 시간
+        const createdAt = createdAtResult[0].createdAt
+          .toISOString()
+          .split(".")[0]; // '2024-10-14T21:08:58'
+        console.log("createdAt>>>>>>>>", createdAt, typeof createdAt);
+        messageBody.createdAt = createdAt.trim();
+      }
+
+      // 확인용
+      console.log("Sending message:", JSON.stringify(messageBody));
+
+      // 메세지 전달
+      if (destination.startsWith(`/app/chat/`)) {
+        // 해당 roomId에 있는 클라이언트에게 메시지 브로드캐스트
+        stompServer.send(
+          `/topic/chat/${roomId}`,
+          {},
+          JSON.stringify(messageBody)
+        );
+      }
     } catch (error) {
       console.log(error);
-      res
-        .status(500)
-        .json({ error: "An error occurred while creating the careerProfile" });
-    }
-
-    // 메세지 전달
-    if (destination.startsWith("/app/chat/")) {
-      // 해당 roomId에 있는 클라이언트에게 메시지 브로드캐스트
-      stompServer.send(
-        `/topic/chat/${roomId}`,
-        {},
-        JSON.stringify(messageBody)
-      );
     }
   });
 
