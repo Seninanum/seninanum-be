@@ -9,6 +9,7 @@ router.get("/member/:roomId", async (req, res) => {
   */
 
   const roomId = req.params.roomId;
+  const userId = req.user.profileId;
 
   try {
     // roomId 행 가져오기
@@ -39,10 +40,17 @@ router.get("/member/:roomId", async (req, res) => {
       (profile) => profile.profileId === opponentId
     );
 
-    return res.status(200).json({
-      memberProfile,
-      opponentProfile,
-    });
+    if (userId === memberId) {
+      return res.status(200).json({
+        memberProfile,
+        opponentProfile,
+      });
+    } else {
+      return res.status(200).json({
+        memberProfile: opponentProfile,
+        opponentProfile: memberProfile,
+      });
+    }
   } catch (error) {
     console.log(error);
     res
