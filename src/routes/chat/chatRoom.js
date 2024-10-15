@@ -90,18 +90,36 @@ router.get("/list", async (req, res) => {
         const roomName = profiles[0]?.nickname || "Unknown";
         const profile = profiles[0]?.profile;
 
-        return {
-          chatRoomId: room.chatRoomId,
-          profile: profile,
-          roomName: roomName,
-          roomStatus: room.roomStatus,
-          // opponentId: opponentId,
-          createdAt: room.createdAt,
-        };
-
         // 마지막으로 보낸 메세지
         // 마지막으로 보낸 메세지 시간
-        // 안 읽은 메세지 개수
+        // 안 읽은 메세지 개수 ?
+        const [message] = await pool.query(
+          "SELECT * FROM chatMessage WHERE chatRoomId = ? ORDER BY chatMessageId DESC LIMIT 1",
+          [room.chatRoomId]
+        );
+
+        // 채팅 메세지 없음 처리
+        if (message.length === 0) {
+          return {
+            chatRoomId: room.chatRoomId,
+            chatMessageId: "",
+            profile: profile,
+            roomName: roomName,
+            roomStatus: room.roomStatus,
+            lastMessage: "",
+            createdAt: room.createdAt,
+          };
+        } else {
+          return {
+            chatRoomId: room.chatRoomId,
+            chatMessageId: message[0].chatMessageId,
+            profile: profile,
+            roomName: roomName,
+            roomStatus: room.roomStatus,
+            lastMessage: message[0].chatMessage,
+            createdAt: message[0].createdAt,
+          };
+        }
       })
     );
 

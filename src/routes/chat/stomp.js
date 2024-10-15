@@ -1,61 +1,94 @@
 const StompServer = require("stomp-broker-js");
+const express = require("express");
+const router = express.Router();
+const pool = require("../../database/db");
 
 module.exports = function (server) {
   // STOMP 서버 설정
   const stompServer = new StompServer({
     server: server, // Express HTTP 서버와 통합
+    // debug: console.log,
     path: "/meet", // WebSocket 엔드포인트
     heartbeat: [0, 0], // 하트비트 설정
   });
 
   // // 클라이언트가 구독할 때
-  // stompServer.on("subscribe", (subscription, headers) => {
-  //   console.log(`Client subscribed to ${headers}`);
-  // });
   stompServer.on("subscribe", (subscription, headers) => {
-    try {
-      if (headers && headers.destination) {
-        console.log(`Client subscribed to ${headers.destination}`);
-      } else {
-        throw new Error("Destination is undefined");
-      }
-    } catch (error) {
-      console.error("Error processing subscription:", error.message);
-    }
+    console.log(`Client subscribed to ${subscription.topic}`);
   });
 
   // 클라이언트가 연결할 때
-  stompServer.on("connect", (sessionId, headers) => {
+  stompServer.on("connected", (sessionId, headers) => {
+    console.log("connect headers: ", headers);
     console.log(`Client connected with session ID: ${sessionId}`);
   });
 
-  // // 클라이언트가 메시지를 보낼 때
-  // stompServer.on("message", (msg, headers) => {
-  //   console.log("headers 데이터 >>>>>>>>>>>>", headers);
-  //   console.log(`Received message on ${headers.destination}: ${msg}`);
+  // 클라이언트가 메시지를 보낼 때
+  stompServer.on("send", async (message) => {
+    console.log("message>>>>>>", message); //확인용
+    const destination = message.dest; // 메시지가 보내진 경로
+    const messageBody = JSON.parse(message.frame.body);
+    const roomId = destination.split("/").pop();
 
-  //   const destination = headers.destination; // 메시지가 보내진 경로
-  //   const messageBody = JSON.parse(msg); // 메시지 본문 (chatMessage, senderId, receiverId 등)
+    // 디코딩
+    const binaryMessage = new Uint8Array(
+      Object.values(messageBody.chatMessage)
+    );
+    const decodedMessage = new TextDecoder().decode(binaryMessage);
 
-  //   if (destination.startsWith("/app/chat/")) {
-  //     // 경로가 "/app/chat/{roomId}"로 시작하는 경우
-  //     const roomId = destination.split("/")[3]; // roomId 추출
+    try {
+      let result;
+      if (message.frame.headers.destination) {
+        // DB에 저장
+        [result] = await pool.query(
+          "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
+          [
+            roomId,
+            messageBody.senderId,
+            decodedMessage,
+            messageBody.publishType,
+            1,
+          ]
+        );
+      }
 
-  //     // 해당 roomId에 있는 모든 클라이언트에게 메시지 브로드캐스트
-  //     stompServer.send(
-  //       `/topic/chat/${roomId}`,
-  //       headers,
-  //       JSON.stringify(messageBody)
-  //     );
-  //   }
-  // });
-  stompServer.on("message", (msg, headers) => {
-    console.log("Headers received:", headers); // headers 전체를 로그로 출력
-    console.log(`Received message on ${headers}: ${msg}`);
+      // 쿼리 결과가 없는 경우에도 코드가 계속 실행되도록 수정
+      if (!result || !result.insertId) {
+        console.warn("DB 저장에 실패했거나, result 값이 없습니다.");
+      } else {
+        // 방금 저장한 행의 createdAt 값을 조회
+        const [createdAtResult] = await pool.query(
+          "SELECT createdAt FROM chatMessage WHERE chatMessageId = ?",
+          [result.insertId]
+        );
+
+        // 메세지 시간
+        const createdAt = createdAtResult[0].createdAt
+          .toISOString()
+          .split(".")[0]; // '2024-10-14T21:08:58'
+        console.log("createdAt>>>>>>>>", createdAt, typeof createdAt);
+        messageBody.createdAt = createdAt.trim();
+      }
+
+      // 확인용
+      console.log("Sending message:", JSON.stringify(messageBody));
+
+      // 메세지 전달
+      if (destination.startsWith(`/app/chat/`)) {
+        // 해당 roomId에 있는 클라이언트에게 메시지 브로드캐스트
+        stompServer.send(
+          `/topic/chat/${roomId}`,
+          {},
+          JSON.stringify(messageBody)
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
   });
 
   // 클라이언트가 연결을 끊을 때
-  stompServer.on("disconnect", (sessionId) => {
+  stompServer.on("disconnected", (sessionId) => {
     console.log(`Client disconnected with session ID: ${sessionId}`);
   });
 
