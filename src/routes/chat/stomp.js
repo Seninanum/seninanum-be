@@ -62,13 +62,15 @@ module.exports = function (server) {
             [result.insertId]
           );
 
-          // 메세지 시간
-          const createdAt = createdAtResult[0].createdAt
-            .toISOString()
-            .split(".")[0]; // '2024-10-14T21:08:58'
-          console.log("createdAt>>>>>>>>", createdAt, typeof createdAt);
-          messageBody.createdAt = createdAt.trim();
+          // 메세지 시간 (UTC -> KST 변환)
+          const createdAt = new Date(createdAtResult[0].createdAt);
+          const kstDate = new Date(createdAt.getTime() + 9 * 60 * 60 * 1000); // 9시간 더하기
+          const formattedDate = kstDate.toISOString().split(".")[0]; // KST로 변환 후 포맷
+
+          messageBody.createdAt = formattedDate;
           messageBody.chatMessageId = result.insertId;
+
+          console.log("createdAt>>>>>>>>", createdAt, typeof createdAt);
         }
 
         // 확인용

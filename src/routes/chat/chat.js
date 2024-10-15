@@ -86,6 +86,8 @@ router.get("/allmessages/:roomId", async (req, res) => {
       return res.status(200).json([]);
     }
 
+    console.log("확인용>>>>>>>>>>>", messages[0].createdAt);
+
     return res.status(200).json(messages);
   } catch (error) {
     console.log(error);
