@@ -90,18 +90,22 @@ router.get("/list", async (req, res) => {
         const roomName = profiles[0]?.nickname || "Unknown";
         const profile = profiles[0]?.profile;
 
+        // 마지막으로 보낸 메세지
+        // 마지막으로 보낸 메세지 시간
+        // 안 읽은 메세지 개수 ?
+        const [message] = await pool.query(
+          "SELECT * FROM chatMessage WHERE chatRoomId = ? ORDER BY chatRoomId DESC LIMIT 1",
+          [room.chatRoomId]
+        );
+
         return {
           chatRoomId: room.chatRoomId,
           profile: profile,
           roomName: roomName,
           roomStatus: room.roomStatus,
-          // opponentId: opponentId,
-          createdAt: room.createdAt,
+          lastMessage: message[0].chatMessage,
+          createdAt: message[0].createdAt,
         };
-
-        // 마지막으로 보낸 메세지
-        // 마지막으로 보낸 메세지 시간
-        // 안 읽은 메세지 개수
       })
     );
 
