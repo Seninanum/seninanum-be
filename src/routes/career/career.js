@@ -224,8 +224,17 @@ router.get("/:profileId", async (req, res) => {
       return res.status(404).json({ error: "경력프로필이 조회되지 않습니다." });
     }
 
-    const { introduce, age, field, service, method, region, price, priceType } =
-      career[0];
+    const {
+      careerProfileId,
+      introduce,
+      age,
+      field,
+      service,
+      method,
+      region,
+      price,
+      priceType,
+    } = career[0];
 
     const [userInfo] = await pool.query(
       "SELECT nickname, gender, birthyear, profile FROM profile WHERE profileId = ?",
