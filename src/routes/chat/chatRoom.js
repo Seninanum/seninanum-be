@@ -87,8 +87,6 @@ router.get("/list", async (req, res) => {
           "SELECT * FROM profile WHERE profileId = ?",
           [opponentId]
         );
-        const roomName = profiles[0]?.nickname || "Unknown";
-        const profile = profiles[0]?.profile;
 
         // 마지막으로 보낸 메세지
         // 마지막으로 보낸 메세지 시간
@@ -103,8 +101,9 @@ router.get("/list", async (req, res) => {
           return {
             chatRoomId: room.chatRoomId,
             chatMessageId: "",
-            profile: profile,
-            roomName: roomName,
+            profile: profiles[0]?.profile,
+            userType: profiles[0]?.userType,
+            roomName: profiles[0]?.nickname || "Unknown",
             roomStatus: room.roomStatus,
             lastMessage: "",
             createdAt: room.createdAt,
@@ -113,8 +112,9 @@ router.get("/list", async (req, res) => {
           return {
             chatRoomId: room.chatRoomId,
             chatMessageId: message[0].chatMessageId,
-            profile: profile,
-            roomName: roomName,
+            profile: profiles[0]?.profile,
+            userType: profiles[0]?.userType,
+            roomName: profiles[0]?.nickname || "Unknown",
             roomStatus: room.roomStatus,
             lastMessage: message[0].chatMessage,
             createdAt: message[0].createdAt,

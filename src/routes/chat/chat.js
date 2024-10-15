@@ -9,6 +9,7 @@ router.get("/member/:roomId", async (req, res) => {
   */
 
   const roomId = req.params.roomId;
+  const userId = req.user.profileId;
 
   try {
     // roomId 행 가져오기
@@ -16,16 +17,40 @@ router.get("/member/:roomId", async (req, res) => {
       "SELECT * FROM chatRoom WHERE chatRoomId = ?",
       [roomId]
     );
-
-    // 채팅방이 존재하지 않음
     if (members.length === 0) {
       return res.status(404).json({ message: "잘못된 채팅방 id 입니다." });
     }
+    const memberId = members[0].memberId;
+    const opponentId = members[0].opponentId;
 
-    return res.status(200).json({
-      memberId: members[0].memberId,
-      opponentId: members[0].opponentId,
-    });
+    // profile 가져오기
+    const [memberProfiles] = await pool.query(
+      "SELECT profileId, userType, nickname, profile FROM profile WHERE profileId IN (?, ?)",
+      [memberId, opponentId]
+    );
+    if (memberProfiles.length !== 2) {
+      return res
+        .status(404)
+        .json({ message: "해당 멤버의 프로필을 찾을 수 없습니다." });
+    }
+    const memberProfile = memberProfiles.find(
+      (profile) => profile.profileId === memberId
+    );
+    const opponentProfile = memberProfiles.find(
+      (profile) => profile.profileId === opponentId
+    );
+
+    if (userId === memberId) {
+      return res.status(200).json({
+        memberProfile,
+        opponentProfile,
+      });
+    } else {
+      return res.status(200).json({
+        memberProfile: opponentProfile,
+        opponentProfile: memberProfile,
+      });
+    }
   } catch (error) {
     console.log(error);
     res
@@ -60,6 +85,8 @@ router.get("/allmessages/:roomId", async (req, res) => {
     if (messages.length === 0) {
       return res.status(200).json([]);
     }
+
+    console.log("확인용>>>>>>>>>>>", messages[0].createdAt);
 
     return res.status(200).json(messages);
   } catch (error) {
