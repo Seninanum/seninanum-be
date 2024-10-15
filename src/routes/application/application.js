@@ -71,7 +71,6 @@ router.get("/status", async (req, res) => {
       JOIN recruit r ON a.recruitId = r.recruitId
       WHERE a.profileId = ? AND r.status = ?`;
 
-    // 쿼리 실행
     const [applications] = await pool.query(query, [profileId, status]);
 
     res.status(200).json(applications);
@@ -140,7 +139,7 @@ router.get("/volunteer/:recruitId", async (req, res) => {
 // 구인글 별 전체 지원자 목록 조회
 router.get("/list", async (req, res) => {
   const profileId = req.user.profileId;
-  const { recruitId } = req.query; // Query Parameter로 recruitId를 받음
+  const { recruitId } = req.query; // 쿼리파라미터로 recruitId를 받음
 
   try {
     // 사용자가 작성한 구인글의 recruitId 목록 조회
@@ -150,7 +149,6 @@ router.get("/list", async (req, res) => {
     );
 
     let recruitIdList = recruitIds.map((r) => r.recruitId);
-    // const placeholders = recruitIdList.map(() => "?").join(", ");
     let query = `
         SELECT a.profileId, p.nickname, p.gender, p.birthyear, 
              IFNULL(c.introduce, '') AS introduce, 
@@ -175,10 +173,6 @@ router.get("/list", async (req, res) => {
       params.push(parsedRecruitId);
     }
 
-    console.log("쿼리:", query);
-    console.log("파라미터:", params);
-
-    // 4. 쿼리 실행 및 응답 처리
     const [applicants] = await pool.query(query, params);
 
     res.status(200).json(applicants);
