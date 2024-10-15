@@ -98,14 +98,26 @@ router.get("/list", async (req, res) => {
           [room.chatRoomId]
         );
 
-        return {
-          chatRoomId: room.chatRoomId,
-          profile: profile,
-          roomName: roomName,
-          roomStatus: room.roomStatus,
-          lastMessage: message[0].chatMessage,
-          createdAt: message[0].createdAt,
-        };
+        // 채팅 메세지 없음 처리
+        if (message.length === 0) {
+          return {
+            chatRoomId: room.chatRoomId,
+            profile: profile,
+            roomName: roomName,
+            roomStatus: room.roomStatus,
+            lastMessage: "",
+            createdAt: room.createdAt,
+          };
+        } else {
+          return {
+            chatRoomId: room.chatRoomId,
+            profile: profile,
+            roomName: roomName,
+            roomStatus: room.roomStatus,
+            lastMessage: message[0].chatMessage,
+            createdAt: message[0].createdAt,
+          };
+        }
       })
     );
 
