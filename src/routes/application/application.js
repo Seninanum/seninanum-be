@@ -117,4 +117,78 @@ router.get("/recruit/list", async (req, res) => {
   }
 });
 
+// 지원자 목록 조회
+router.get("/volunteer/:recruitId", async (req, res) => {
+  const { recruitId } = req.params;
+
+  try {
+    const [applicants] = await pool.query(
+      `SELECT a.profileId, p.nickname, p.gender, p.birthyear
+        FROM application a
+        JOIN profile p ON a.profileId = p.profileId
+        WHERE a.recruitId = ?`,
+      [recruitId]
+    );
+
+    res.status(200).json(applicants);
+  } catch (error) {
+    console.error("지원자 목록 조회 중 오류 발생:", error);
+    res.status(500).json({ error: "지원자 목록 조회 중 오류가 발생했습니다." });
+  }
+});
+
+// 구인글 별 전체 지원자 목록 조회
+router.get("/list", async (req, res) => {
+  const profileId = req.user.profileId;
+  const { recruitId } = req.query; // Query Parameter로 recruitId를 받음
+
+  try {
+    // 사용자가 작성한 구인글의 recruitId 목록 조회
+    const [recruitIds] = await pool.query(
+      "SELECT r.recruitId FROM recruit r WHERE r.profileId = ?",
+      [profileId]
+    );
+
+    let recruitIdList = recruitIds.map((r) => r.recruitId);
+    // const placeholders = recruitIdList.map(() => "?").join(", ");
+    let query = `
+        SELECT a.profileId, p.nickname, p.gender, p.birthyear, 
+             IFNULL(c.introduce, '') AS introduce, 
+             IFNULL(c.field, '') AS field, 
+             r.recruitId, r.title 
+      FROM application a
+      JOIN recruit r ON a.recruitId = r.recruitId
+      JOIN profile p ON a.profileId = p.profileId
+      LEFT JOIN careerProfile c ON a.profileId = c.profileId
+      WHERE a.recruitId IN (${recruitIdList.map(() => "?").join(", ")})
+      `;
+
+    let params = [...recruitIdList];
+
+    // recruitId가 제공된 경우 필터링 쿼리 확장
+    if (recruitId) {
+      const parsedRecruitId = Number(recruitId);
+      if (!recruitIdList.includes(parsedRecruitId)) {
+        return res.status(400).json({ error: "잘못된 recruitId입니다." });
+      }
+      query += " AND r.recruitId = ?";
+      params.push(parsedRecruitId);
+    }
+
+    console.log("쿼리:", query);
+    console.log("파라미터:", params);
+
+    // 4. 쿼리 실행 및 응답 처리
+    const [applicants] = await pool.query(query, params);
+
+    res.status(200).json(applicants);
+  } catch (error) {
+    console.error("내 구인글 지원자 목록 조회 중 오류 발생:", error);
+    res.status(500).json({
+      error: "지원자 목록 조회 중 오류가 발생했습니다.",
+      details: error.message,
+    });
+  }
+});
+
 module.exports = router;
