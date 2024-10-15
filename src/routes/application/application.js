@@ -150,7 +150,7 @@ router.get("/list", async (req, res) => {
 
     let recruitIdList = recruitIds.map((r) => r.recruitId);
     let query = `
-        SELECT a.profileId, p.nickname, p.gender, p.birthyear, p.profile,
+        SELECT a.profileId, a.applicationId, p.nickname, p.gender, p.birthyear, p.profile,
              IFNULL(c.introduce, '') AS introduce, 
              IFNULL(c.field, '') AS field, 
              r.recruitId, r.title 
