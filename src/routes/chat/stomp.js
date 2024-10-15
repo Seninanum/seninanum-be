@@ -47,7 +47,7 @@ module.exports = function (server) {
             roomId,
             messageBody.senderId,
             decodedMessage,
-            messageBody.publishType,
+            messageBody.senderType,
             1,
           ]
         );
