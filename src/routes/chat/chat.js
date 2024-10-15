@@ -4,8 +4,8 @@ const pool = require("../../database/db");
 
 router.get("/member/:roomId", async (req, res) => {
   /**
-    #swagger.tags = ['Chatroom']
-    #swagger.summary = '채팅 방 목록 조회'
+    #swagger.tags = ['Chat']
+    #swagger.summary = '채팅 멤버 조회'
   */
 
   const roomId = req.params.roomId;
@@ -32,6 +32,13 @@ router.get("/member/:roomId", async (req, res) => {
       .status(500)
       .json({ error: "An error occurred while creating the chatRoom" });
   }
+});
+
+router.get("/member/:roomId", async (req, res) => {
+  /**
+    #swagger.tags = ['Chat']
+    #swagger.summary = '채팅 내역 조회'
+  */
 });
 
 module.exports = router;

@@ -102,6 +102,7 @@ router.get("/list", async (req, res) => {
         if (message.length === 0) {
           return {
             chatRoomId: room.chatRoomId,
+            chatMessageId: "",
             profile: profile,
             roomName: roomName,
             roomStatus: room.roomStatus,
@@ -111,6 +112,7 @@ router.get("/list", async (req, res) => {
         } else {
           return {
             chatRoomId: room.chatRoomId,
+            chatMessageId: message[0].chatMessageId,
             profile: profile,
             roomName: roomName,
             roomStatus: room.roomStatus,
