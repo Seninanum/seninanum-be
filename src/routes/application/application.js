@@ -119,7 +119,7 @@ router.get("/recruit/list", async (req, res) => {
 
 // 지원자 목록 조회
 router.get("/volunteer/:recruitId", async (req, res) => {
-  const { recruitId } = req.params;
+  const recruitId = req.params.recruitId;
 
   try {
     const [applicants] = await pool.query(
