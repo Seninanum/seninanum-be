@@ -142,7 +142,7 @@ router.get("/mylist/:recruitId", async (req, res) => {
 
   try {
     const [recruit] = await pool.query(
-      "SELECT recruitId, title, content, method, priceType, price, region, field, createdAt FROM recruit WHERE profileId = ? AND recruitId = ?",
+      "SELECT recruitId, title, content, method, priceType, price, region, field, status, createdAt FROM recruit WHERE profileId = ? AND recruitId = ?",
       [profileId, recruitId]
     );
 
