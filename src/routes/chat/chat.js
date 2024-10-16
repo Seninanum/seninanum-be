@@ -20,8 +20,9 @@ router.get("/member/:roomId", async (req, res) => {
     if (members.length === 0) {
       return res.status(404).json({ message: "잘못된 채팅방 id 입니다." });
     }
-    const memberId = members[0].memberId;
-    const opponentId = members[0].opponentId;
+    // 모든 id 양수화
+    const memberId = Math.abs(members[0].memberId);
+    const opponentId = Math.abs(members[0].opponentId);
 
     // profile 가져오기
     const [memberProfiles] = await pool.query(
