@@ -12,7 +12,7 @@ module.exports = function (server) {
     heartbeat: [0, 0], // 하트비트 설정
   });
 
-  // // 클라이언트가 구독할 때
+  // 클라이언트가 구독할 때
   stompServer.on("subscribe", (subscription, headers) => {
     console.log(`Client subscribed to ${subscription.topic}`);
   });
@@ -29,8 +29,20 @@ module.exports = function (server) {
     const messageBody = JSON.parse(message.frame.body);
     const roomId = destination.split("/").pop();
 
+    // 프론트 신호 수신
+    if (destination.startsWith(`/app/disconnect`)) {
+      // 마지막 메세지 아이디 값 DB에 저장
+      console.log("채팅 방 나갈 때 >>>>>>>", message);
+
+      try {
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    // 사용자의 메세지 수신
     if (destination.startsWith(`/app/chat/`)) {
-      console.log("message>>>>>>", message); //확인용
+      // console.log("message>>>>>>", message); //확인용
       // 디코딩
       const binaryMessage = new Uint8Array(
         Object.values(messageBody.chatMessage)
@@ -62,11 +74,21 @@ module.exports = function (server) {
             [result.insertId]
           );
 
-          console.log("원래 값이여 ~~~~", createdAtResult[0].createdAt);
-          // 메세지 시간 (KST)
+          // 메세지 시간 (KST) - 배포용
           const createdAt = new Date(createdAtResult[0].createdAt);
           messageBody.createdAt = createdAt.toISOString().split(".")[0];
+
+          // 메세지 시간 (UTC -> KST 변환) - 로컬용
+          // const createdAt = new Date(createdAtResult[0].createdAt);
+          // const kstDate = new Date(createdAt.getTime() + 9 * 60 * 60 * 1000);
+          // const formattedDate = kstDate.toISOString().split(".")[0];
+          // messageBody.createdAt = formattedDate;
+
+          // 응답값 수정
           messageBody.chatMessageId = result.insertId;
+          messageBody.unreadCount = 1;
+          messageBody.chatRoomId = roomId;
+          delete messageBody.receiverId;
         }
 
         // 메세지 전달
@@ -83,7 +105,7 @@ module.exports = function (server) {
 
   // 클라이언트가 연결을 끊을 때
   stompServer.on("disconnected", (sessionId) => {
-    console.log(`Client disconnected with session ID: ${sessionId}`);
+    console.log(`채팅방 나감: ${sessionId}`);
   });
 
   console.log("STOMP server is running on wss://api.seninanum.shop/meet");
