@@ -127,7 +127,38 @@ module.exports = function (server) {
                 [roomId]
               );
 
-              // chatRoomMember에서 해당 roomId 행 지우기
+              // 둘 다 나간 방은 chatRoomMember에서 해당 roomId 행 지우기
+              const [roomCheck] = await pool.query(
+                `SELECT * FROM chatRoom WHERE chatRoomId = ? AND memberId < 0 AND opponentId < 0`,
+                [roomId]
+              );
+              if (roomCheck.length > 0) {
+                await pool.query(
+                  `DELETE FROM chatRoomMember WHERE roomId = ?`,
+                  [roomId]
+                );
+              }
+
+              // DB에 메세지 저장
+              [result] = await pool.query(
+                "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
+                [
+                  roomId,
+                  messageBody.senderId,
+                  messageBody.chatMessage,
+                  messageBody.senderType,
+                  1,
+                ]
+              );
+
+              console.log("최종 데이터 >>>>>>", messageBody);
+
+              // 메세지 전달
+              stompServer.send(
+                `/topic/chat/${roomId}`,
+                {},
+                JSON.stringify(messageBody)
+              );
             }
           } catch (error) {
             console.log(error);
