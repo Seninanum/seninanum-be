@@ -7,6 +7,9 @@ router.post("/disconnect", async (req, res) => {
   const memberId = req.user.profileId;
 
   try {
+    if (lastReadMessageId === null)
+      return res.status(200).json({ message: "NOMESSAGE" });
+
     // 마지막으로 읽은 메세지 id 저장
     await pool.query(
       "INSERT INTO chatRoomMember (chatRoomId, profileId, lastReadMessageId) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE lastReadMessageId = ?",
