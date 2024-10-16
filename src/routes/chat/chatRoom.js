@@ -90,7 +90,6 @@ router.get("/list", async (req, res) => {
 
         // 마지막으로 보낸 메세지
         // 마지막으로 보낸 메세지 시간
-        // 안 읽은 메세지 개수 ?
         const [message] = await pool.query(
           "SELECT * FROM chatMessage WHERE chatRoomId = ? ORDER BY chatMessageId DESC LIMIT 1",
           [room.chatRoomId]
@@ -106,9 +105,22 @@ router.get("/list", async (req, res) => {
             roomName: profiles[0]?.nickname || "Unknown",
             roomStatus: room.roomStatus,
             lastMessage: "",
+            unreadMessageCount: 0,
             createdAt: room.createdAt,
           };
         } else {
+          // 안 읽은 메세지 개수 계산
+          const [readMessage] = await pool.query(
+            "SELECT * FROM chatRoomMember WHERE chatRoomId=? AND profileId=? ",
+            [room.chatRoomId, myProfileId]
+          );
+          const lastReadMessageId =
+            readMessage.length > 0 ? readMessage[0].lastReadMessageId : null;
+          const [unreadMessages] = await pool.query(
+            "SELECT COUNT(*) AS unreadCount FROM chatMessage WHERE chatRoomId = ? AND chatMessageId > ?",
+            [room.chatRoomId, lastReadMessageId]
+          );
+
           return {
             chatRoomId: room.chatRoomId,
             chatMessageId: message[0].chatMessageId,
@@ -117,6 +129,7 @@ router.get("/list", async (req, res) => {
             roomName: profiles[0]?.nickname || "Unknown",
             roomStatus: room.roomStatus,
             lastMessage: message[0].chatMessage,
+            unreadMessageCount: unreadMessages[0].unreadCount,
             createdAt: message[0].createdAt,
           };
         }
