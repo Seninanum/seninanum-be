@@ -122,7 +122,7 @@ router.get("/volunteer/:recruitId", async (req, res) => {
 
   try {
     const [applicants] = await pool.query(
-      `SELECT a.profileId, p.nickname, p.gender, p.birthyear
+      `SELECT a.profileId, p.nickname, p.gender, p.birthyear, p.profile
         FROM application a
         JOIN profile p ON a.profileId = p.profileId
         WHERE a.recruitId = ?`,
