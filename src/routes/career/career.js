@@ -168,7 +168,8 @@ router.get("/list", async (req, res) => {
         );
         const { nickname, gender, birthyear, profile } = user[0];
         return {
-          profileId: career.careerProfileId,
+          careerProfileId: career.careerProfileId,
+          profileId: career.profileId,
           introduce: career.introduce,
           field: career.field,
           nickname,
