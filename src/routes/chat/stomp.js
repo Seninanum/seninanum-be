@@ -105,12 +105,14 @@ module.exports = function (server) {
               await pool.query(
                 `UPDATE chatRoom 
                   SET 
-                    memberId = CASE WHEN memberId = ? THEN -1 ELSE memberId END, 
-                    opponentId = CASE WHEN opponentId = ? THEN -1 ELSE opponentId END
+                    memberId = CASE WHEN memberId = ? THEN ? ELSE memberId END, 
+                    opponentId = CASE WHEN opponentId = ? THEN ? ELSE opponentId END
                   WHERE (memberId = ? OR opponentId = ?) AND chatRoomId = ?`,
                 [
                   messageBody.senderId,
+                  -messageBody.senderId,
                   messageBody.senderId,
+                  -messageBody.senderId,
                   messageBody.senderId,
                   messageBody.senderId,
                   roomId,
@@ -124,6 +126,8 @@ module.exports = function (server) {
                   WHERE chatRoomId = ?`,
                 [roomId]
               );
+
+              // chatRoomMember에서 해당 roomId 행 지우기
             }
           } catch (error) {
             console.log(error);
