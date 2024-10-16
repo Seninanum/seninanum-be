@@ -323,6 +323,7 @@ router.post("/filter", async (req, res) => {
           careerProfileId: career.careerProfileId,
           introduce: career.introduce,
           field: career.field,
+          profileId: career.profileId,
           nickname,
           gender,
           birthyear,
