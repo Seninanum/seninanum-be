@@ -62,19 +62,12 @@ module.exports = function (server) {
             [result.insertId]
           );
 
-          // 메세지 시간 (UTC -> KST 변환)
+          console.log("원래 값이여 ~~~~", createdAtResult[0].createdAt);
+          // 메세지 시간 (KST)
           const createdAt = new Date(createdAtResult[0].createdAt);
-          const kstDate = new Date(createdAt.getTime() + 9 * 60 * 60 * 1000); // 9시간 더하기
-          const formattedDate = kstDate.toISOString().split(".")[0]; // KST로 변환 후 포맷
-
-          messageBody.createdAt = formattedDate;
+          messageBody.createdAt = createdAt.toISOString().split(".")[0];
           messageBody.chatMessageId = result.insertId;
-
-          console.log("createdAt>>>>>>>>", createdAt, typeof createdAt);
         }
-
-        // 확인용
-        console.log("Sending message:", JSON.stringify(messageBody));
 
         // 메세지 전달
         stompServer.send(
