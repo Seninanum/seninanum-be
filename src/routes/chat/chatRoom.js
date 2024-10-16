@@ -79,13 +79,14 @@ router.get("/list", async (req, res) => {
     const modifiedChatrooms = await Promise.all(
       existingChatroom.map(async (room) => {
         // 상대방 Id
-        const opponentId =
-          room.memberId === myProfileId ? room.opponentId : room.memberId;
+        const opponentId = Math.abs(
+          room.memberId === myProfileId ? room.opponentId : room.memberId
+        );
 
         // 방 이름 (상대방 닉네임)
         const [profiles] = await pool.query(
           "SELECT * FROM profile WHERE profileId = ?",
-          [opponentId]
+          [+opponentId]
         );
 
         // 마지막으로 보낸 메세지
