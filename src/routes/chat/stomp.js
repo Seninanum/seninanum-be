@@ -1,6 +1,4 @@
 const StompServer = require("stomp-broker-js");
-const express = require("express");
-const router = express.Router();
 const pool = require("../../database/db");
 
 module.exports = function (server) {
@@ -29,20 +27,9 @@ module.exports = function (server) {
     const messageBody = JSON.parse(message.frame.body);
     const roomId = destination.split("/").pop();
 
-    // 프론트 신호 수신
-    if (destination.startsWith(`/app/disconnect`)) {
-      // 마지막 메세지 아이디 값 DB에 저장
-      console.log("채팅 방 나갈 때 >>>>>>>", message);
-
-      try {
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
     // 사용자의 메세지 수신
     if (destination.startsWith(`/app/chat/`)) {
-      // console.log("message>>>>>>", message); //확인용
+      console.log("message>>>>>>", message); //확인용
       // 디코딩
       const binaryMessage = new Uint8Array(
         Object.values(messageBody.chatMessage)
