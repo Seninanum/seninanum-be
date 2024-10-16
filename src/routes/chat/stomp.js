@@ -120,7 +120,7 @@ module.exports = function (server) {
               // 위에서 업데이트한 행의 roomStatus를 'inactive'로 설정
               await pool.query(
                 `UPDATE chatRoom 
-                  SET roomStatus = 'inactive' 
+                  SET roomStatus = 'INACTIVE' 
                   WHERE chatRoomId = ?`,
                 [roomId]
               );

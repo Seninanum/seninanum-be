@@ -72,7 +72,7 @@ router.get("/list", async (req, res) => {
 
     // 채팅 목록 없음
     if (existingChatroom.length === 0) {
-      return res.status(404).json({ message: "생성된 채팅방이 없습니다." });
+      return res.status(200).json([]);
     }
 
     // 사용자 기준으로 응답값 수정
