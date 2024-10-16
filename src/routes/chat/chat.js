@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../database/db");
 
-router.get("/member/:roomId", async (req, res) => {
+router.get("/info/:roomId", async (req, res) => {
   /**
     #swagger.tags = ['Chat']
     #swagger.summary = '채팅 멤버 조회'
@@ -13,16 +13,16 @@ router.get("/member/:roomId", async (req, res) => {
 
   try {
     // roomId 행 가져오기
-    const [members] = await pool.query(
+    const [room] = await pool.query(
       "SELECT * FROM chatRoom WHERE chatRoomId = ?",
       [roomId]
     );
-    if (members.length === 0) {
+    if (room.length === 0) {
       return res.status(404).json({ message: "잘못된 채팅방 id 입니다." });
     }
     // 모든 id 양수화
-    const memberId = Math.abs(members[0].memberId);
-    const opponentId = Math.abs(members[0].opponentId);
+    const memberId = Math.abs(room[0].memberId);
+    const opponentId = Math.abs(room[0].opponentId);
 
     // profile 가져오기
     const [memberProfiles] = await pool.query(
@@ -45,11 +45,13 @@ router.get("/member/:roomId", async (req, res) => {
       return res.status(200).json({
         memberProfile,
         opponentProfile,
+        roomStatus: room[0].roomStatus,
       });
     } else {
       return res.status(200).json({
         memberProfile: opponentProfile,
         opponentProfile: memberProfile,
+        roomStatus: room[0].roomStatus,
       });
     }
   } catch (error) {
