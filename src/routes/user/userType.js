@@ -17,12 +17,10 @@ router.get("/userType", async (req, res) => {
     );
 
     // career가 빈 배열일 경우 처리
-    let result = -1;
+    let result = userType === "dong" ? 0 : -1;
     if (career.length > 0) {
       result = career[0];
     }
-
-    console.log(req.user);
 
     // 응답 형식화
     res.json({ userType: userType, career: result });

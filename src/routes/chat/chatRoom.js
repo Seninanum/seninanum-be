@@ -72,20 +72,21 @@ router.get("/list", async (req, res) => {
 
     // 채팅 목록 없음
     if (existingChatroom.length === 0) {
-      return res.status(404).json({ message: "생성된 채팅방이 없습니다." });
+      return res.status(200).json([]);
     }
 
     // 사용자 기준으로 응답값 수정
     const modifiedChatrooms = await Promise.all(
       existingChatroom.map(async (room) => {
         // 상대방 Id
-        const opponentId =
-          room.memberId === myProfileId ? room.opponentId : room.memberId;
+        const opponentId = Math.abs(
+          room.memberId === myProfileId ? room.opponentId : room.memberId
+        );
 
         // 방 이름 (상대방 닉네임)
         const [profiles] = await pool.query(
           "SELECT * FROM profile WHERE profileId = ?",
-          [opponentId]
+          [+opponentId]
         );
 
         // 마지막으로 보낸 메세지
@@ -103,7 +104,7 @@ router.get("/list", async (req, res) => {
             profile: profiles[0]?.profile,
             userType: profiles[0]?.userType,
             roomName: profiles[0]?.nickname || "Unknown",
-            roomStatus: room.roomStatus,
+            // roomStatus: room.roomStatus,
             lastMessage: "",
             unreadMessageCount: 0,
             createdAt: room.createdAt,
@@ -127,7 +128,7 @@ router.get("/list", async (req, res) => {
             profile: profiles[0]?.profile,
             userType: profiles[0]?.userType,
             roomName: profiles[0]?.nickname || "Unknown",
-            roomStatus: room.roomStatus,
+            // roomStatus: room.roomStatus,
             lastMessage: message[0].chatMessage,
             unreadMessageCount: unreadMessages[0].unreadCount,
             createdAt: message[0].createdAt,
