@@ -20,10 +20,11 @@ router.get("/userType", async (req, res) => {
     let result = userType === "dong" ? 0 : -1;
     if (career.length > 0) {
       result = career[0];
+      // 응답 형식화
+      return res.json({ userType: userType, career: result.progressStep });
+    } else {
+      return res.json({ userType: userType, career: result });
     }
-
-    // 응답 형식화
-    res.json({ userType: userType, career: result });
   } catch (error) {
     console.error("Error fetching user type:", error);
     res
