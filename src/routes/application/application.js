@@ -96,6 +96,10 @@ router.get("/recruit/list", async (req, res) => {
 
     // recruitId를 기준으로 recruit 테이블과 profile 테이블에서 정보 가져오기
     const recruitIds = applications.map((a) => a.recruitId);
+    // recruitId가 없을 경우 빈 배열 반환
+    if (recruitIds.length === 0) {
+      return res.status(200).json([]); // 지원한 구인글이 없으면 빈 배열 반환
+    }
     const placeholders = recruitIds.map(() => "?").join(", ");
 
     const [recruitInfo] = await pool.query(
