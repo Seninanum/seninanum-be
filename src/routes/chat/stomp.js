@@ -35,7 +35,7 @@ module.exports = function (server) {
         const roomId = headers.chatRoomId;
         const messageBody = {
           chatMessage: "채팅방에 들어왔습니다.",
-          senderType: "SYSTEM",
+          senderType: "COME",
         };
         stompServer.send(
           `/topic/chat/${roomId}`,
