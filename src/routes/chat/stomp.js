@@ -18,6 +18,12 @@ module.exports = function (server) {
   // 클라이언트가 연결할 때
   stompServer.on("connected", (sessionId, headers) => {
     console.log("connect headers: ", headers);
+    // connect headers:  {
+    //   0|app  |   chatRoomId: '1',
+    //   0|app  |   memberId: '14',
+    //   0|app  |   'accept-version': '1.2,1.1,1.0',
+    //   0|app  |   'heart-beat': '4000,4000'
+    //   0|app  | }
     console.log(`Client connected with session ID: ${sessionId}`);
   });
 

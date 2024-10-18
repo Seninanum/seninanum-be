@@ -119,8 +119,6 @@ router.get("/unread/:roomId", async (req, res) => {
       return res.status(404).json({ message: "잘못된 채팅방 id 입니다." });
     }
 
-    console.log(room[0]);
-
     // 메세지 내역 가져오기
     const [messages] = await pool.query(
       "SELECT * FROM chatMessage WHERE chatMessageId > ? AND chatRoomId = ? ",

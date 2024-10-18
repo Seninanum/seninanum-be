@@ -26,10 +26,22 @@ router.post("/create", async (req, res) => {
     );
 
     if (existingChatroom.length === 0) {
-      // 새로 프로필 생성
+      // 새로 채팅방 생성
       const [result] = await pool.query(
         "INSERT INTO chatRoom (roomStatus, memberId, opponentId) VALUES (?, ?, ?)",
         ["ACTIVE", myProfileId, oppProfileId]
+      );
+
+      // 마지막으로 읽은 메세지 설정
+      const [latestMessage] = await pool.query(
+        "SELECT chatMessageId FROM chatMessage ORDER BY chatMessageId DESC LIMIT 1"
+      );
+      // 마지막 메시지가 있는 경우 그 값을 사용, 없으면 0으로 설정
+      const lastReadMessageId =
+        latestMessage.length > 0 ? latestMessage[0].chatMessageId : 0;
+      await pool.query(
+        "INSERT INTO chatRoomMember (chatRoomId, profileId, lastReadMessageId) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE lastReadMessageId = ?",
+        [result.insertId, myProfileId, lastReadMessageId, lastReadMessageId]
       );
 
       // 생성된 채팅방의 ID 반환
