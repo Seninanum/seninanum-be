@@ -16,8 +16,37 @@ module.exports = function (server) {
   });
 
   // 클라이언트가 연결할 때
-  stompServer.on("connected", (sessionId, headers) => {
+  stompServer.on("connected", async (sessionId, headers) => {
     console.log("connect headers: ", headers);
+
+    try {
+      const [result] = await pool.query(
+        "SELECT * FROM chatRoomMember WHERE profileId = ?",
+        header.memberId
+      );
+
+      // chatId가 다르면 상대방에게만 입장 메세지 전송
+      if (
+        result.length > 0 &&
+        result[0].chatRoomId != headers.chatRoomId &&
+        headers.memberId != result[0].profileId
+      ) {
+        // '채팅방에 들어왔습니다' 메세지 생성 및 전송
+        const roomId = headers.chatRoomId;
+        const messageBody = {
+          chatMessage: "채팅방에 들어왔습니다.",
+          senderType: "SYSTEM",
+        };
+        stompServer.send(
+          `/topic/chat/${roomId}`,
+          {},
+          JSON.stringify(messageBody)
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
     // connect headers:  {
     //   0|app  |   chatRoomId: '1',
     //   0|app  |   memberId: '14',
