@@ -129,7 +129,7 @@ module.exports = function (server) {
 
               // 둘 다 나간 방은 chatRoomMember에서 해당 roomId 행 지우기
               const [roomCheck] = await pool.query(
-                `SELECT * FROM chatRoom WHERE chatRoomId = ? AND memberId < 0 AND opponentId < 0`,
+                `SELECT * FROM chatRoom WHERE chatRoomId = ? AND memberId < 0 OR opponentId < 0`,
                 [roomId]
               );
               if (roomCheck.length > 0) {
