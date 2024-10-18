@@ -22,7 +22,7 @@ module.exports = function (server) {
     try {
       const [result] = await pool.query(
         "SELECT * FROM chatRoomMember WHERE profileId = ?",
-        header.memberId
+        headers.memberId
       );
 
       // chatId가 다르면 상대방에게만 입장 메세지 전송
