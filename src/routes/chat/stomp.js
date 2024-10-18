@@ -134,7 +134,7 @@ module.exports = function (server) {
               );
               if (roomCheck.length > 0) {
                 await pool.query(
-                  `DELETE FROM chatRoomMember WHERE roomId = ?`,
+                  `DELETE FROM chatRoomMember WHERE chatRoomId = ?`,
                   [roomId]
                 );
               }
