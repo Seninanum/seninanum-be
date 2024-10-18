@@ -68,6 +68,7 @@ router.get("/allmessages/:roomId", async (req, res) => {
     #swagger.summary = '전체 채팅 내역 조회'
   */
   const roomId = req.params.roomId;
+  const myProfileId = req.user.profileId;
 
   try {
     // roomId 행 가져오기
@@ -80,11 +81,17 @@ router.get("/allmessages/:roomId", async (req, res) => {
       return res.status(404).json({ message: "잘못된 채팅방 id 입니다." });
     }
 
+    // limit값 가져오기
+    const [limitMessageId] = await pool.query(
+      "SELECT limitMessageId FORM chatRoomMember WHERE profileID = ? AND chatRoomId = ?",
+      [myProfileId, roomId]
+    );
     // 메세지 내역 가져오기
     const [messages] = await pool.query(
-      "SELECT * FROM chatMessage WHERE chatRoomId = ?",
-      [roomId]
+      "SELECT * FROM chatMessage WHERE chatRoomId = ? AND chatMessageId > ?",
+      [roomId, limitMessageId[0]?.limitMessageId || 0]
     );
+
     if (messages.length === 0) {
       return res.status(200).json([]);
     }

@@ -137,7 +137,7 @@ module.exports = function (server) {
             );
             if (existingRecord.length > 0) {
               // 나간 사람의 id 값을 -1로 업데이트
-              await pool.query(
+              const [inactiveRoom] = await pool.query(
                 `UPDATE chatRoom 
                   SET 
                     memberId = CASE WHEN memberId = ? THEN ? ELSE memberId END, 
@@ -164,13 +164,18 @@ module.exports = function (server) {
 
               // 둘 다 나간 방은 chatRoomMember에서 해당 roomId 행 지우기
               const [roomCheck] = await pool.query(
-                `SELECT * FROM chatRoom WHERE chatRoomId = ? AND memberId < 0 OR opponentId < 0`,
+                `SELECT * FROM chatRoom WHERE chatRoomId = ? AND memberId < 0 AND opponentId < 0`,
                 [roomId]
               );
               if (roomCheck.length > 0) {
                 await pool.query(
                   `DELETE FROM chatRoomMember WHERE chatRoomId = ?`,
                   [roomId]
+                );
+              } else {
+                await pool.query(
+                  "UPDATE chatRoomMember SET limitMessageId = ?",
+                  [inactiveRoom[0].lastReadMessageId]
                 );
               }
 
