@@ -18,8 +18,21 @@ router.post("/create", async (req, res) => {
     });
   }
 
-  // 생성되어있는 방이 있는지 확인
+  // 채팅방 생성 또는 기존 채팅방 확인 함수
+  async function setLastReadMessage(chatRoomId, profileId) {
+    const [latestMessage] = await pool.query(
+      "SELECT chatMessageId FROM chatMessage ORDER BY chatMessageId DESC LIMIT 1"
+    );
+    const lastReadMessageId =
+      latestMessage.length > 0 ? latestMessage[0].chatMessageId : 0;
+    await pool.query(
+      "INSERT INTO chatRoomMember (chatRoomId, profileId, lastReadMessageId) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE lastReadMessageId = ?",
+      [chatRoomId, profileId, lastReadMessageId, lastReadMessageId]
+    );
+  }
+
   try {
+    // 생성되어있는 방이 있는지 확인
     const [existingChatroom] = await pool.query(
       "SELECT * FROM chatRoom WHERE ABS(memberId) = ABS(?) OR ABS(opponentId) = ABS(?)",
       [myProfileId, myProfileId]
@@ -33,20 +46,10 @@ router.post("/create", async (req, res) => {
       );
 
       // 마지막으로 읽은 메세지 설정
-      const [latestMessage] = await pool.query(
-        "SELECT chatMessageId FROM chatMessage ORDER BY chatMessageId DESC LIMIT 1"
-      );
-      // 마지막 메시지가 있는 경우 그 값을 사용, 없으면 0으로 설정
-      const lastReadMessageId =
-        latestMessage.length > 0 ? latestMessage[0].chatMessageId : 0;
-      await pool.query(
-        "INSERT INTO chatRoomMember (chatRoomId, profileId, lastReadMessageId) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE lastReadMessageId = ?",
-        [result.insertId, myProfileId, lastReadMessageId, lastReadMessageId]
-      );
-      await pool.query(
-        "INSERT INTO chatRoomMember (chatRoomId, profileId, lastReadMessageId) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE lastReadMessageId = ?",
-        [result.insertId, oppProfileId, lastReadMessageId, lastReadMessageId]
-      );
+      await setLastReadMessage(result.insertId, myProfileId);
+      await setLastReadMessage(result.insertId, oppProfileId);
+
+      console.log("아이디 확인 >>>>>>>>>>>", myProfileId, oppProfileId);
 
       // 생성된 채팅방의 ID 반환
       return res.status(200).json({
@@ -57,41 +60,30 @@ router.post("/create", async (req, res) => {
       });
     } else {
       // 기존에 생성되어있던 채팅방 ID 반환
+      const chatRoomId = existingChatroom[0].chatRoomId;
 
       if (existingChatroom[0].roomStatus === "INACTIVE") {
         // chatRoom 테이블 업데이트
         await pool.query(
-          "UPDATE chatRoom SET roomStatus = 'ACTIVE', memberId = CASE WHEN memberId < 0 THEN ? ELSE memberId END, opponentId = CASE WHEN opponentId < 0 THEN ? ELSE opponentId END WHERE chatRoomId = ?",
-          [myProfileId, myProfileId, existingChatroom[0].chatRoomId]
+          "UPDATE chatRoom SET roomStatus = 'ACTIVE', memberId = CASE WHEN ABS(memberId) = ABS(?) THEN ? ELSE memberId END, opponentId = CASE WHEN ABS(opponentId) = ABS(?) THEN ? ELSE opponentId END WHERE chatRoomId = ?",
+          [myProfileId, myProfileId, myProfileId, myProfileId, chatRoomId]
         );
-        // chatMessage 테이블 업데이트
+
+        // chatRoomMember 테이블 업데이트
         await pool.query(
-          "UPDATE chatRoomMember SET profileId = ? WHERE ABS(profileId) = ? AND chatRoomId = ?  ",
-          [myProfileId, myProfileId, existingChatroom[0].chatRoomId]
+          "UPDATE chatRoomMember SET profileId = ? WHERE ABS(profileId) = ? AND chatRoomId = ?",
+          [myProfileId, myProfileId, chatRoomId]
         );
       }
 
       // 마지막으로 읽은 메세지 설정
-      const [latestMessage] = await pool.query(
-        "SELECT chatMessageId FROM chatMessage ORDER BY chatMessageId DESC LIMIT 1"
-      );
-      // 마지막 메시지가 있는 경우 그 값을 사용, 없으면 0으로 설정
-      const lastReadMessageId =
-        latestMessage.length > 0 ? latestMessage[0].chatMessageId : 0;
-      await pool.query(
-        "INSERT INTO chatRoomMember (chatRoomId, profileId, lastReadMessageId) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE lastReadMessageId = ?",
-        [
-          existingChatroom[0].chatRoomId,
-          myProfileId,
-          lastReadMessageId,
-          lastReadMessageId,
-        ]
-      );
+      await setLastReadMessage(chatRoomId, myProfileId);
 
+      // 기존 채팅방 반환
       return res.status(200).json({
-        chatRoomId: existingChatroom[0].chatRoomId,
-        memberId: existingChatroom[0].myProfileId,
-        opponentId: existingChatroom[0].oppProfileId,
+        chatRoomId: chatRoomId,
+        memberId: existingChatroom[0].memberId,
+        opponentId: existingChatroom[0].opponentId,
         message: "기존 채팅방이 반환되었습니다.",
       });
     }

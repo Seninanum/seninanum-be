@@ -83,7 +83,7 @@ router.get("/allmessages/:roomId", async (req, res) => {
 
     // limit값 가져오기
     const [limitMessageId] = await pool.query(
-      "SELECT limitMessageId FORM chatRoomMember WHERE profileID = ? AND chatRoomId = ?",
+      "SELECT limitMessageId FROM chatRoomMember WHERE profileID = ? AND chatRoomId = ?",
       [myProfileId, roomId]
     );
     // 메세지 내역 가져오기
