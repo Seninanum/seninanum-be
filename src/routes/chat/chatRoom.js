@@ -43,6 +43,10 @@ router.post("/create", async (req, res) => {
         "INSERT INTO chatRoomMember (chatRoomId, profileId, lastReadMessageId) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE lastReadMessageId = ?",
         [result.insertId, myProfileId, lastReadMessageId, lastReadMessageId]
       );
+      await pool.query(
+        "INSERT INTO chatRoomMember (chatRoomId, profileId, lastReadMessageId) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE lastReadMessageId = ?",
+        [result.insertId, oppProfileId, lastReadMessageId, lastReadMessageId]
+      );
 
       // 생성된 채팅방의 ID 반환
       return res.status(200).json({
