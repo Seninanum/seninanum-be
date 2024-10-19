@@ -95,29 +95,10 @@ router.patch("/", async (req, res) => {
   /**
     #swagger.tags = ['Career']
     #swagger.summary = '경력 프로필 수정'
-    #swagger.parameters = [
-      {
-        name: 'body',
-        in: 'body',
-        required: true,
-        schema: {
-          profileId: 111111,
-          introduce: "소개",
-          age: "60대",
-          field: "경제",
-          service: "제공할 서비스",
-          method: "대면",
-          region: "종로구",
-          priceType: "시간당",
-          price: 1000,
-          progressStep: 8
-        },
-      }
-    ]
    */
 
   const {
-    careerProfileId,
+    profileId, // 경력 프로필 ID
     introduce,
     age,
     field,
@@ -126,13 +107,11 @@ router.patch("/", async (req, res) => {
     region,
     priceType,
     price,
-    progressStep,
   } = req.body;
 
   try {
-    // profileId인 곳에 프로필 Update
     await pool.query(
-      "UPDATE careerProfile SET introduce = ?, age = ?, field = ?, service = ?, method = ?, region = ?, priceType = ?, price = ?, progressStep = ? WHERE careerProfileId = ?",
+      "UPDATE careerProfile SET introduce = ?, age = ?, field = ?, service = ?, method = ?, region = ?, priceType = ?, price = ? WHERE careerProfileId = ?",
       [
         introduce,
         age,
@@ -142,17 +121,52 @@ router.patch("/", async (req, res) => {
         region,
         priceType,
         price,
-        progressStep,
-        careerProfileId,
+        profileId,
       ]
     );
 
-    res.status(200).json({ message: "경력프로필이 업데이트 되었습니다." });
+    // progressStep 계산
+    let progressStep = 0;
+
+    // 각 조건을 확인하고 step을 추가
+    if (introduce) progressStep += 1;
+    if (age) progressStep += 1;
+    if (field) progressStep += 1;
+    if (service) progressStep += 1;
+    if (method === "비대면") {
+      progressStep += 1;
+    } else if ((method === "대면" || method === "모두 선택") && region) {
+      progressStep += 1;
+    }
+    if (priceType && price >= 0) {
+      progressStep += 1;
+    }
+    const [careerItemsCount] = await pool.query(
+      "SELECT COUNT(*) AS itemCount FROM careerItem WHERE careerProfileId = ?",
+      [profileId]
+    );
+    if (careerItemsCount[0].itemCount > 0) progressStep += 1;
+    const [careerCertificatesCount] = await pool.query(
+      "SELECT COUNT(*) AS certificateCount FROM careerCertificate WHERE careerProfileId = ?",
+      [profileId]
+    );
+    if (careerCertificatesCount[0].certificateCount > 0) progressStep += 1;
+
+    // progressStep 값 업데이트
+    await pool.query(
+      "UPDATE careerProfile SET progressStep = ? WHERE careerProfileId = ?",
+      [progressStep, profileId]
+    );
+
+    res.status(200).json({
+      message: "경력 프로필이 성공적으로 업데이트 되었습니다.",
+      progressStep: progressStep,
+    });
   } catch (error) {
     console.log(error);
     res
       .status(500)
-      .json({ error: "An error occurred while creating the careerProfile" });
+      .json({ error: "경력 프로필 업데이트 중 오류가 발생했습니다." });
   }
 });
 
@@ -198,7 +212,6 @@ router.get("/list", async (req, res) => {
   }
 });
 
-//수정!!! profileId careerProfileId로 변경하기
 router.get("/:profileId", async (req, res) => {
   /**
     #swagger.tags = ['Career']
