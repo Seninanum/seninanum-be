@@ -31,15 +31,13 @@ module.exports = function (server) {
         [headers.memberId, headers.memberId]
       );
 
-      console.log("roomStatus>>>>>>>>>>>", existingChatroom[0].roomStatus);
-
       if (
         existingChatroom.length > 0 &&
         existingChatroom[0].roomStatus === "INACTIVE"
       ) {
         // chatRoom 테이블 업데이트
         await pool.query(
-          "UPDATE chatRoom SET roomStatus = 'ACTIVE', memberId = CASE WHEN ABS(memberId) = ABS(?) THEN ? ELSE memberId END, opponentId = CASE WHEN ABS(opponentId) = ABS(?) THEN ? ELSE opponentId END WHERE chatRoomId = ?",
+          "UPDATE chatRoom SET memberId = CASE WHEN ABS(memberId) = ABS(?) THEN ? ELSE memberId END, opponentId = CASE WHEN ABS(opponentId) = ABS(?) THEN ? ELSE opponentId END WHERE chatRoomId = ?",
           [
             headers.memberId,
             headers.memberId,

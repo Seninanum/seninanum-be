@@ -61,11 +61,28 @@ router.post("/create", async (req, res) => {
       // 기존에 생성되어있던 채팅방 ID 반환
       const chatRoomId = existingChatroom[0].chatRoomId;
 
+      // 나갔다가 다시 들어 온 방
       if (existingChatroom[0].roomStatus === "INACTIVE") {
+        // chatRoom 테이블 업데이트
+        await pool.query(
+          "UPDATE chatRoom SET roomStatus = 'ACTIVE' WHERE chatRoomId = ?",
+          [chatRoomId]
+        );
+
+        // chatRoomMember 테이블 업데이트 (limitMessageId 추가 업데이트)
+        const [lastMessageId] = await pool.query(
+          "SELECT lastReadMessage FROM chatRoomMember ORDER BY chatMessageId DESC LIMIT 1"
+        );
+        // chatRoomMember 테이블 업데이트
         // chatRoomMember 테이블 업데이트
         await pool.query(
-          "UPDATE chatRoomMember SET profileId = ? WHERE ABS(profileId) = ? AND chatRoomId = ?",
-          [myProfileId, myProfileId, chatRoomId]
+          "UPDATE chatRoomMember SET profileId = ?, limitMessageId = ? WHERE ABS(profileId) = ? AND chatRoomId = ?",
+          [
+            myProfileId,
+            lastMessageId[0].lastReadMessageId + 1,
+            myProfileId,
+            chatRoomId,
+          ]
         );
       }
 
