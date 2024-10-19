@@ -53,7 +53,7 @@ router.get("/", async (req, res) => {
   try {
     // 경력 프로필 존재 여부 확인
     const [careerProfile] = await pool.query(
-      "SELECT careerProfileId FROM careerProfile WHERE profileId = ?",
+      "SELECT careerProfileId, introduce, age, field, service, method, region, priceType, price FROM careerProfile WHERE profileId = ?",
       [profileId]
     );
     if (careerProfile.length === 0) {
@@ -72,9 +72,9 @@ router.get("/", async (req, res) => {
       [careerProfileId]
     );
 
-    // 응답 데이터 구조
+    // careerProfile 안에 careerItems와 careerCertificate를 포함시킴
     const response = {
-      careerProfile: careerProfileId,
+      ...careerProfile[0],
       careerItems: careerItems,
       careerCertificate: careerCertificate,
     };
