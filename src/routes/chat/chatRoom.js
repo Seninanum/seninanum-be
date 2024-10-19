@@ -62,6 +62,12 @@ router.post("/create", async (req, res) => {
       const chatRoomId = existingChatroom[0].chatRoomId;
 
       if (existingChatroom[0].roomStatus === "INACTIVE") {
+        // chatRoom 테이블 업데이트
+        await pool.query(
+          "UPDATE chatRoom SET roomStatus = 'ACTIVE' WHERE chatRoomId = ?",
+          [chatRoomId]
+        );
+
         // chatRoomMember 테이블 업데이트
         await pool.query(
           "UPDATE chatRoomMember SET profileId = ? WHERE ABS(profileId) = ? AND chatRoomId = ?",
