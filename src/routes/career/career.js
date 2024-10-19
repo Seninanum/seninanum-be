@@ -68,15 +68,18 @@ router.get("/", async (req, res) => {
     );
     // 경력증명서 조회
     const [careerCertificate] = await pool.query(
-      "SELECT certificateName, certificateStatus FROM careerCertificate WHERE careerProfileId = ?",
+      "SELECT name, status FROM careerCertificate WHERE careerProfileId = ?",
       [careerProfileId]
     );
+    // 경력증명서를 객체로 반환
+    const careerCertificateObj =
+      careerCertificate.length > 0 ? careerCertificate[0] : {}; // 경력증명서가 없으면 빈 배열 처리
 
     // careerProfile 안에 careerItems와 careerCertificate를 포함시킴
     const response = {
       ...careerProfile[0],
       careerItems: careerItems,
-      careerCertificate: careerCertificate,
+      careerCertificate: careerCertificateObj,
     };
 
     res.status(200).json(response);

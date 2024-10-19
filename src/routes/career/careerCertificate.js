@@ -61,7 +61,7 @@ router.post(
       const careerProfileId = careerProfile[0].careerProfileId;
       //db에 파일 이름, 상태 저장
       await pool.query(
-        "INSERT INTO careerCertificate (careerProfileId, certificateName, certificateStatus) VALUES(?,?,?)",
+        "INSERT INTO careerCertificate (careerProfileId, name, status) VALUES(?,?,?)",
         [careerProfileId, fileName, "PENDING"]
       );
 
