@@ -202,6 +202,9 @@ module.exports = function (server) {
                   `DELETE FROM chatRoomMember WHERE chatRoomId = ?`,
                   [roomId]
                 );
+                await pool.query(`DELETE FROM chatRoom WHERE chatRoomId = ?`, [
+                  roomId,
+                ]);
               } else {
                 await pool.query(
                   "UPDATE chatRoomMember SET limitMessageId = ? WHERE profileId = ? AND chatRoomId = ?",
