@@ -34,9 +34,26 @@ module.exports = function (server) {
         // '채팅방에 들어왔습니다' 메세지 생성 및 전송
         const roomId = headers.chatRoomId;
         const messageBody = {
+          senderId: headers.memberId,
           chatMessage: "채팅방에 들어왔습니다.",
           senderType: "COME",
         };
+
+        // DB에 메세지 저장
+        [result] = await pool.query(
+          "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
+          [
+            roomId,
+            messageBody.senderId,
+            messageBody.chatMessage,
+            messageBody.senderType,
+            1,
+          ]
+        );
+        messageBody.createdAt = new Date(createdAtResult[0].createdAt)
+          .toISOString()
+          .split(".")[0];
+
         stompServer.send(
           `/topic/chat/${roomId}`,
           {},
@@ -46,13 +63,6 @@ module.exports = function (server) {
     } catch (error) {
       console.log(error);
     }
-
-    // connect headers:  {
-    //   0|app  |   chatRoomId: '1',
-    //   0|app  |   memberId: '14',
-    //   0|app  |   'accept-version': '1.2,1.1,1.0',
-    //   0|app  |   'heart-beat': '4000,4000'
-    //   0|app  | }
     console.log(`Client connected with session ID: ${sessionId}`);
   });
 
@@ -65,7 +75,6 @@ module.exports = function (server) {
     // 사용자의 메세지 수신
     if (destination.startsWith(`/app/chat/`)) {
       console.log("message>>>>>>", message); //확인용
-      console.log("메세지 타입 확인 >>>>>", messageBody.senderType);
 
       switch (messageBody.senderType) {
         case "USER":
@@ -130,14 +139,35 @@ module.exports = function (server) {
 
         case "LEAVE":
           try {
-            // 메세지를 보낸 사용자가 member인지 opponent인지 확인
+            // 사용자가 나가려는 방이 존재하는지 확인
             const [existingRecord] = await pool.query(
               "SELECT * FROM chatRoom WHERE memberId = ? OR opponentId = ?",
               [messageBody.senderId, messageBody.senderId]
             );
             if (existingRecord.length > 0) {
-              // 나간 사람의 id 값을 -1로 업데이트
-              const [inactiveRoom] = await pool.query(
+              // LEAVE 메시지 저장
+              const [insertResult] = await pool.query(
+                "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
+                [
+                  roomId,
+                  messageBody.senderId,
+                  messageBody.chatMessage,
+                  messageBody.senderType,
+                  1,
+                ]
+              );
+              // 저장된 메시지의 ID와 생성 시간을 메시지 본문에 추가
+              messageBody.chatMessageId = insertResult.insertId;
+              const [createdAtResult] = await pool.query(
+                "SELECT createdAt FROM chatMessage WHERE chatMessageId = ?",
+                [insertResult.insertId]
+              );
+              messageBody.createdAt = new Date(createdAtResult[0].createdAt)
+                .toISOString()
+                .split(".")[0];
+
+              // chatRoomd: 나간 사람의 id 값을 -1로 업데이트
+              await pool.query(
                 `UPDATE chatRoom 
                   SET 
                     memberId = CASE WHEN memberId = ? THEN ? ELSE memberId END, 
@@ -153,7 +183,6 @@ module.exports = function (server) {
                   roomId,
                 ]
               );
-
               // 위에서 업데이트한 행의 roomStatus를 'inactive'로 설정
               await pool.query(
                 `UPDATE chatRoom 
@@ -168,30 +197,17 @@ module.exports = function (server) {
                 [roomId]
               );
               if (roomCheck.length > 0) {
+                //둘 다 나간 방
                 await pool.query(
                   `DELETE FROM chatRoomMember WHERE chatRoomId = ?`,
                   [roomId]
                 );
               } else {
                 await pool.query(
-                  "UPDATE chatRoomMember SET limitMessageId = ?",
-                  [inactiveRoom[0].lastReadMessageId]
+                  "UPDATE chatRoomMember SET limitMessageId = ? WHERE profileId = ? AND chatRoomId = ?",
+                  [insertResult.insertId, messageBody.senderId, roomId]
                 );
               }
-
-              // DB에 메세지 저장
-              [result] = await pool.query(
-                "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
-                [
-                  roomId,
-                  messageBody.senderId,
-                  messageBody.chatMessage,
-                  messageBody.senderType,
-                  1,
-                ]
-              );
-
-              console.log("최종 데이터 >>>>>>", messageBody);
 
               // 메세지 전달
               stompServer.send(

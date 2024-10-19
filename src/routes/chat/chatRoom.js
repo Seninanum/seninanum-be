@@ -20,6 +20,7 @@ router.post("/create", async (req, res) => {
 
   // 채팅방 생성 또는 기존 채팅방 확인 함수
   async function setLastReadMessage(chatRoomId, profileId) {
+    // 메세지의 마지막 id를 lastMessageId 값으로 저장
     const [latestMessage] = await pool.query(
       "SELECT chatMessageId FROM chatMessage ORDER BY chatMessageId DESC LIMIT 1"
     );
@@ -48,8 +49,6 @@ router.post("/create", async (req, res) => {
       // 마지막으로 읽은 메세지 설정
       await setLastReadMessage(result.insertId, myProfileId);
       await setLastReadMessage(result.insertId, oppProfileId);
-
-      console.log("아이디 확인 >>>>>>>>>>>", myProfileId, oppProfileId);
 
       // 생성된 채팅방의 ID 반환
       return res.status(200).json({
@@ -170,6 +169,8 @@ router.get("/list", async (req, res) => {
             roomName: profiles[0]?.nickname || "Unknown",
             // roomStatus: room.roomStatus,
             lastMessage: message[0].chatMessage,
+            senderId: message[0].senderId,
+            myProfileId: myProfileId,
             unreadMessageCount: unreadMessages[0].unreadCount,
             createdAt: message[0].createdAt,
           };

@@ -96,8 +96,6 @@ router.get("/allmessages/:roomId", async (req, res) => {
       return res.status(200).json([]);
     }
 
-    console.log("확인용>>>>>>>>>>>", messages[0].createdAt);
-
     return res.status(200).json(messages);
   } catch (error) {
     console.log(error);
@@ -134,8 +132,6 @@ router.get("/unread/:roomId", async (req, res) => {
     if (messages.length === 0) {
       return res.status(200).json([]);
     }
-
-    // console.log("확인용>>>>>>>>>>>", messages[0].createdAt);
 
     return res.status(200).json(messages);
   } catch (error) {
