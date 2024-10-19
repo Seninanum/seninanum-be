@@ -10,30 +10,40 @@ module.exports = function (server) {
     heartbeat: [0, 0], // 하트비트 설정
   });
 
-  // 클라이언트가 구독할 때
+  /* 
+  클라이언트 구독
+  */
   stompServer.on("subscribe", (subscription, headers) => {
     console.log(`Client subscribed to ${subscription.topic}`);
   });
 
-  // 클라이언트가 연결할 때
+  /* 
+  클라이언트 연결
+  */
   stompServer.on("connected", async (sessionId, headers) => {
     console.log("connect headers: ", headers);
 
+    // 트랜잭션을 위한 데이터베이스 연결
+    const connection = await pool.getConnection();
     try {
-      const [result] = await pool.query(
+      // 트랜잭션 시작
+      await connection.beginTransaction();
+
+      // DB에서 chatRoomMember 정보 가져오기
+      const [result] = await connection.query(
         "SELECT * FROM chatRoomMember WHERE profileId = ?",
-        headers.memberId
+        [headers.memberId]
       );
 
       // id가 마이너스인 chatRoom 정보 가져오기
-      const [existingChatroom] = await pool.query(
+      const [existingChatroom] = await connection.query(
         "SELECT * FROM chatRoom WHERE ABS(memberId) = ABS(?) AND memberId < 0 OR ABS(opponentId) = ABS(?) AND opponentId < 0",
         [headers.memberId, headers.memberId]
       );
 
       if (existingChatroom.length > 0) {
         // chatRoom 사용자 id값 양수로 변경
-        await pool.query(
+        await connection.query(
           "UPDATE chatRoom SET memberId = CASE WHEN ABS(memberId) = ABS(?) THEN ? ELSE memberId END, opponentId = CASE WHEN ABS(opponentId) = ABS(?) THEN ? ELSE opponentId END WHERE chatRoomId = ?",
           [
             headers.memberId,
@@ -52,8 +62,8 @@ module.exports = function (server) {
           senderType: "COME",
         };
 
-        // DB에 메세지 저장
-        const [insertResult] = await pool.query(
+        // DB에 메시지 저장
+        const [insertResult] = await connection.query(
           "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
           [
             roomId,
@@ -64,14 +74,21 @@ module.exports = function (server) {
           ]
         );
 
+        console.log("지금 들어온 메세지 아이디 >>>>>>>", insertResult.insertId);
+
         // limitMessageId 설정하기
-        await pool.query(
+        await connection.query(
           "UPDATE chatRoomMember SET profileId = ?, limitMessageId = ? WHERE ABS(profileId) = ? AND chatRoomId = ?",
-          [myProfileId, insertResult.insertId, myProfileId, chatRoomId]
+          [
+            headers.memberId,
+            insertResult.insertId,
+            headers.memberId,
+            headers.chatRoomId,
+          ]
         );
 
         // 저장된 메시지의 createdAt 값 가져오기
-        const [createdAtResult] = await pool.query(
+        const [createdAtResult] = await connection.query(
           "SELECT createdAt FROM chatMessage WHERE chatMessageId = ?",
           [insertResult.insertId]
         );
@@ -88,20 +105,30 @@ module.exports = function (server) {
         // STOMP 메시지 전송 전에 로그 출력
         console.log(`Sending message to /topic/chat/${roomId}:`, messageBody);
 
-        // 메세지 전송
+        // 메시지 전송
         stompServer.send(
           `/topic/chat/${roomId}`,
           {},
           JSON.stringify(messageBody)
         );
+
+        // 트랜잭션 커밋
+        await connection.commit();
       }
     } catch (error) {
+      // 에러 발생 시 트랜잭션 롤백
+      await connection.rollback();
       console.error("Error while processing connected event: ", error);
+    } finally {
+      // 연결 해제
+      connection.release();
     }
     console.log(`Client connected with session ID: ${sessionId}`);
   });
 
-  // 클라이언트가 메시지를 보낼 때
+  /* 
+    클라이언트 메세지 전송
+  */
   stompServer.on("send", async (message) => {
     const destination = message.dest; // 메시지가 보내진 경로
     const messageBody = JSON.parse(message.frame.body);
@@ -262,7 +289,9 @@ module.exports = function (server) {
     }
   });
 
-  // 클라이언트가 연결을 끊을 때
+  /* 
+    클라이언트 연결 끊기
+  */
   stompServer.on("disconnected", (sessionId) => {
     console.log(`채팅방 나감: ${sessionId}`);
   });
