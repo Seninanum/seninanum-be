@@ -66,11 +66,17 @@ router.get("/", async (req, res) => {
       "SELECT careerId, title, startYear, startMonth, endYear, endMonth, content FROM careerItem WHERE careerProfileId = ?",
       [careerProfileId]
     );
+    // 경력증명서 조회
+    const [careerCertificate] = await pool.query(
+      "SELECT certificateName, certificateStatus FROM careerCertificate WHERE careerProfileId = ?",
+      [careerProfileId]
+    );
 
     // 응답 데이터 구조
     const response = {
       careerProfile: careerProfileId,
       careerItems: careerItems,
+      careerCertificate: careerCertificate,
     };
 
     res.status(200).json(response);
