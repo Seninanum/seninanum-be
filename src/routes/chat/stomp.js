@@ -25,12 +25,30 @@ module.exports = function (server) {
         headers.memberId
       );
 
-      // chatId가 다르면 상대방에게만 입장 메세지 전송
+      // chatRoom 정보 가져오기
+      const [existingChatroom] = await pool.query(
+        "SELECT * FROM chatRoom WHERE ABS(memberId) = ABS(?) OR ABS(opponentId) = ABS(?)",
+        [headers.memberId, headers.memberId]
+      );
+
+      console.log("roomStatus>>>>>>>>>>>", existingChatroom[0].roomStatus);
+
       if (
-        result.length > 0 &&
-        result[0].chatRoomId != headers.chatRoomId &&
-        headers.memberId != result[0].profileId
+        existingChatroom.length > 0 &&
+        existingChatroom[0].roomStatus === "INACTIVE"
       ) {
+        // chatRoom 테이블 업데이트
+        await pool.query(
+          "UPDATE chatRoom SET roomStatus = 'ACTIVE', memberId = CASE WHEN ABS(memberId) = ABS(?) THEN ? ELSE memberId END, opponentId = CASE WHEN ABS(opponentId) = ABS(?) THEN ? ELSE opponentId END WHERE chatRoomId = ?",
+          [
+            headers.memberId,
+            headers.memberId,
+            headers.memberId,
+            headers.memberId,
+            headers.chatRoomId,
+          ]
+        );
+
         // '채팅방에 들어왔습니다' 메세지 생성 및 전송
         const roomId = headers.chatRoomId;
         const messageBody = {
@@ -40,7 +58,7 @@ module.exports = function (server) {
         };
 
         // DB에 메세지 저장
-        [result] = await pool.query(
+        const [insertResult] = await pool.query(
           "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
           [
             roomId,
@@ -50,10 +68,26 @@ module.exports = function (server) {
             1,
           ]
         );
-        messageBody.createdAt = new Date(createdAtResult[0].createdAt)
-          .toISOString()
-          .split(".")[0];
 
+        // 저장된 메시지의 createdAt 값 가져오기
+        const [createdAtResult] = await pool.query(
+          "SELECT createdAt FROM chatMessage WHERE chatMessageId = ?",
+          [insertResult.insertId]
+        );
+
+        if (createdAtResult.length > 0) {
+          messageBody.createdAt = new Date(createdAtResult[0].createdAt)
+            .toISOString()
+            .split(".")[0];
+        } else {
+          // 만약 createdAt 조회 실패 시 기본 값 설정
+          messageBody.createdAt = new Date().toISOString().split(".")[0];
+        }
+
+        // STOMP 메시지 전송 전에 로그 출력
+        console.log(`Sending message to /topic/chat/${roomId}:`, messageBody);
+
+        // 메세지 전송
         stompServer.send(
           `/topic/chat/${roomId}`,
           {},
@@ -61,7 +95,7 @@ module.exports = function (server) {
         );
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error while processing connected event: ", error);
     }
     console.log(`Client connected with session ID: ${sessionId}`);
   });

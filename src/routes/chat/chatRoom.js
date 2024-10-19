@@ -62,12 +62,6 @@ router.post("/create", async (req, res) => {
       const chatRoomId = existingChatroom[0].chatRoomId;
 
       if (existingChatroom[0].roomStatus === "INACTIVE") {
-        // chatRoom 테이블 업데이트
-        await pool.query(
-          "UPDATE chatRoom SET roomStatus = 'ACTIVE', memberId = CASE WHEN ABS(memberId) = ABS(?) THEN ? ELSE memberId END, opponentId = CASE WHEN ABS(opponentId) = ABS(?) THEN ? ELSE opponentId END WHERE chatRoomId = ?",
-          [myProfileId, myProfileId, myProfileId, myProfileId, chatRoomId]
-        );
-
         // chatRoomMember 테이블 업데이트
         await pool.query(
           "UPDATE chatRoomMember SET profileId = ? WHERE ABS(profileId) = ? AND chatRoomId = ?",
