@@ -68,22 +68,6 @@ router.post("/create", async (req, res) => {
           "UPDATE chatRoom SET roomStatus = 'ACTIVE' WHERE chatRoomId = ?",
           [chatRoomId]
         );
-
-        // chatRoomMember 테이블 업데이트 (limitMessageId 추가 업데이트)
-        const [lastMessageId] = await pool.query(
-          "SELECT lastReadMessage FROM chatRoomMember ORDER BY chatMessageId DESC LIMIT 1"
-        );
-        // chatRoomMember 테이블 업데이트
-        // chatRoomMember 테이블 업데이트
-        await pool.query(
-          "UPDATE chatRoomMember SET profileId = ?, limitMessageId = ? WHERE ABS(profileId) = ? AND chatRoomId = ?",
-          [
-            myProfileId,
-            lastMessageId[0].lastReadMessageId + 1,
-            myProfileId,
-            chatRoomId,
-          ]
-        );
       }
 
       // 마지막으로 읽은 메세지 설정

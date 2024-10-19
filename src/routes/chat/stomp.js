@@ -25,17 +25,14 @@ module.exports = function (server) {
         headers.memberId
       );
 
-      // chatRoom 정보 가져오기
+      // id가 마이너스인 chatRoom 정보 가져오기
       const [existingChatroom] = await pool.query(
-        "SELECT * FROM chatRoom WHERE ABS(memberId) = ABS(?) OR ABS(opponentId) = ABS(?)",
+        "SELECT * FROM chatRoom WHERE ABS(memberId) = ABS(?) AND memberId < 0 OR ABS(opponentId) = ABS(?) AND opponentId < 0",
         [headers.memberId, headers.memberId]
       );
 
-      if (
-        existingChatroom.length > 0 &&
-        existingChatroom[0].roomStatus === "INACTIVE"
-      ) {
-        // chatRoom 테이블 업데이트
+      if (existingChatroom.length > 0) {
+        // chatRoom 사용자 id값 양수로 변경
         await pool.query(
           "UPDATE chatRoom SET memberId = CASE WHEN ABS(memberId) = ABS(?) THEN ? ELSE memberId END, opponentId = CASE WHEN ABS(opponentId) = ABS(?) THEN ? ELSE opponentId END WHERE chatRoomId = ?",
           [
@@ -65,6 +62,12 @@ module.exports = function (server) {
             messageBody.senderType,
             1,
           ]
+        );
+
+        // limitMessageId 설정하기
+        await pool.query(
+          "UPDATE chatRoomMember SET profileId = ?, limitMessageId = ? WHERE ABS(profileId) = ? AND chatRoomId = ?",
+          [myProfileId, insertResult.insertId, myProfileId, chatRoomId]
         );
 
         // 저장된 메시지의 createdAt 값 가져오기
