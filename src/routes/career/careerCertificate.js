@@ -53,10 +53,16 @@ router.post(
 
     try {
       await transporter.sendMail(mailOptions);
+      // profileId로 careerProfile에 있는 careerProfileId조회
+      const [careerProfile] = await pool.query(
+        "SELECT careerProfileId FROM careerProfile WHERE profileId = ?",
+        [profileId]
+      );
+      const careerProfileId = careerProfile[0].careerProfileId;
       //db에 파일 이름, 상태 저장
       await pool.query(
-        "UPDATE careerProfile SET certificateName = ?, certificate = ? WHERE profileId = ?",
-        [fileName, "PENDING", profileId]
+        "INSERT INTO careerCertificate (careerProfileId, certificateName, certificateStatus) VALUES(?,?,?)",
+        [careerProfileId, fileName, "PENDING"]
       );
 
       return res
@@ -78,10 +84,16 @@ router.delete("/:profileId", async (req, res) => {
     #swagger.summary = '경력 증명서 삭제'
    */
   const profileId = req.params.profileId;
+  // profileId로 careerProfile에 있는 careerProfileId조회
+  const [careerProfile] = await pool.query(
+    "SELECT careerProfileId FROM careerProfile WHERE profileId = ?",
+    [profileId]
+  );
+  const careerProfileId = careerProfile[0].careerProfileId;
   try {
     const result = await pool.query(
-      "UPDATE careerProfile SET certificateName = ?, certificate = ? WHERE profileId = ?",
-      ["", "DEFAULT", profileId]
+      "DELETE FROM careerCertificate WHERE careerProfileId = ?",
+      [careerProfileId]
     );
     console.log("Rows affected:", result[0].affectedRows);
     res.status(200).json({ message: "경력 증명서가 삭제되었습니다." });
