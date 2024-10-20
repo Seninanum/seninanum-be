@@ -100,7 +100,7 @@ router.get("/list", async (req, res) => {
   const myProfileId = req.user.profileId;
 
   try {
-    // chatRoom에 해당하는 방 모두 가져오기
+    // chatRoom에 사용자가 해당하는 방 모두 가져오기
     const [existingChatroom] = await pool.query(
       "SELECT * FROM chatRoom WHERE memberId = ? OR opponentId = ?",
       [myProfileId, myProfileId]
@@ -126,7 +126,6 @@ router.get("/list", async (req, res) => {
         );
 
         // 마지막으로 보낸 메세지
-        // 마지막으로 보낸 메세지 시간
         const [message] = await pool.query(
           "SELECT * FROM chatMessage WHERE chatRoomId = ? ORDER BY chatMessageId DESC LIMIT 1",
           [room.chatRoomId]
@@ -140,7 +139,6 @@ router.get("/list", async (req, res) => {
             profile: profiles[0]?.profile,
             userType: profiles[0]?.userType,
             roomName: profiles[0]?.nickname || "Unknown",
-            // roomStatus: room.roomStatus,
             senderId: "",
             myProfileId: myProfileId,
             senderType: "",
@@ -150,12 +148,14 @@ router.get("/list", async (req, res) => {
           };
         } else {
           // 안 읽은 메세지 개수 계산
-          const [readMessage] = await pool.query(
+          const [lastMessageId] = await pool.query(
             "SELECT * FROM chatRoomMember WHERE chatRoomId=? AND profileId=? ",
             [room.chatRoomId, myProfileId]
           );
           const lastReadMessageId =
-            readMessage.length > 0 ? readMessage[0].lastReadMessageId : null;
+            lastMessageId.length > 0
+              ? lastMessageId[0].lastReadMessageId
+              : null;
           const [unreadMessages] = await pool.query(
             "SELECT COUNT(*) AS unreadCount FROM chatMessage WHERE chatRoomId = ? AND chatMessageId > ?",
             [room.chatRoomId, lastReadMessageId]
@@ -167,7 +167,6 @@ router.get("/list", async (req, res) => {
             profile: profiles[0]?.profile,
             userType: profiles[0]?.userType,
             roomName: profiles[0]?.nickname || "Unknown",
-            // roomStatus: room.roomStatus,
             lastMessage: message[0].chatMessage,
             senderId: message[0].senderId,
             senderType: message[0].senderType,
