@@ -3,11 +3,10 @@ const pool = require("../../database/db");
 const handleConnected = async (stompServer, sessionId, headers) => {
   try {
     // session 등록하기
-    const [insertResult] = await pool.query(
+    await pool.query(
       "INSERT INTO chatRoomSession (sessionId, profileId, chatRoomId) VALUES (?, ?, ?)",
       [sessionId, headers.memberId, headers.chatRoomId]
     );
-    console.log("chatRoomSession insert result:", insertResult);
 
     // id가 마이너스인 chatRoom 정보 가져오기
     const [existingChatroom] = await pool.query(
