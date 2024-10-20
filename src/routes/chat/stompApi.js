@@ -1,24 +1,16 @@
 const pool = require("../../database/db");
 
 const handleConnected = async (stompServer, sessionId, headers) => {
-  const connection = await pool.getConnection();
   try {
-    // 트랜잭션 시작
-    await connection.beginTransaction();
-
-    console.log("sessionId:", sessionId);
-    console.log("headers.memberId:", headers.memberId);
-    console.log("headers.chatRoomId:", headers.chatRoomId);
-
     // session 등록하기
-    const [insertResult] = await connection.query(
+    const [insertResult] = await pool.query(
       "INSERT INTO chatRoomSession (sessionId, profileId, chatRoomId) VALUES (?, ?, ?)",
       [sessionId, headers.memberId, headers.chatRoomId]
     );
     console.log("chatRoomSession insert result:", insertResult);
 
     // id가 마이너스인 chatRoom 정보 가져오기
-    const [existingChatroom] = await connection.query(
+    const [existingChatroom] = await pool.query(
       "SELECT * FROM chatRoom WHERE ABS(memberId) = ABS(?) AND memberId < 0 OR ABS(opponentId) = ABS(?) AND opponentId < 0",
       [headers.memberId, headers.memberId]
     );
@@ -27,12 +19,12 @@ const handleConnected = async (stompServer, sessionId, headers) => {
     if (existingChatroom.length > 0) {
       // chatRoom 사용자 id값 양수로 변경
       if (existingChatroom[0].memberId < 0) {
-        await connection.query(
+        await pool.query(
           "UPDATE chatRoom SET memberId = ? WHERE chatRoomId = ?",
           [headers.memberId, headers.chatRoomId]
         );
       } else if (existingChatroom[0].opponentId < 0) {
-        await connection.query(
+        await pool.query(
           "UPDATE chatRoom SET opponentId = ? WHERE chatRoomId = ?",
           [headers.memberId, headers.chatRoomId]
         );
@@ -47,7 +39,7 @@ const handleConnected = async (stompServer, sessionId, headers) => {
       };
 
       // DB에 메시지 저장
-      const [insertResult] = await connection.query(
+      const [insertResult] = await pool.query(
         "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
         [
           roomId,
@@ -59,7 +51,7 @@ const handleConnected = async (stompServer, sessionId, headers) => {
       );
 
       // limitMessageId 설정하기
-      await connection.query(
+      await pool.query(
         "UPDATE chatRoomMember SET limitMessageId = ? WHERE profileId = ? AND chatRoomId = ?",
         [insertResult.insertId, headers.memberId, headers.chatRoomId]
       );
@@ -70,17 +62,10 @@ const handleConnected = async (stompServer, sessionId, headers) => {
         {},
         JSON.stringify(messageBody)
       );
-
-      // 트랜잭션 커밋
-      await connection.commit();
     }
   } catch (error) {
     // 에러 발생 시 트랜잭션 롤백
-    await connection.rollback();
     console.error("Error while processing connected event: ", error);
-  } finally {
-    // 연결 해제
-    connection.release();
   }
 };
 
