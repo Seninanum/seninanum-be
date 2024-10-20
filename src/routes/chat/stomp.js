@@ -4,6 +4,7 @@ const {
   handleConnected,
   handleSendUser,
   handleSendLeave,
+  handleDisconnected,
 } = require("./stompApi");
 
 module.exports = function (server) {
@@ -57,7 +58,8 @@ module.exports = function (server) {
   /* 
     클라이언트 연결 끊기
   */
-  stompServer.on("disconnected", (sessionId) => {
+  stompServer.on("disconnected", async (sessionId) => {
+    await handleDisconnected(sessionId);
     console.log(`채팅방 나감: ${sessionId}`);
   });
 

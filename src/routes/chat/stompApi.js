@@ -6,6 +6,17 @@ const handleConnected = async (stompServer, sessionId, headers) => {
     // 트랜잭션 시작
     await connection.beginTransaction();
 
+    console.log("sessionId:", sessionId);
+    console.log("headers.memberId:", headers.memberId);
+    console.log("headers.chatRoomId:", headers.chatRoomId);
+
+    // session 등록하기
+    const [insertResult] = await connection.query(
+      "INSERT INTO chatRoomSession (sessionId, profileId, chatRoomId) VALUES (?, ?, ?)",
+      [sessionId, headers.memberId, headers.chatRoomId]
+    );
+    console.log("chatRoomSession insert result:", insertResult);
+
     // id가 마이너스인 chatRoom 정보 가져오기
     const [existingChatroom] = await connection.query(
       "SELECT * FROM chatRoom WHERE ABS(memberId) = ABS(?) AND memberId < 0 OR ABS(opponentId) = ABS(?) AND opponentId < 0",
@@ -178,4 +189,20 @@ const handleSendLeave = async (stompServer, messageBody, roomId) => {
   }
 };
 
-module.exports = { handleConnected, handleSendUser, handleSendLeave };
+const handleDisconnected = async (sessionId) => {
+  try {
+    // chatRoomSession에서 sessionId가 일치하는 행 삭제
+    await pool.query("DELETE FROM chatRoomSession WHERE sessionId = ?", [
+      sessionId,
+    ]);
+  } catch (error) {
+    console.error("Error while deleting session from chatRoomSession:", error);
+  }
+};
+
+module.exports = {
+  handleConnected,
+  handleSendUser,
+  handleSendLeave,
+  handleDisconnected,
+};
