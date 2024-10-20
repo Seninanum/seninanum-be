@@ -1,5 +1,10 @@
 const StompServer = require("stomp-broker-js");
 const pool = require("../../database/db");
+const {
+  handleConnected,
+  handleSendUser,
+  handleSendLeave,
+} = require("./stompApi");
 
 module.exports = function (server) {
   // STOMP 서버 설정
@@ -39,150 +44,11 @@ module.exports = function (server) {
 
       switch (messageBody.senderType) {
         case "USER":
-          // 디코딩
-          const binaryMessage = new Uint8Array(
-            Object.values(messageBody.chatMessage)
-          );
-          const decodedMessage = new TextDecoder().decode(binaryMessage);
-
-          try {
-            let result;
-
-            // DB에 저장
-            [result] = await pool.query(
-              "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
-              [
-                roomId,
-                messageBody.senderId,
-                decodedMessage,
-                messageBody.senderType,
-                1,
-              ]
-            );
-
-            // 쿼리 결과가 없는 경우에도 코드가 계속 실행되도록 수정
-            if (!result || !result.insertId) {
-              console.warn("DB 저장에 실패했거나, result 값이 없습니다.");
-            } else {
-              // 방금 저장한 행의 createdAt 값을 조회
-              const [createdAtResult] = await pool.query(
-                "SELECT createdAt FROM chatMessage WHERE chatMessageId = ?",
-                [result.insertId]
-              );
-
-              // 메세지 시간 (KST) - 배포용
-              const createdAt = new Date(createdAtResult[0].createdAt);
-              messageBody.createdAt = createdAt.toISOString().split(".")[0];
-
-              // 메세지 시간 (UTC -> KST 변환) - 로컬용
-              // const createdAt = new Date(createdAtResult[0].createdAt);
-              // const kstDate = new Date(createdAt.getTime() + 9 * 60 * 60 * 1000);
-              // const formattedDate = kstDate.toISOString().split(".")[0];
-              // messageBody.createdAt = formattedDate;
-
-              // 응답값 수정
-              messageBody.chatMessageId = result.insertId;
-              messageBody.unreadCount = 1;
-              messageBody.chatRoomId = roomId;
-              delete messageBody.receiverId;
-            }
-
-            // 메세지 전달
-            stompServer.send(
-              `/topic/chat/${roomId}`,
-              {},
-              JSON.stringify(messageBody)
-            );
-          } catch (error) {
-            console.log(error);
-          }
+          await handleSendUser(stompServer, messageBody, roomId);
           break;
 
         case "LEAVE":
-          try {
-            // 사용자가 나가려는 방이 존재하는지 확인
-            const [existingRecord] = await pool.query(
-              "SELECT * FROM chatRoom WHERE memberId = ? OR opponentId = ?",
-              [messageBody.senderId, messageBody.senderId]
-            );
-            if (existingRecord.length > 0) {
-              // LEAVE 메시지 저장
-              const [insertResult] = await pool.query(
-                "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
-                [
-                  roomId,
-                  messageBody.senderId,
-                  messageBody.chatMessage,
-                  messageBody.senderType,
-                  1,
-                ]
-              );
-              // 저장된 메시지의 ID와 생성 시간을 메시지 본문에 추가
-              messageBody.chatMessageId = insertResult.insertId;
-              const [createdAtResult] = await pool.query(
-                "SELECT createdAt FROM chatMessage WHERE chatMessageId = ?",
-                [insertResult.insertId]
-              );
-              messageBody.createdAt = new Date(createdAtResult[0].createdAt)
-                .toISOString()
-                .split(".")[0];
-
-              // chatRoomd: 나간 사람의 id 값을 -1로 업데이트
-              await pool.query(
-                `UPDATE chatRoom 
-                  SET 
-                    memberId = CASE WHEN memberId = ? THEN ? ELSE memberId END, 
-                    opponentId = CASE WHEN opponentId = ? THEN ? ELSE opponentId END
-                  WHERE (memberId = ? OR opponentId = ?) AND chatRoomId = ?`,
-                [
-                  messageBody.senderId,
-                  -messageBody.senderId,
-                  messageBody.senderId,
-                  -messageBody.senderId,
-                  messageBody.senderId,
-                  messageBody.senderId,
-                  roomId,
-                ]
-              );
-              // 위에서 업데이트한 행의 roomStatus를 'inactive'로 설정
-              await pool.query(
-                `UPDATE chatRoom 
-                  SET roomStatus = 'INACTIVE' 
-                  WHERE chatRoomId = ?`,
-                [roomId]
-              );
-
-              // 둘 다 나간 방은 chatRoomMember에서 해당 roomId 행 지우기
-              const [roomCheck] = await pool.query(
-                `SELECT * FROM chatRoom WHERE chatRoomId = ? AND memberId < 0 AND opponentId < 0`,
-                [roomId]
-              );
-              if (roomCheck.length > 0) {
-                //둘 다 나간 방
-                await pool.query(
-                  `DELETE FROM chatRoomMember WHERE chatRoomId = ?`,
-                  [roomId]
-                );
-                await pool.query(`DELETE FROM chatRoom WHERE chatRoomId = ?`, [
-                  roomId,
-                ]);
-              } else {
-                await pool.query(
-                  "UPDATE chatRoomMember SET limitMessageId = ? WHERE profileId = ? AND chatRoomId = ?",
-                  [insertResult.insertId, messageBody.senderId, roomId]
-                );
-              }
-
-              // 메세지 전달
-              stompServer.send(
-                `/topic/chat/${roomId}`,
-                {},
-                JSON.stringify(messageBody)
-              );
-            }
-          } catch (error) {
-            console.log(error);
-          }
+          await handleSendLeave(stompServer, messageBody, roomId);
           break;
       }
     }
