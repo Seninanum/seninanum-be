@@ -426,7 +426,7 @@ router.get("/others/:profileId", async (req, res) => {
     const [recruits] = await pool.query(
       `
       SELECT r.recruitId, r.title, r.content, r.method, r.region,
-             p.nickname, p.gender, p.birthyear, p.profileId
+             p.nickname, p.gender, p.birthyear, p.profile
       FROM recruit r
       JOIN profile p ON r.profileId = p.profileId
       WHERE r.profileId = ?
@@ -442,11 +442,9 @@ router.get("/others/:profileId", async (req, res) => {
     res.status(200).json(recruits);
   } catch (error) {
     console.error("Error fetching other users' recruit list:", error);
-    res
-      .status(500)
-      .json({
-        error: "다른 사용자의 구인글 목록을 불러오는 중 오류가 발생했습니다.",
-      });
+    res.status(500).json({
+      error: "다른 사용자의 구인글 목록을 불러오는 중 오류가 발생했습니다.",
+    });
   }
 });
 
