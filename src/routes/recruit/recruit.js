@@ -171,9 +171,11 @@ router.get("/mylist", async (req, res) => {
 
   // 해당 사용자의 모든 구인글을 조회
   let query = `
-    SELECT recruitId, title, content, method, region, field, status 
-    FROM recruit 
-    WHERE profileId = ?`;
+    SELECT r.recruitId, r.title, r.content, r.method, r.region, r.field, r.status, 
+           COUNT(a.applicationId) AS applicantCount
+    FROM recruit r
+    LEFT JOIN application a ON r.recruitId = a.recruitId
+    WHERE r.profileId = ?`;
 
   const params = [profileId]; // 쿼리의 첫 번째 파라미터는 profileId
 
@@ -188,6 +190,8 @@ router.get("/mylist", async (req, res) => {
     query += " AND status = ?";
     params.push(status); // 두 번째 파라미터로 status 값 추가
   }
+  // 그룹화하여 각 구인글에 대한 지원자 수 카운트
+  query += " GROUP BY r.recruitId";
 
   try {
     const [recruits] = await pool.query(query, params);
@@ -408,6 +412,41 @@ router.get("/:recruitId", async (req, res) => {
     res
       .status(500)
       .json({ error: "An error occurred while fetching recruit detail" });
+  }
+});
+
+router.get("/others/:profileId", async (req, res) => {
+  /**
+    #swagger.tags = ['Recruit']
+    #swagger.summary = '다른 사용자의 구인글 목록 조회'
+   */
+  const profileId = req.params.profileId;
+  try {
+    // 구인글과 작성자 정보를 함께 조회
+    const [recruits] = await pool.query(
+      `
+      SELECT r.recruitId, r.title, r.content, r.method, r.region,
+             p.nickname, p.gender, p.birthyear, p.profileId
+      FROM recruit r
+      JOIN profile p ON r.profileId = p.profileId
+      WHERE r.profileId = ?
+      ORDER BY r.recruitId DESC
+    `,
+      [profileId]
+    );
+
+    if (recruits.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    res.status(200).json(recruits);
+  } catch (error) {
+    console.error("Error fetching other users' recruit list:", error);
+    res
+      .status(500)
+      .json({
+        error: "다른 사용자의 구인글 목록을 불러오는 중 오류가 발생했습니다.",
+      });
   }
 });
 
