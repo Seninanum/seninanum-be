@@ -1,8 +1,8 @@
 const StompServer = require("stomp-broker-js");
-const pool = require("../../database/db");
+
 const {
   handleConnected,
-  handleSendUser,
+  handleSendMessage,
   handleSendLeave,
   handleDisconnected,
 } = require("./stompApi");
@@ -45,7 +45,8 @@ module.exports = function (server) {
 
       switch (messageBody.senderType) {
         case "USER":
-          await handleSendUser(stompServer, messageBody, roomId);
+        case "SCHEDULE":
+          await handleSendMessage(stompServer, messageBody, roomId);
           break;
 
         case "LEAVE":

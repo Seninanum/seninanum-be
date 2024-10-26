@@ -140,6 +140,79 @@ router.get("/unread/:roomId", async (req, res) => {
   }
 });
 
+router.get("/:roomId", async (req, res) => {
+  /**
+    #swagger.tags = ['Chat']
+    #swagger.summary = '채팅 페이지 개수 반환'
+  */
+  const profileId = req.user.profileId;
+  const { roomId } = req.params; // 경로 매개변수로 roomId 가져오기
+
+  try {
+    // roomId 행 가져오기
+    const [room] = await pool.query(
+      "SELECT limitMessageId FROM chatRoomMember WHERE chatRoomId = ? AND profileId = ?",
+      [roomId, profileId]
+    );
+    // 채팅방이 존재하지 않음
+    if (room.length === 0) {
+      return res.status(404).json({ message: "잘못된 채팅방 id 입니다." });
+    }
+
+    // 총 페이지 개수 계산
+    const [[{ totalMessages }]] = await pool.query(
+      "SELECT COUNT(*) AS totalMessages FROM chatMessage WHERE chatRoomId = ? AND chatMessageId > ?",
+      [roomId, room[0]?.limitMessageId || 0]
+    );
+    // 총 페이지 수를 계산합니다.
+    const totalPages = Math.ceil(totalMessages / 10);
+
+    res.status(200).json({ totalPages });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "채팅방 페이지를 계산하는 중 오류가 발생했습니다." });
+  }
+});
+
+router.get("/message/:roomId", async (req, res) => {
+  /**
+    #swagger.tags = ['Chat']
+    #swagger.summary = '채팅 페이지 별 메세지 내역 반환'
+  */
+
+  const profileId = req.user.profileId;
+  const { roomId } = req.params;
+  const { page = 0 } = req.query;
+  try {
+    // 채팅방 멤버의 limitMessageId를 가져옵니다.
+    const [room] = await pool.query(
+      "SELECT limitMessageId FROM chatRoomMember WHERE chatRoomId = ? AND profileId = ?",
+      [roomId, profileId]
+    );
+    if (room.length === 0) {
+      return res.status(404).json({ message: "잘못된 채팅방 id 입니다." });
+    }
+
+    const limit = 10; // 한 페이지에 보여줄 메시지 개수
+    const offset = page * limit;
+
+    // 메시지 내역을 페이지에 맞게 가져옵니다.
+    const [messages] = await pool.query(
+      "SELECT * FROM chatMessage WHERE chatMessageId > ? AND chatRoomId = ? ORDER BY chatMessageId ASC LIMIT ? OFFSET ?",
+      [room[0]?.limitMessageId || 0, roomId, limit, offset]
+    );
+
+    res.status(200).json({ messages });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: "채팅방 페이지의 메시지 내역을 가져오는 중 오류가 발생했습니다.",
+    });
+  }
+});
+
 router.post("/disconnect", async (req, res) => {
   const { roomId, lastReadMessageId } = req.body;
   const memberId = req.user.profileId;
