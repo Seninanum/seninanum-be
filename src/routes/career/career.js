@@ -179,7 +179,7 @@ router.get("/list", async (req, res) => {
   try {
     //경력프로필 정보
     const [careers] = await pool.query(
-      "SELECT careerProfileId, profileId, introduce, field FROM careerProfile"
+      "SELECT careerProfileId, profileId, introduce, field FROM careerProfile ORDER BY careerProfileId DESC"
     );
 
     // 각 경력프로필에 대해 user 정보를 병합
@@ -238,13 +238,31 @@ router.get("/:profileId", async (req, res) => {
   // const profileId = req.user.profileId;
 
   try {
+    // 경력 프로필 조회
     const [career] = await pool.query(
       "SELECT * FROM careerProfile WHERE profileId = ?",
       [profileId]
     );
 
+    // 기본 프로필 조회
+    const [userInfo] = await pool.query(
+      "SELECT nickname, gender, birthyear, profile FROM profile WHERE profileId = ?",
+      [profileId]
+    );
+
+    if (userInfo.length === 0) {
+      return res.status(404).json({ error: "프로필을 찾을 수 없습니다." });
+    }
+
+    const { nickname, gender, birthyear, profile } = userInfo[0];
+
     if (career.length === 0) {
-      return res.status(404).json({ error: "경력프로필이 조회되지 않습니다." });
+      return res.status(200).json({
+        nickname,
+        gender,
+        birthyear,
+        profile,
+      });
     }
 
     const {
@@ -258,12 +276,6 @@ router.get("/:profileId", async (req, res) => {
       price,
       priceType,
     } = career[0];
-
-    const [userInfo] = await pool.query(
-      "SELECT nickname, gender, birthyear, profile FROM profile WHERE profileId = ?",
-      [profileId]
-    );
-    const { nickname, gender, birthyear, profile } = userInfo[0];
 
     // 경력 상세 항목 조회
     const [careerItems] = await pool.query(
