@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../../database/db");
+const { fetchPaginatedMessages } = require("../../util/fetchPage");
 
 router.get("/info/:roomId", async (req, res) => {
   /**
@@ -186,22 +187,13 @@ router.get("/message/:roomId", async (req, res) => {
   const { roomId } = req.params;
   const { page = 0 } = req.query;
   try {
-    // 채팅방 멤버의 limitMessageId를 가져옵니다.
-    const [room] = await pool.query(
-      "SELECT limitMessageId FROM chatRoomMember WHERE chatRoomId = ? AND profileId = ?",
-      [roomId, profileId]
-    );
-    if (room.length === 0) {
-      return res.status(404).json({ message: "잘못된 채팅방 id 입니다." });
-    }
-
-    const limit = 10; // 한 페이지에 보여줄 메시지 개수
-    const offset = page * limit;
-
-    // 메시지 내역을 페이지에 맞게 가져옵니다.
-    const [messages] = await pool.query(
-      "SELECT * FROM chatMessage WHERE chatMessageId > ? AND chatRoomId = ? ORDER BY chatMessageId ASC LIMIT ? OFFSET ?",
-      [room[0]?.limitMessageId || 0, roomId, limit, offset]
+    const messages = await fetchPaginatedMessages(
+      pool,
+      "chatMessage",
+      roomId,
+      profileId,
+      page,
+      10
     );
 
     res.status(200).json({ messages });
