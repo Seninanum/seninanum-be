@@ -50,6 +50,19 @@ router.delete("/:recruitId", async (req, res) => {
         .json({ error: "구인글을 찾을 수 없거나 삭제 권한이 없습니다." });
     }
 
+    // 지원자가 있는지 확인
+    const [applications] = await pool.query(
+      "SELECT COUNT(*) AS applicantCount FROM application WHERE recruitId = ?",
+      [recruitId]
+    );
+
+    if (applications[0].applicantCount > 0) {
+      // 지원자가 있을 경우 삭제하지 않고 메시지 반환
+      return res
+        .status(400)
+        .json({ message: "지원한 사람이 있어 구인글을 삭제할 수 없습니다." });
+    }
+
     await pool.query("DELETE FROM recruit WHERE recruitId = ?", [recruitId]);
 
     res.status(200).json({ message: "구인글이 성공적으로 삭제되었습니다." });
@@ -213,7 +226,7 @@ router.get("/list", async (req, res) => {
   try {
     //구인글 정보
     const [recruits] = await pool.query(
-      "SELECT recruitId, profileId, title, content, method, region, field FROM recruit"
+      "SELECT recruitId, profileId, title, content, method, region, field FROM recruit WHERE status != '마감'"
     );
     if (recruits.length === 0) {
       // 구인글이 없을 경우 빈 배열 반환
@@ -429,7 +442,7 @@ router.get("/others/:profileId", async (req, res) => {
              p.nickname, p.gender, p.birthyear, p.profile
       FROM recruit r
       JOIN profile p ON r.profileId = p.profileId
-      WHERE r.profileId = ?
+      WHERE r.profileId = ? AND r.status != '마감'
       ORDER BY r.recruitId DESC
     `,
       [profileId]
