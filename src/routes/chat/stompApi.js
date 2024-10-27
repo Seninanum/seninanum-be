@@ -68,7 +68,7 @@ const handleConnected = async (stompServer, sessionId, headers) => {
   }
 };
 
-const handleSendUser = async (stompServer, messageBody, roomId) => {
+const handleSendMessage = async (stompServer, messageBody, roomId) => {
   try {
     // 메시지 디코딩
     const binaryMessage = new Uint8Array(
@@ -186,7 +186,7 @@ const handleDisconnected = async (sessionId) => {
 
 module.exports = {
   handleConnected,
-  handleSendUser,
+  handleSendMessage,
   handleSendLeave,
   handleDisconnected,
 };
