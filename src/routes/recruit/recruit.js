@@ -50,6 +50,19 @@ router.delete("/:recruitId", async (req, res) => {
         .json({ error: "구인글을 찾을 수 없거나 삭제 권한이 없습니다." });
     }
 
+    // 지원자가 있는지 확인
+    const [applications] = await pool.query(
+      "SELECT COUNT(*) AS applicantCount FROM application WHERE recruitId = ?",
+      [recruitId]
+    );
+
+    if (applications[0].applicantCount > 0) {
+      // 지원자가 있을 경우 삭제하지 않고 메시지 반환
+      return res
+        .status(400)
+        .json({ message: "지원한 사람이 있어 구인글을 삭제할 수 없습니다." });
+    }
+
     await pool.query("DELETE FROM recruit WHERE recruitId = ?", [recruitId]);
 
     res.status(200).json({ message: "구인글이 성공적으로 삭제되었습니다." });
