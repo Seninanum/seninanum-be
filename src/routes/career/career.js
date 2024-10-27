@@ -129,7 +129,9 @@ router.patch("/", async (req, res) => {
     let progressStep = 0;
 
     // 각 조건을 확인하고 step을 추가
-    if (introduce) progressStep += 1;
+    if (introduce) {
+      progressStep += 1;
+    }
     if (age) progressStep += 1;
     if (field) progressStep += 1;
     if (service) progressStep += 1;
@@ -158,6 +160,13 @@ router.patch("/", async (req, res) => {
       [progressStep, profileId]
     );
 
+    // isSatisfy 값 업데이트
+    const isSatisfy = introduce && field ? 1 : 0;
+    await pool.query(
+      "UPDATE careerProfile SET isSatisfy = ? WHERE careerProfileId = ?",
+      [isSatisfy, profileId]
+    );
+
     res.status(200).json({
       message: "경력 프로필이 성공적으로 업데이트 되었습니다.",
       progressStep: progressStep,
@@ -179,7 +188,7 @@ router.get("/list", async (req, res) => {
   try {
     //경력프로필 정보
     const [careers] = await pool.query(
-      "SELECT careerProfileId, profileId, introduce, field FROM careerProfile ORDER BY careerProfileId DESC"
+      "SELECT careerProfileId, profileId, introduce, field FROM careerProfile WHERE isSatisfy = 1 ORDER BY careerProfileId DESC"
     );
 
     // 각 경력프로필에 대해 user 정보를 병합
