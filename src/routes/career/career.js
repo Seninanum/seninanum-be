@@ -317,6 +317,75 @@ router.get("/:profileId", async (req, res) => {
   }
 });
 
+// router.post("/filter", async (req, res) => {
+//   /**
+//     #swagger.tags = ['Career']
+//     #swagger.summary = '나리 필터링에 맞는 경력프로필 조회'
+//    */
+
+//   try {
+//     const { method, priceType, price, region, field } = req.body;
+
+//     // 필수 필터 조건 확인
+//     if (!method || !priceType || !price || !field) {
+//       return res.status(400).json({ error: "모든 필터 조건이 필요합니다." });
+//     }
+
+//     // 배열로 변환
+//     const userFieldsArray = Array.isArray(field) ? field : field.split(",");
+//     // 사용자가 보낸 필드들을 정렬
+//     const userFieldsSorted = userFieldsArray
+//       .map((f) => f.trim())
+//       .sort()
+//       .join(",");
+
+//     // 경력 프로필 정보 가져오기
+//     const [careers] = await pool.query(
+//       "SELECT profileId, careerProfileId, introduce, field FROM careerProfile WHERE method = ? AND priceType = ? AND price = ? AND region = ?",
+//       [method, priceType, price, region]
+//     );
+
+//     // 필드 비교
+//     const filteredCareers = careers.filter((career) => {
+//       const profileFieldsSorted = career.field
+//         .split(",")
+//         .map((f) => f.trim())
+//         .sort()
+//         .join(",");
+//       return userFieldsSorted === profileFieldsSorted;
+//     });
+
+//     // 각 경력 프로필에 대해 사용자 정보를 병합
+//     const careerWithUserInfo = await Promise.all(
+//       filteredCareers.map(async (career) => {
+//         const [userProfile] = await pool.query(
+//           "SELECT nickname, gender, birthyear, profile FROM profile WHERE profileId = ?",
+//           [career.profileId]
+//         );
+//         const { nickname, gender, birthyear, profile } = userProfile[0];
+//         return {
+//           careerProfileId: career.careerProfileId,
+//           introduce: career.introduce,
+//           field: career.field,
+//           profileId: career.profileId,
+//           nickname,
+//           gender,
+//           birthyear,
+//           profile,
+//         };
+//       })
+//     );
+
+//     // 필터링된 결과 반환
+//     res.status(200).json(careerWithUserInfo);
+//   } catch (error) {
+//     console.error("Error occurred: ", error.message);
+//     res
+//       .status(500)
+//       .json({ error: "경력 프로필 정보를 불러오는 데 실패했습니다." });
+//   }
+// });
+
 router.post("/filter", async (req, res) => {
   /**
     #swagger.tags = ['Career']
@@ -324,40 +393,73 @@ router.post("/filter", async (req, res) => {
    */
 
   try {
-    const { method, priceType, price, region, field } = req.body;
+    const { field, age, method, region, priceType, priceMin, priceMax } =
+      req.body;
 
-    // 필수 필터 조건 확인
-    if (!method || !priceType || !price || !field) {
-      return res.status(400).json({ error: "모든 필터 조건이 필요합니다." });
+    // 조건 검증
+    if ((method === "대면" || method === "모두 선택") && !region) {
+      return res
+        .status(400)
+        .json({ error: "대면 또는 모두 선택인 경우 지역 정보가 필요합니다." });
+    }
+    if (priceType && (priceMin === undefined || priceMax === undefined)) {
+      return res.status(400).json({
+        error: "가격 유형이 설정된 경우 최소 금액과 최대 금액이 필요합니다.",
+      });
     }
 
-    // 배열로 변환
-    const userFieldsArray = Array.isArray(field) ? field : field.split(",");
-    // 사용자가 보낸 필드들을 정렬
-    const userFieldsSorted = userFieldsArray
-      .map((f) => f.trim())
-      .sort()
-      .join(",");
+    // 필터링 조건 설정
+    const conditions = [];
+    const params = [];
+
+    if (method) {
+      conditions.push("method = ?");
+      params.push(method);
+    }
+    if (priceType && priceType !== "상관없음") {
+      conditions.push("priceType = ?");
+      params.push(priceType);
+    }
+    if (priceMin !== undefined && priceMax !== undefined) {
+      conditions.push("price BETWEEN ? AND ?");
+      params.push(priceMin, priceMax);
+    }
+    if (region) {
+      conditions.push("region = ?");
+      params.push(region);
+    }
+
+    // age 필터링 설정 (부분 일치)
+    if (age && age !== "상관없음") {
+      const ageArray = Array.isArray(age) ? age : age.split(",");
+      ageArray.forEach((a) => {
+        conditions.push("age LIKE ?");
+        params.push(`%${a.trim()}%`);
+      });
+    }
+
+    // 필드 조건 설정 (부분 일치)
+    if (field) {
+      const userFieldsArray = Array.isArray(field) ? field : field.split(",");
+      userFieldsArray.forEach((f) => {
+        conditions.push("field LIKE ?");
+        params.push(`%${f.trim()}%`);
+      });
+    }
+
+    // 쿼리 생성
+    const query = `
+      SELECT profileId, careerProfileId, introduce, field, age 
+      FROM careerProfile
+      ${conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : ""}
+    `;
 
     // 경력 프로필 정보 가져오기
-    const [careers] = await pool.query(
-      "SELECT profileId, careerProfileId, introduce, field FROM careerProfile WHERE method = ? AND priceType = ? AND price = ? AND region = ?",
-      [method, priceType, price, region]
-    );
-
-    // 필드 비교
-    const filteredCareers = careers.filter((career) => {
-      const profileFieldsSorted = career.field
-        .split(",")
-        .map((f) => f.trim())
-        .sort()
-        .join(",");
-      return userFieldsSorted === profileFieldsSorted;
-    });
+    const [careers] = await pool.query(query, params);
 
     // 각 경력 프로필에 대해 사용자 정보를 병합
     const careerWithUserInfo = await Promise.all(
-      filteredCareers.map(async (career) => {
+      careers.map(async (career) => {
         const [userProfile] = await pool.query(
           "SELECT nickname, gender, birthyear, profile FROM profile WHERE profileId = ?",
           [career.profileId]
@@ -368,6 +470,7 @@ router.post("/filter", async (req, res) => {
           introduce: career.introduce,
           field: career.field,
           profileId: career.profileId,
+          age: career.age,
           nickname,
           gender,
           birthyear,
