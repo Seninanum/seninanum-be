@@ -12,6 +12,19 @@ router.post("/", async (req, res) => {
   }
 
   try {
+    // careerProfile 테이블에서 isSatisfy 값 확인
+    const [careerProfile] = await pool.query(
+      "SELECT isSatisfy FROM careerProfile WHERE profileId = ?",
+      [profileId]
+    );
+
+    // profileId에 해당하는 careerProfile이 없거나 isSatisfy가 0인 경우 지원 불가
+    if (careerProfile.length === 0 || careerProfile[0].isSatisfy === 0) {
+      return res
+        .status(400)
+        .json({ message: "지원이 불가능합니다. 경력 프로필을 완성하세요." });
+    }
+
     await pool.query(
       "INSERT INTO application (recruitId, profileId, createdAt) VALUES (?, ?, CURRENT_TIMESTAMP)",
       [recruitId, profileId]
