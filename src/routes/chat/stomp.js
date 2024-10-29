@@ -41,7 +41,7 @@ module.exports = function (server) {
 
     // 사용자의 메세지 수신
     if (destination.startsWith(`/app/chat/`)) {
-      console.log("message>>>>>>", message); //확인용
+      console.log("message>>>>>>", messageBody.chatMessage); //확인용
 
       switch (messageBody.senderType) {
         case "USER":
