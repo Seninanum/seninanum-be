@@ -192,8 +192,7 @@ router.get("/message/:roomId", async (req, res) => {
       "chatMessage",
       roomId,
       profileId,
-      page,
-      10
+      page
     );
 
     res.status(200).json({ messages });
