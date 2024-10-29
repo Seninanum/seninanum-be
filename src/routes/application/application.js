@@ -167,15 +167,15 @@ router.get("/list", async (req, res) => {
 
     let recruitIdList = recruitIds.map((r) => r.recruitId);
     let query = `
-        SELECT a.profileId, a.applicationId, p.nickname, p.gender, p.birthyear, p.profile,
-             IFNULL(c.introduce, '') AS introduce, 
-             IFNULL(c.field, '') AS field, 
-             r.recruitId, r.title 
-      FROM application a
-      JOIN recruit r ON a.recruitId = r.recruitId
-      JOIN profile p ON a.profileId = p.profileId
-      LEFT JOIN careerProfile c ON a.profileId = c.profileId
-      WHERE a.recruitId IN (${recruitIdList.map(() => "?").join(", ")})
+        SELECT r.recruitId, r.title, 
+               a.profileId, a.applicationId, p.nickname, p.gender, p.birthyear, p.profile,
+               IFNULL(c.introduce, '') AS introduce, 
+               IFNULL(c.field, '') AS field
+        FROM recruit r
+        LEFT JOIN application a ON r.recruitId = a.recruitId
+        LEFT JOIN profile p ON a.profileId = p.profileId
+        LEFT JOIN careerProfile c ON a.profileId = c.profileId
+        WHERE r.recruitId IN (${recruitIdList.map(() => "?").join(", ")})
       `;
 
     let params = [...recruitIdList];
