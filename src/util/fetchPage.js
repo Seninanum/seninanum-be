@@ -45,7 +45,7 @@ async function fetchPaginatedMessages(
       `SELECT * FROM ?? WHERE chatMessageId > ? AND chatRoomId = ? ORDER BY chatMessageId ASC LIMIT ? OFFSET ?`,
       [tableName, room[0]?.limitMessageId || 0, roomId, limit, offset]
     );
-    return messages.reverse();
+    return messages;
   } catch (error) {
     throw error;
   }
