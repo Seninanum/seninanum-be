@@ -409,7 +409,7 @@ router.post("/filter", async (req, res) => {
     }
 
     // 필터링 조건 설정
-    const conditions = [];
+    const conditions = ["isSatisfy = 1"];
     const params = [];
 
     if (method) {
