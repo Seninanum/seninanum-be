@@ -412,7 +412,7 @@ router.post("/filter", async (req, res) => {
     const conditions = ["isSatisfy = 1"];
     const params = [];
 
-    if (method) {
+    if (method && method !== "모두 선택") {
       conditions.push("method = ?");
       params.push(method);
     }
