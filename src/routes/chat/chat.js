@@ -42,17 +42,42 @@ router.get("/info/:roomId", async (req, res) => {
       (profile) => profile.profileId === opponentId
     );
 
+    // 상대방이 작성한 recruitId 목록 조회
+    const [recruitIds] = await pool.query(
+      "SELECT recruitId,title FROM recruit WHERE profileId = ?",
+      [memberId]
+    );
+    const recruitIdArray = recruitIds.map((r) => r.recruitId);
+
+    // application 테이블에서 내 profileId와 상대방의 recruitId로 조회하여 title도 포함한 응답 생성
+    let appliedRecruitIds = [];
+    if (recruitIdArray.length > 0) {
+      const [applications] = await pool.query(
+        "SELECT recruitId FROM application WHERE profileId = ? AND recruitId IN (?)",
+        [userId, recruitIdArray]
+      );
+
+      const appliedRecruitIdArray = applications.map((app) => app.recruitId);
+
+      // recruitId와 title을 포함하여 응답 생성
+      appliedRecruitIds = recruitIds
+        .filter((r) => appliedRecruitIdArray.includes(r.recruitId))
+        .map((r) => ({ recruitId: r.recruitId, title: r.title }));
+    }
+
     if (userId === memberId) {
       return res.status(200).json({
         memberProfile,
         opponentProfile,
         roomStatus: room[0].roomStatus,
+        appliedRecruitIds,
       });
     } else {
       return res.status(200).json({
         memberProfile: opponentProfile,
         opponentProfile: memberProfile,
         roomStatus: room[0].roomStatus,
+        appliedRecruitIds,
       });
     }
   } catch (error) {
