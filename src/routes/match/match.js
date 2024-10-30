@@ -25,7 +25,7 @@ router.get("/dong", async (req, res) => {
     const fieldsArray = recruitFields.split(",");
 
     // 각 field에 해당하는 careerProfile 조회
-    const recommendedProfiles = {};
+    const recommendedProfiles = [];
 
     for (const field of fieldsArray) {
       const [profiles] = await pool.query(
@@ -35,7 +35,7 @@ router.get("/dong", async (req, res) => {
 
       // 추천 대상 프로필이 없을 때 빈 값 설정
       if (profiles.length === 0) {
-        recommendedProfiles[field] = {}; // 빈 값으로 설정
+        recommendedProfiles.push({ field, recommendation: null }); // 빈 값으로 설정
         continue;
       }
 
@@ -111,7 +111,7 @@ router.get("/dong", async (req, res) => {
         (max, profile) => (profile.score > max.score ? profile : max),
         scoredProfiles[0]
       );
-      recommendedProfiles[field] = topProfile;
+      recommendedProfiles.push({ field, recommendation: topProfile });
     }
 
     res.status(200).json(recommendedProfiles);
