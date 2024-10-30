@@ -146,7 +146,7 @@ router.get("/recruit", async (req, res) => {
     const fieldsArray = userFields.split(",");
 
     // 추천 구인글 결과를 저장할 객체
-    const recommendedRecruits = {};
+    const recommendedRecruits = [];
 
     for (const field of fieldsArray) {
       const [recruits] = await pool.query(
@@ -155,7 +155,7 @@ router.get("/recruit", async (req, res) => {
       );
 
       if (recruits.length === 0) {
-        recommendedRecruits[field] = {}; // 구인글이 없는 경우 빈 객체 설정
+        recommendedRecruits.push({ field, recommendation: null }); // 구인글이 없는 경우 빈 객체 설정
         continue;
       }
 
@@ -187,7 +187,7 @@ router.get("/recruit", async (req, res) => {
         scoredRecruits[0]
       );
 
-      recommendedRecruits[field] = topRecruit;
+      recommendedRecruits.push({ field, recommendation: topRecruit });
     }
 
     res.status(200).json(recommendedRecruits);
