@@ -402,7 +402,10 @@ router.post("/filter", async (req, res) => {
         .status(400)
         .json({ error: "대면 또는 모두 선택인 경우 지역 정보가 필요합니다." });
     }
-    if (priceType && (priceMin === undefined || priceMax === undefined)) {
+    if (
+      priceType !== "상관없음" &&
+      (priceMin === undefined || priceMax === undefined)
+    ) {
       return res.status(400).json({
         error: "가격 유형이 설정된 경우 최소 금액과 최대 금액이 필요합니다.",
       });
@@ -420,7 +423,12 @@ router.post("/filter", async (req, res) => {
       conditions.push("priceType = ?");
       params.push(priceType);
     }
-    if (priceMin !== undefined && priceMax !== undefined) {
+    if (
+      priceType === "건당" &&
+      "시간당" &&
+      priceMin !== undefined &&
+      priceMax !== undefined
+    ) {
       conditions.push("price BETWEEN ? AND ?");
       params.push(priceMin, priceMax);
     }
