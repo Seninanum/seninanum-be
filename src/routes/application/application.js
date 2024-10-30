@@ -161,7 +161,7 @@ router.get("/list", async (req, res) => {
   try {
     // 사용자가 작성한 구인글의 recruitId 목록 조회
     const [recruitIds] = await pool.query(
-      "SELECT r.recruitId FROM recruit r WHERE r.profileId = ?",
+      "SELECT r.recruitId FROM recruit r WHERE r.profileId = ? AND r.status = '모집중'",
       [profileId]
     );
 
