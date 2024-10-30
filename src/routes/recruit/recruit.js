@@ -223,11 +223,13 @@ router.get("/list", async (req, res) => {
     #swagger.summary = '구인글 전체 목록 불러오기'
     
    */
+  const userProfileId = req.user.profileId;
   try {
     //구인글 정보
     const [recruits] = await pool.query(
       "SELECT recruitId, profileId, title, content, method, region, field FROM recruit WHERE status != '마감'"
     );
+    0;
     if (recruits.length === 0) {
       // 구인글이 없을 경우 빈 배열 반환
       return res.status(200).json([]);
@@ -241,6 +243,14 @@ router.get("/list", async (req, res) => {
           [recruit.profileId]
         );
         const { nickname, gender, birthyear, profile } = user[0];
+
+        // application 테이블에서 지원 여부 확인
+        const [application] = await pool.query(
+          "SELECT * FROM application WHERE recruitId = ? AND profileId = ?",
+          [recruit.recruitId, userProfileId]
+        );
+        const isApplicate = application.length > 0 ? 1 : 0;
+
         return {
           recruitId: recruit.recruitId,
           title: recruit.title,
@@ -252,6 +262,7 @@ router.get("/list", async (req, res) => {
           gender,
           birthyear,
           profile,
+          isApplicate,
         };
       })
     );
@@ -265,90 +276,104 @@ router.get("/list", async (req, res) => {
   }
 });
 
-router.get("/filter", async (req, res) => {
+router.post("/filter", async (req, res) => {
   /**
     #swagger.tags = ['Recruit']
-    #swagger.summary = '동백 분야에 맞는 구인글 조회'
-    #swagger.parameters = [
-    [{
-        "field": "경제",
-        "list": 
-        [
-            {
-                "userId": 12345678,
-                "title": "은퇴를 앞두고 있습니다. 앞으로의 자산 계획에 조언을 구합니다.",
-                "content": "은퇴를 앞두고 있는 60대 직장인입니다.",
-                "method": "비대면 서비스",
-                "priceType": "건당",
-                "price": 10000,
-                "region": "",
-                "field": "경제,생활"
-            },
-            {
-                "userId": 12345678,
-                "title": "장애아동 교육분야 전문가의 조언이 필요합니다.",
-                "content": "안녕하세요? 대학생 나리입니다. ",
-                "method": "비대면 서비스",
-                "priceType": "건당",
-                "price": 40000,
-                "region": null,
-                "field": "경제,교육"
-            }
-        ]
-    },
-    {
-        "field": "입시",
-        "list": []
-    }
-        ]
-    ]
+    #swagger.summary = '상세조건 필터링에 맞는 구인글 조회'
    */
   try {
+    const { field, method, region, priceType, priceMin, priceMax } = req.body;
     const profileId = req.user.profileId;
-    const [fields] = await pool.query(
-      "SELECT field FROM careerProfile WHERE profileId = ?",
-      [profileId]
-    );
 
-    if (fields.length === 0 || !fields[0].field) {
+    if ((method === "대면" || method === "모두") && !region) {
       return res
         .status(400)
-        .json({ error: "경력프로필에 설정된 분야가 없습니다." });
+        .json({ error: "대면 또는 모두 선택인 경우 지역 정보가 필요합니다." });
+    }
+    if (
+      priceType &&
+      priceType !== "상관없음" &&
+      (priceMin === undefined || priceMax === undefined)
+    ) {
+      return res.status(400).json({
+        error: "가격 유형이 설정된 경우 최소 금액과 최대 금액이 필요합니다.",
+      });
     }
 
-    // 분야 리스트
-    const field = fields[0].field;
-    const fieldList = field.split(",").map((f) => f.trim());
+    // 필터 조건과 파라미터 초기화
+    const conditions = ["status = '모집중'"];
+    const params = [];
 
-    // SQL FIND_IN_SET 조건을 사용하여 쿼리문 생성 (OR 조건으로 연결)
-    const whereClause = fieldList
-      .map(() => `FIND_IN_SET(?, field)`)
-      .join(" OR ");
-    const query = `
-      SELECT recruit.recruitId, recruit.title, recruit.content, recruit.method, recruit.priceType, recruit.price, recruit.region, recruit.field, profile.profileId, profile.nickname, profile.birthyear
-      FROM recruit
-      JOIN profile ON recruit.profileId = profile.profileId
-      WHERE ${whereClause}
-    `;
-    const recruits = await pool.query(query, fieldList);
-
-    // 필드별로 데이터를 그룹화
-    const groupedResults = fieldList.map((field) => {
-      const fieldRecruits = recruits[0].filter((recruit) => {
-        const recruitFields = recruit.field.includes(",")
-          ? recruit.field.split(",").map((f) => f.trim())
-          : [recruit.field.trim()];
-
-        // 요청된 필드 값도 trim 처리하여 비교
-        const matched = recruitFields.some(
-          (recruitField) => recruitField.trim() === field.trim()
-        );
-        return matched;
+    // 필드 조건 추가
+    if (field) {
+      const fieldsArray = Array.isArray(field) ? field : field.split(",");
+      fieldsArray.forEach((f) => {
+        conditions.push("field LIKE ?");
+        params.push(`%${f.trim()}%`);
       });
+    }
 
-      return { field, list: fieldRecruits };
-    });
-    res.status(200).json(groupedResults);
+    // 만남 방식 필터링 설정
+    if (method === "모두") {
+      // "모두 선택"일 경우 모든 방식이 포함되도록 조건 설정
+      conditions.push(
+        "(method = '대면' OR method = '비대면' OR method = '모두')"
+      );
+    } else if (method) {
+      // 특정 방식이 지정된 경우 해당 방식만 필터링
+      conditions.push("method = ?");
+      params.push(method);
+    }
+
+    //지역 필터링 설정
+    if (method === "대면" && region) {
+      conditions.push("region = ?");
+      params.push(region);
+    }
+
+    // 가격 유형 및 가격 범위 필터링 설정(상관없음 포함 시 전체 조회)
+    if (priceType && priceType !== "상관없음") {
+      conditions.push("priceType = ?");
+      params.push(priceType);
+      if (priceMin !== undefined && priceMax !== undefined) {
+        conditions.push("price BETWEEN ? AND ?");
+        params.push(priceMin, priceMax);
+      }
+    }
+
+    // 쿼리 생성
+    const query = `
+      SELECT recruit.recruitId, recruit.field, recruit.title, recruit.content, recruit.method, recruit.region
+      FROM recruit
+      ${conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : ""}
+    `;
+
+    // 조건에 맞는 구인글 조회
+    const [recruits] = await pool.query(query, params);
+
+    // 각 구인글에 대해 지원 여부 확인(지원O:1,지원X:0)
+    const recruitWithApplicateStatus = await Promise.all(
+      recruits.map(async (recruit) => {
+        const [application] = await pool.query(
+          "SELECT * FROM application WHERE recruitId = ? AND profileId = ?",
+          [recruit.recruitId, profileId]
+        );
+        const isApplicate = application.length > 0 ? 1 : 0;
+
+        return {
+          recruitId: recruit.recruitId,
+          field: recruit.field,
+          title: recruit.title,
+          content: recruit.content,
+          method: recruit.method,
+          region: recruit.region,
+          isApplicate,
+        };
+      })
+    );
+
+    // 결과 반환
+    res.status(200).json(recruitWithApplicateStatus);
   } catch (error) {
     console.error("Error occurred: ", error.message);
     res.status(500).json({

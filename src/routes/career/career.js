@@ -320,20 +320,18 @@ router.get("/:profileId", async (req, res) => {
 router.post("/filter", async (req, res) => {
   /**
     #swagger.tags = ['Career']
-    #swagger.summary = '나리 필터링에 맞는 경력프로필 조회'
+    #swagger.summary = '상세조건 필터링에 맞는 경력프로필 조회'
    */
 
   try {
     const { field, age, method, region, priceType, priceMin, priceMax } =
       req.body;
 
-    // 조건 검증
     if ((method === "대면" || method === "모두 선택") && !region) {
       return res
         .status(400)
         .json({ error: "대면 또는 모두 선택인 경우 지역 정보가 필요합니다." });
     }
-    // 가격 유형 및 범위 검증
     if (
       priceType &&
       priceType !== "상관없음" &&
@@ -433,6 +431,48 @@ router.post("/filter", async (req, res) => {
     res
       .status(500)
       .json({ error: "경력 프로필 정보를 불러오는 데 실패했습니다." });
+  }
+});
+
+router.get("/myprofile/sync", async (req, res) => {
+  /**
+    #swagger.tags = ['Career']
+    #swagger.summary = '내 경력 프로필 동기화'
+   */
+
+  const profileId = req.user.profileId;
+  if (!profileId) {
+    return res
+      .status(400)
+      .json({ error: "유효한 profileId가 제공되지 않았습니다." });
+  }
+  try {
+    // 경력 프로필 존재 여부 확인
+    const [careerProfile] = await pool.query(
+      "SELECT careerProfileId, field, method, region, priceType, price FROM careerProfile WHERE profileId = ?",
+      [profileId]
+    );
+    if (careerProfile.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    const response = {
+      careerProfileId: careerProfile[0].careerProfileId,
+      field: careerProfile[0].field === null ? "" : careerProfile[0].field,
+      method: careerProfile[0].method === null ? "" : careerProfile[0].method,
+      region: careerProfile[0].region === null ? "" : careerProfile[0].region,
+      priceType:
+        careerProfile[0].priceType === null ? "" : careerProfile[0].priceType,
+      price: careerProfile[0].price === null ? "" : careerProfile[0].price,
+      //...careerProfile[0],
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching recruit detail" });
   }
 });
 
