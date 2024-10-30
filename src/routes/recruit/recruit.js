@@ -223,6 +223,7 @@ router.get("/list", async (req, res) => {
     #swagger.summary = '구인글 전체 목록 불러오기'
     
    */
+  const userProfileId = req.user.profileId;
   try {
     //구인글 정보
     const [recruits] = await pool.query(
@@ -242,6 +243,14 @@ router.get("/list", async (req, res) => {
           [recruit.profileId]
         );
         const { nickname, gender, birthyear, profile } = user[0];
+
+        // application 테이블에서 지원 여부 확인
+        const [application] = await pool.query(
+          "SELECT * FROM application WHERE recruitId = ? AND profileId = ?",
+          [recruit.recruitId, userProfileId]
+        );
+        const isApplicate = application.length > 0 ? 1 : 0;
+
         return {
           recruitId: recruit.recruitId,
           title: recruit.title,
@@ -253,6 +262,7 @@ router.get("/list", async (req, res) => {
           gender,
           birthyear,
           profile,
+          isApplicate,
         };
       })
     );
