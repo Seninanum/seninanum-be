@@ -333,7 +333,9 @@ router.post("/filter", async (req, res) => {
         .status(400)
         .json({ error: "대면 또는 모두 선택인 경우 지역 정보가 필요합니다." });
     }
+    // 가격 유형 및 범위 검증
     if (
+      priceType &&
       priceType !== "상관없음" &&
       (priceMin === undefined || priceMax === undefined)
     ) {
@@ -346,30 +348,36 @@ router.post("/filter", async (req, res) => {
     const conditions = ["isSatisfy = 1"];
     const params = [];
 
-    if (method && method !== "모두 선택") {
+    // 만남 방식 필터링 설정
+    if (method === "모두 선택") {
+      // "모두 선택"일 경우 모든 방식이 포함되도록 조건 설정
+      conditions.push(
+        "(method = '대면' OR method = '비대면' OR method = '모두 선택')"
+      );
+    } else if (method) {
+      // 특정 방식이 지정된 경우 해당 방식만 필터링
       conditions.push("method = ?");
       params.push(method);
     }
-    if (priceType && priceType !== "상관없음") {
-      conditions.push("priceType = ?");
-      params.push(priceType);
-    }
-    if (
-      priceType === "건당" &&
-      "시간당" &&
-      priceMin !== undefined &&
-      priceMax !== undefined
-    ) {
-      conditions.push("price BETWEEN ? AND ?");
-      params.push(priceMin, priceMax);
-    }
-    if (region) {
+
+    //지역 필터링 설정
+    if (region && method === "대면") {
       conditions.push("region = ?");
       params.push(region);
     }
 
-    // age 필터링 설정 (부분 일치)
-    if (age && age !== "상관없음") {
+    // 가격 유형 및 가격 범위 필터링 설정(상관없음 포함 시 전체 조회)
+    if (priceType && priceType !== "상관없음") {
+      conditions.push("priceType = ?");
+      params.push(priceType);
+      if (priceMin !== undefined && priceMax !== undefined) {
+        conditions.push("price BETWEEN ? AND ?");
+        params.push(priceMin, priceMax);
+      }
+    }
+
+    // age 필터링 설정 ("상관없음" 포함 시 전체 조회)
+    if (age && !age.includes("상관없음")) {
       const ageArray = Array.isArray(age) ? age : age.split(",");
       ageArray.forEach((a) => {
         conditions.push("age LIKE ?");
@@ -377,7 +385,7 @@ router.post("/filter", async (req, res) => {
       });
     }
 
-    // 필드 조건 설정 (부분 일치)
+    // 필드 조건 설정
     if (field) {
       const userFieldsArray = Array.isArray(field) ? field : field.split(",");
       userFieldsArray.forEach((f) => {
