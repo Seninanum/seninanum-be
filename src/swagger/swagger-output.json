@@ -245,6 +245,9 @@
           "200": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "401": {
             "description": "Unauthorized"
           },
@@ -357,6 +360,49 @@
         }
       }
     },
+    "/recruit/close": {
+      "post": {
+        "tags": [
+          "Recruit"
+        ],
+        "summary": "구인글 마감",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "recruitId": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/recruit/mylist/{recruitId}": {
       "get": {
         "tags": [
@@ -398,9 +444,19 @@
         ],
         "summary": "내 구인글 목록 조회",
         "description": "",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"
@@ -438,40 +494,39 @@
       }
     },
     "/recruit/filter": {
-      "get": {
+      "post": {
         "tags": [
           "Recruit"
         ],
-        "summary": "동백 분야에 맞는 구인글 조회",
+        "summary": "상세조건 필터링에 맞는 구인글 조회",
         "description": "",
         "parameters": [
           {
-            "name": "   ",
-            "field": "경제",
-            "list": [
-              {
-                "userId": 12345678,
-                "title": "은퇴를 앞두고 있습니다. 앞으로의 자산 계획에 조언을 구합니다.",
-                "content": "은퇴를 앞두고 있는 60대 직장인입니다.",
-                "method": "비대면 서비스",
-                "priceType": "건당",
-                "price": 10000,
-                "region": "",
-                "field": "경제,생활"
-              },
-              {
-                "userId": 12345678,
-                "title": "장애아동 교육분야 전문가의 조언이 필요합니다.",
-                "content": "안녕하세요? 대학생 나리입니다. ",
-                "method": "비대면 서비스",
-                "priceType": "건당",
-                "price": 40000,
-                "region": null,
-                "field": "경제,교육"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "example": "any"
+                },
+                "method": {
+                  "example": "any"
+                },
+                "region": {
+                  "example": "any"
+                },
+                "priceType": {
+                  "example": "any"
+                },
+                "priceMin": {
+                  "example": "any"
+                },
+                "priceMax": {
+                  "example": "any"
+                }
               }
-            ],
-            "in": "query",
-            "type": "string"
+            }
           }
         ],
         "responses": {
@@ -480,6 +535,37 @@
           },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/recruit/others/{profileId}": {
+      "get": {
+        "tags": [
+          "Recruit"
+        ],
+        "summary": "다른 사용자의 구인글 목록 조회",
+        "description": "",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           },
           "401": {
             "description": "Unauthorized"
@@ -676,49 +762,35 @@
           {
             "name": "body",
             "in": "body",
-            "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "profileId": {
-                  "type": "number",
-                  "example": 111111
+                  "example": "any"
                 },
                 "introduce": {
-                  "type": "string",
-                  "example": "소개"
+                  "example": "any"
                 },
                 "age": {
-                  "type": "string",
-                  "example": "60대"
+                  "example": "any"
                 },
                 "field": {
-                  "type": "string",
-                  "example": "경제"
+                  "example": "any"
                 },
                 "service": {
-                  "type": "string",
-                  "example": "제공할 서비스"
+                  "example": "any"
                 },
                 "method": {
-                  "type": "string",
-                  "example": "대면"
+                  "example": "any"
                 },
                 "region": {
-                  "type": "string",
-                  "example": "종로구"
+                  "example": "any"
                 },
                 "priceType": {
-                  "type": "string",
-                  "example": "시간당"
+                  "example": "any"
                 },
                 "price": {
-                  "type": "number",
-                  "example": 1000
-                },
-                "progressStep": {
-                  "type": "number",
-                  "example": 8
+                  "example": "any"
                 }
               }
             }
@@ -820,7 +892,7 @@
         "tags": [
           "Career"
         ],
-        "summary": "나리 필터링에 맞는 경력프로필 조회",
+        "summary": "상세조건 필터링에 맞는 경력프로필 조회",
         "description": "",
         "parameters": [
           {
@@ -829,25 +901,57 @@
             "schema": {
               "type": "object",
               "properties": {
+                "field": {
+                  "example": "any"
+                },
+                "age": {
+                  "example": "any"
+                },
                 "method": {
-                  "example": "any"
-                },
-                "priceType": {
-                  "example": "any"
-                },
-                "price": {
                   "example": "any"
                 },
                 "region": {
                   "example": "any"
                 },
-                "field": {
+                "priceType": {
+                  "example": "any"
+                },
+                "priceMin": {
+                  "example": "any"
+                },
+                "priceMax": {
                   "example": "any"
                 }
               }
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/career/myprofile/sync": {
+      "get": {
+        "tags": [
+          "Career"
+        ],
+        "summary": "내 경력 프로필 동기화",
+        "description": "",
         "responses": {
           "200": {
             "description": "OK"
@@ -1073,6 +1177,9 @@
           "200": {
             "description": "OK"
           },
+          "201": {
+            "description": "Created"
+          },
           "400": {
             "description": "Bad Request"
           },
@@ -1105,8 +1212,429 @@
           "403": {
             "description": "Forbidden"
           },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/chat/info/{roomId}": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "채팅 멤버 조회",
+        "description": "",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
           "404": {
             "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/chat/allmessages/{roomId}": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "전체 채팅 내역 조회",
+        "description": "",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/chat/unread/{roomId}": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "채팅 내역 조회",
+        "description": "",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/chat/{roomId}": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "채팅 페이지 개수 반환",
+        "description": "",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/chat/message/{roomId}": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "채팅 페이지 별 메세지 내역 반환",
+        "description": "",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/chat/disconnect": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "roomId": {
+                  "example": "any"
+                },
+                "lastReadMessageId": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/application/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "recruitId": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/application/status": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/application/recruit/list": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/application/volunteer/{recruitId}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "recruitId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/application/list": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "recruitId",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/match/dong": {
+      "get": {
+        "tags": [
+          "Career"
+        ],
+        "summary": "최근 구인글의 분야별 동백 맞춤 추천",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/match/recruit": {
+      "get": {
+        "tags": [
+          "Career"
+        ],
+        "summary": "분야별 맞춤 구인글 추천",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
