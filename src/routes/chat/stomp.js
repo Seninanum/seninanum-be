@@ -11,7 +11,7 @@ module.exports = function (server) {
   // STOMP 서버 설정
   const stompServer = new StompServer({
     server: server, // Express HTTP 서버와 통합
-    // debug: console.log,
+    debug: console.log,
     path: "/meet", // WebSocket 엔드포인트
     heartbeat: [0, 0], // 하트비트 설정
   });
