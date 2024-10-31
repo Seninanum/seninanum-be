@@ -46,7 +46,7 @@ router.get("/:freeBoardId", async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      "SELECT freeBoardId, profileId, title, content, image, likes, commentCount, createdAt FROM freeBoard WHERE id = ?",
+      "SELECT freeBoardId, profileId, title, content, image, likes, commentCount, createdAt FROM freeBoard WHERE freeBoardId = ?",
       [freeBoardId]
     );
     if (rows.length > 0) {
