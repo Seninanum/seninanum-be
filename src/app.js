@@ -23,6 +23,8 @@ const chatRouter = require("./routes/chat/chat");
 const profileRouter = require("./routes/profile/basicProfile");
 const applicationRouter = require("./routes/application/application");
 const matchRouter = require("./routes/match/match");
+const freeBoardRouter = require("./routes/board/freeBoard");
+const adviceBoardRouter = require("./routes/board/adviceBoard");
 
 // swagger
 const swaggerUi = require("swagger-ui-express");
@@ -67,6 +69,8 @@ app.use("/chatroom", verifyToken, chatRoomRouter);
 app.use("/chat", verifyToken, chatRouter);
 app.use("/application", verifyToken, applicationRouter);
 app.use("/match", verifyToken, matchRouter);
+app.use("/board/advice", verifyToken, adviceBoardRouter);
+app.use("/board/free", verifyToken, freeBoardRouter);
 
 app.use(
   "/api-docs",
