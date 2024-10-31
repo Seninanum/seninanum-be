@@ -31,7 +31,10 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const [rows] = await pool.query(
-      "SELECT freeBoardId, profileId, title, content, image, likes, commentCount, createdAt FROM freeBoard ORDER BY createdAt DESC"
+      `SELECT fb.freeBoardId, fb.profileId, fb.title, fb.content, fb.image, fb.likes, fb.commentCount, fb.createdAt, p.nickname, p.userType
+         FROM freeBoard AS fb
+         JOIN profile AS p ON fb.profileId = p.profileId
+         ORDER BY fb.createdAt DESC`
     );
     res.status(200).json(rows);
   } catch (error) {
@@ -46,7 +49,11 @@ router.get("/:freeBoardId", async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      "SELECT freeBoardId, profileId, title, content, image, likes, commentCount, createdAt FROM freeBoard WHERE freeBoardId = ?",
+      `SELECT fb.freeBoardId, fb.profileId, fb.title, fb.content, fb.image, fb.likes, fb.commentCount, fb.createdAt, 
+                p.profile, p.nickname, p.userType
+         FROM freeBoard AS fb
+         JOIN profile AS p ON fb.profileId = p.profileId
+         WHERE fb.freeBoardId = ?`,
       [freeBoardId]
     );
     if (rows.length > 0) {

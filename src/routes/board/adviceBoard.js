@@ -31,7 +31,10 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const [rows] = await pool.query(
-      "SELECT adviceBoardId, profileId, title, content, commentCount, createdAt FROM adviceBoard ORDER BY createdAt DESC"
+      `SELECT ab.adviceBoardId, ab.profileId, ab.title, ab.content, ab.commentCount, ab.createdAt, p.nickname, p.userType
+         FROM adviceBoard AS ab
+         JOIN profile AS p ON ab.profileId = p.profileId
+         ORDER BY ab.createdAt DESC`
     );
     res.status(200).json(rows);
   } catch (error) {
@@ -46,7 +49,11 @@ router.get("/:adviceBoardId", async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      "SELECT adviceBoardId, profileId, title, content, commentCount, createdAt FROM adviceBoard WHERE adviceBoardId = ?",
+      `SELECT ab.adviceBoardId, ab.profileId, ab.title, ab.content, ab.commentCount, ab.createdAt, 
+                p.profile, p.nickname, p.userType
+         FROM adviceBoard AS ab
+         JOIN profile AS p ON ab.profileId = p.profileId
+         WHERE ab.adviceBoardId = ?`,
       [adviceBoardId]
     );
     if (rows.length > 0) {
