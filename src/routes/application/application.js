@@ -2,8 +2,11 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../database/db");
 
-// 구인글 지원
 router.post("/", async (req, res) => {
+  /**
+      #swagger.tags = ['Application']
+      #swagger.summary = '구인글 지원하기'
+     */
   const { recruitId } = req.body;
   const profileId = req.user.profileId;
 
@@ -37,8 +40,11 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 구인글 지원 취소
 router.delete("/", async (req, res) => {
+  /**
+      #swagger.tags = ['Application']
+      #swagger.summary = '구인글 지원취소하기'
+     */
   const { applicationId } = req.query; // req.query로 수정
 
   if (!applicationId) {
@@ -64,8 +70,11 @@ router.delete("/", async (req, res) => {
   }
 });
 
-// 동백의 구인글 지원 상태 조회
 router.get("/status", async (req, res) => {
+  /**
+      #swagger.tags = ['Application']
+      #swagger.summary = '동백의 구인글 지원 상태 조회'
+     */
   const profileId = req.user.profileId;
   const { status } = req.query; // 쿼리파라미터로 status를 받음 ('모집중'/'마감')
 
@@ -95,8 +104,11 @@ router.get("/status", async (req, res) => {
   }
 });
 
-// 동백의 지원한 구인글 조회
 router.get("/recruit/list", async (req, res) => {
+  /**
+      #swagger.tags = ['Application']
+      #swagger.summary = '동백의 지원한 구인글 조회'
+     */
   const profileId = req.user.profileId;
   try {
     // 동백이 지원한 구인글 recruitId를 조회
@@ -133,8 +145,11 @@ router.get("/recruit/list", async (req, res) => {
   }
 });
 
-// 지원자 목록 조회
 router.get("/volunteer/:recruitId", async (req, res) => {
+  /**
+      #swagger.tags = ['Application']
+      #swagger.summary = '지원자 목록 조회'
+     */
   const recruitId = req.params.recruitId;
 
   try {
@@ -153,8 +168,11 @@ router.get("/volunteer/:recruitId", async (req, res) => {
   }
 });
 
-// 구인글 별 전체 지원자 목록 조회
 router.get("/list", async (req, res) => {
+  /**
+      #swagger.tags = ['Application']
+      #swagger.summary = '구인글 별 전체 지원자 목록 조회'
+     */
   const profileId = req.user.profileId;
   const { recruitId } = req.query; // 쿼리파라미터로 recruitId를 받음
 
