@@ -4,7 +4,7 @@ const pool = require("../../database/db");
 
 router.get("/dong", async (req, res) => {
   /**
-      #swagger.tags = ['Career']
+      #swagger.tags = ['Match']
       #swagger.summary = '최근 구인글의 분야별 동백 맞춤 추천'
      */
   try {
@@ -123,8 +123,8 @@ router.get("/dong", async (req, res) => {
 
 router.get("/recruit", async (req, res) => {
   /**
-      #swagger.tags = ['Career']
-      #swagger.summary = '분야별 맞춤 구인글 추천'
+      #swagger.tags = ['Match']
+      #swagger.summary = '분야별 맞춤형 구인글 추천'
      */
   const profileId = req.user.profileId;
   try {

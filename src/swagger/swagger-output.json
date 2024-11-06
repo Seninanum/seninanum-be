@@ -1428,6 +1428,10 @@
     },
     "/application/": {
       "post": {
+        "tags": [
+          "Application"
+        ],
+        "summary": "구인글 지원하기",
         "description": "",
         "parameters": [
           {
@@ -1462,6 +1466,10 @@
         }
       },
       "delete": {
+        "tags": [
+          "Application"
+        ],
+        "summary": "구인글 지원취소하기",
         "description": "",
         "parameters": [
           {
@@ -1494,6 +1502,10 @@
     },
     "/application/status": {
       "get": {
+        "tags": [
+          "Application"
+        ],
+        "summary": "동백의 구인글 지원 상태 조회",
         "description": "",
         "parameters": [
           {
@@ -1523,6 +1535,10 @@
     },
     "/application/recruit/list": {
       "get": {
+        "tags": [
+          "Application"
+        ],
+        "summary": "동백의 지원한 구인글 조회",
         "description": "",
         "responses": {
           "200": {
@@ -1542,6 +1558,10 @@
     },
     "/application/volunteer/{recruitId}": {
       "get": {
+        "tags": [
+          "Application"
+        ],
+        "summary": "지원자 목록 조회",
         "description": "",
         "parameters": [
           {
@@ -1569,6 +1589,10 @@
     },
     "/application/list": {
       "get": {
+        "tags": [
+          "Application"
+        ],
+        "summary": "구인글 별 전체 지원자 목록 조회",
         "description": "",
         "parameters": [
           {
@@ -1599,7 +1623,7 @@
     "/match/dong": {
       "get": {
         "tags": [
-          "Career"
+          "Match"
         ],
         "summary": "최근 구인글의 분야별 동백 맞춤 추천",
         "description": "",
@@ -1622,9 +1646,9 @@
     "/match/recruit": {
       "get": {
         "tags": [
-          "Career"
+          "Match"
         ],
-        "summary": "분야별 맞춤 구인글 추천",
+        "summary": "분야별 맞춤형 구인글 추천",
         "description": "",
         "responses": {
           "200": {
@@ -1635,6 +1659,181 @@
           },
           "403": {
             "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/board/advice/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "example": "any"
+                },
+                "content": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/board/advice/{adviceBoardId}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "adviceBoardId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/board/free/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "example": "any"
+                },
+                "content": {
+                  "example": "any"
+                },
+                "image": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/board/free/{freeBoardId}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "freeBoardId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
