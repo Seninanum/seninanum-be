@@ -40,23 +40,25 @@ router.get("/:freeBoardId/comments", async (req, res) => {
   const profileId = req.user.profileId;
 
   try {
-    // 게시글 작성자 ID 조회
+    // 게시글 작성자 ID 및 댓글 수 조회
     const [post] = await pool.query(
-      "SELECT profileId FROM freeBoard WHERE freeBoardId = ?",
+      "SELECT profileId, commentCount FROM freeBoard WHERE freeBoardId = ?",
       [freeBoardId]
     );
     const postOwnerId = post[0]?.profileId;
+    const commentCount = post[0]?.commentCount;
 
-    // 댓글 조회
+    // 댓글과 작성자 정보 조회
     const [rows] = await pool.query(
-      `SELECT id, profileId, content, isSecret, parentId, createdAt
-           FROM freeBoardComment 
-           WHERE freeBoardId = ?
-           ORDER BY createdAt ASC`,
+      `SELECT c.id, c.profileId, c.content, c.isSecret, c.parentId, c.createdAt,
+              p.profile, p.nickname, p.userType
+         FROM freeBoardComment AS c
+         JOIN profile AS p ON c.profileId = p.profileId
+         WHERE c.freeBoardId = ?
+         ORDER BY c.createdAt ASC`,
       [freeBoardId]
     );
 
-    // 비밀 댓글 필터링 및 부모-자식 구조 생성
     const comments = rows.reduce((acc, comment) => {
       // 비밀 댓글 필터링: 게시글 작성자와 댓글 작성자만 내용을 볼 수 있음
       if (
@@ -78,7 +80,10 @@ router.get("/:freeBoardId/comments", async (req, res) => {
       return acc;
     }, []);
 
-    res.status(200).json(comments);
+    res.status(200).json({
+      commentCount,
+      comments,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "댓글 조회에 실패했습니다." });
