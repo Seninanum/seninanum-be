@@ -16,7 +16,7 @@ router.post(
    */
 
     const file = req.files["pdfFile"] ? req.files["pdfFile"][0] : null; // multer가 처리한 파일 정보
-    const profileId = req.body.profileId; // 텍스트 필드에서 profileId 가져오기
+    const profileId = req.body.profileId;
 
     if (!file) {
       return res.status(400).json({ message: "PDF 파일이 없습니다." });
