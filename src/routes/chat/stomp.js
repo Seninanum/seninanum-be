@@ -45,6 +45,7 @@ module.exports = function (server) {
 
       switch (messageBody.senderType) {
         case "USER":
+        case "IMAGE":
         case "SCHEDULE":
           await handleSendMessage(stompServer, messageBody, roomId);
           break;
