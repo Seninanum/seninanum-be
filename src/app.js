@@ -73,8 +73,8 @@ app.use("/application", verifyToken, applicationRouter);
 app.use("/match", verifyToken, matchRouter);
 app.use("/board/advice", verifyToken, adviceBoardRouter);
 app.use("/board/free", verifyToken, freeBoardRouter);
-app.use("/", verifyToken, imageRouter);
 app.use("/freeBoard", verifyToken, freeBoardCommentRouter);
+app.use("/", verifyToken, imageRouter);
 
 app.use(
   "/api-docs",
