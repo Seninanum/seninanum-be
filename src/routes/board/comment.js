@@ -3,9 +3,9 @@ const router = express.Router();
 const pool = require("../../database/db");
 
 //댓글 작성
-router.post("/:freeBoardId", async (req, res) => {
+router.post("/:boardType/:postId", async (req, res) => {
   const profileId = req.user.profileId;
-  const { freeBoardId } = req.params;
+  const { boardType, postId } = req.params;
   const { content, isSecret = 0, parentId } = req.body;
 
   if (!content) {
@@ -14,14 +14,14 @@ router.post("/:freeBoardId", async (req, res) => {
 
   try {
     const [result] = await pool.query(
-      "INSERT INTO freeBoardComment (freeBoardId, profileId, content, isSecret, parentId) VALUES (?, ?, ?, ?, ?)",
-      [freeBoardId, profileId, content, isSecret, parentId]
+      "INSERT INTO comment (boardType, postId, profileId, content, isSecret, parentId) VALUES (?, ?, ?, ?, ?, ?)",
+      [boardType, postId, profileId, content, isSecret, parentId]
     );
 
     // 댓글 수 증가
     await pool.query(
-      "UPDATE freeBoard SET commentCount = commentCount + 1 WHERE freeBoardId = ?",
-      [freeBoardId]
+      `UPDATE ${boardType} SET commentCount = commentCount + 1 WHERE ${boardType}Id = ?`,
+      [postId]
     );
 
     res.status(201).json({
@@ -35,30 +35,30 @@ router.post("/:freeBoardId", async (req, res) => {
 });
 
 // 댓글 조회
-router.get("/:freeBoardId/comments", async (req, res) => {
-  const { freeBoardId } = req.params;
+router.get("/:boardType/:postId/comments", async (req, res) => {
+  const { boardType, postId } = req.params;
   const profileId = req.user.profileId;
 
   try {
-    // 게시글 작성자 ID 및 댓글 수 조회
+    // 게시글 작성자 ID 조회
     const [post] = await pool.query(
-      "SELECT profileId, commentCount FROM freeBoard WHERE freeBoardId = ?",
-      [freeBoardId]
+      `SELECT profileId FROM ${boardType} WHERE ${boardType}Id = ?`,
+      [postId]
     );
     const postOwnerId = post[0]?.profileId;
-    const commentCount = post[0]?.commentCount;
 
     // 댓글과 작성자 정보 조회
     const [rows] = await pool.query(
       `SELECT c.id, c.profileId, c.content, c.isSecret, c.parentId, c.createdAt,
               p.profile, p.nickname, p.userType
-         FROM freeBoardComment AS c
+         FROM comment AS c
          JOIN profile AS p ON c.profileId = p.profileId
-         WHERE c.freeBoardId = ?
+         WHERE c.boardType = ? AND c.postId= ?
          ORDER BY c.createdAt ASC`,
-      [freeBoardId]
+      [boardType, postId]
     );
 
+    // 비밀 댓글 필터링 및 부모-자식 구조 생성
     const comments = rows.reduce((acc, comment) => {
       // 비밀 댓글 필터링: 게시글 작성자와 댓글 작성자만 내용을 볼 수 있음
       if (
@@ -81,7 +81,6 @@ router.get("/:freeBoardId/comments", async (req, res) => {
     }, []);
 
     res.status(200).json({
-      commentCount,
       comments,
     });
   } catch (error) {
