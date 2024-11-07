@@ -25,6 +25,7 @@ const applicationRouter = require("./routes/application/application");
 const matchRouter = require("./routes/match/match");
 const freeBoardRouter = require("./routes/board/freeBoard");
 const adviceBoardRouter = require("./routes/board/adviceBoard");
+const imageRouter = require("./routes/aws/s3Image");
 const commentRouter = require("./routes/board/comment");
 
 // swagger
@@ -72,6 +73,7 @@ app.use("/application", verifyToken, applicationRouter);
 app.use("/match", verifyToken, matchRouter);
 app.use("/board/advice", verifyToken, adviceBoardRouter);
 app.use("/board/free", verifyToken, freeBoardRouter);
+app.use("/", verifyToken, imageRouter);
 app.use("/board", verifyToken, commentRouter);
 
 app.use(
