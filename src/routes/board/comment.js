@@ -20,7 +20,7 @@ router.post("/:boardType/:postId", async (req, res) => {
 
     // 댓글 수 증가
     await pool.query(
-      `UPDATE ${boardType} SET commentCount = commentCount + 1 WHERE ${boardType}Id = ?`,
+      `UPDATE ${boardType}Board SET commentCount = commentCount + 1 WHERE ${boardType}BoardId = ?`,
       [postId]
     );
 
@@ -42,7 +42,7 @@ router.get("/:boardType/:postId/comments", async (req, res) => {
   try {
     // 게시글 작성자 ID 조회
     const [post] = await pool.query(
-      `SELECT profileId FROM ${boardType} WHERE ${boardType}Id = ?`,
+      `SELECT profileId FROM ${boardType}Board WHERE ${boardType}IdBoard = ?`,
       [postId]
     );
     const postOwnerId = post[0]?.profileId;
