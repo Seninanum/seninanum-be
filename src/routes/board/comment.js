@@ -42,7 +42,7 @@ router.get("/:boardType/:postId/comments", async (req, res) => {
   try {
     // 게시글 작성자 ID 조회
     const [post] = await pool.query(
-      `SELECT profileId FROM ${boardType}Board WHERE ${boardType}IdBoard = ?`,
+      `SELECT profileId FROM ${boardType}Board WHERE ${boardType}BoardId = ?`,
       [postId]
     );
     const postOwnerId = post[0]?.profileId;
