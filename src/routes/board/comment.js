@@ -49,7 +49,7 @@ router.get("/:boardType/:postId/comments", async (req, res) => {
 
     // 댓글과 작성자 정보 조회
     const [rows] = await pool.query(
-      `SELECT c.id, c.profileId, c.content, c.isSecret, c.parentId, c.createdAt,
+      `SELECT c.id, c.profileId, c.content, c.isSecret, c.parentId, c.createdAt, c.likes,
               p.profile, p.nickname, p.userType
          FROM comment AS c
          JOIN profile AS p ON c.profileId = p.profileId
@@ -86,6 +86,42 @@ router.get("/:boardType/:postId/comments", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "댓글 조회에 실패했습니다." });
+  }
+});
+
+// 좋아요 등록/취소
+router.post("/comment/:commentId/like", async (req, res) => {
+  const profileId = req.user.profileId;
+  const { commentId } = req.params;
+
+  try {
+    // 좋아요 여부 확인
+    const [existingLike] = await pool.query(
+      "SELECT id FROM likes WHERE targetId = ? AND type = 'comment' AND profileId = ?",
+      [commentId, profileId]
+    );
+
+    if (existingLike.length > 0) {
+      // 이미 좋아요가 존재 -> 좋아요 취소
+      await pool.query("DELETE FROM likes WHERE id = ?", [existingLike[0].id]);
+      await pool.query("UPDATE comment SET likes = likes - 1 WHERE id = ?", [
+        commentId,
+      ]);
+      return res.status(200).json({ message: "좋아요가 취소되었습니다." });
+    } else {
+      // 좋아요 추가
+      await pool.query(
+        "INSERT INTO likes (targetId, type, profileId) VALUES (?, 'comment', ?)",
+        [commentId, profileId]
+      );
+      await pool.query("UPDATE comment SET likes = likes + 1 WHERE id = ?", [
+        commentId,
+      ]);
+      return res.status(201).json({ message: "좋아요가 추가되었습니다." });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "좋아요 처리에 실패했습니다." });
   }
 });
 
