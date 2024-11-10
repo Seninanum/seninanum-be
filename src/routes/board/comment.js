@@ -60,6 +60,7 @@ router.get("/:boardType/:postId/comments", async (req, res) => {
 
     // 비밀 댓글 필터링 및 부모-자식 구조 생성
     const comments = rows.reduce((acc, comment) => {
+      const isOwner = comment.profileId === profileId;
       // 비밀 댓글 필터링: 게시글 작성자와 댓글 작성자만 내용을 볼 수 있음
       if (
         comment.isSecret &&
@@ -68,13 +69,14 @@ router.get("/:boardType/:postId/comments", async (req, res) => {
       ) {
         comment.content = "비밀 댓글입니다.";
       }
+      const commentWithOwnerInfo = { ...comment, isOwner };
 
       if (comment.parentId === null) {
-        acc.push({ ...comment, replies: [] });
+        acc.push({ ...commentWithOwnerInfo, replies: [] });
       } else {
         const parent = acc.find((item) => item.id === comment.parentId);
         if (parent) {
-          parent.replies.push(comment);
+          parent.replies.push(commentWithOwnerInfo);
         }
       }
       return acc;
