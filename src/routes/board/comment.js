@@ -58,11 +58,9 @@ router.get("/:boardType/:postId/comments", async (req, res) => {
       [boardType, postId]
     );
 
-    // 좋아요 여부 확인 및 비밀 댓글 필터링
+    // 좋아요 여부 확인 및 게시글 작성자 여부 체크
     const comments = await Promise.all(
       rows.map(async (comment) => {
-        const isOwner = comment.profileId === profileId;
-
         const [likeResult] = await pool.query(
           "SELECT id FROM likes WHERE targetId = ? AND type = 'comment' AND profileId = ?",
           [comment.id, profileId]
@@ -79,7 +77,7 @@ router.get("/:boardType/:postId/comments", async (req, res) => {
 
         return {
           ...comment,
-          isOwner,
+          isPostOwner: comment.profileId === postOwnerId,
           liked: likeResult.length > 0 ? 1 : 0,
         };
       })

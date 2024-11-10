@@ -46,8 +46,10 @@ router.get("/", async (req, res) => {
 // 게시글 상세 조회 API
 router.get("/:freeBoardId", async (req, res) => {
   const { freeBoardId } = req.params;
+  const profileId = req.user.profileId;
 
   try {
+    // 게시글 정보 조회
     const [rows] = await pool.query(
       `SELECT fb.freeBoardId, fb.profileId, fb.title, fb.content, fb.image, fb.likes, fb.commentCount, fb.createdAt, 
                 p.profile, p.nickname, p.userType
@@ -56,11 +58,20 @@ router.get("/:freeBoardId", async (req, res) => {
          WHERE fb.freeBoardId = ?`,
       [freeBoardId]
     );
-    if (rows.length > 0) {
-      res.status(200).json(rows[0]);
-    } else {
-      res.status(404).json({ message: "게시글을 찾을 수 없습니다." });
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "게시글을 찾을 수 없습니다." });
     }
+
+    const post = rows[0];
+    // 사용자가 좋아요를 눌렀는지 여부 확인
+    const [likeResult] = await pool.query(
+      "SELECT id FROM likes WHERE targetId = ? AND type = 'post' AND profileId = ?",
+      [freeBoardId, profileId]
+    );
+    const liked = likeResult.length > 0 ? 1 : 0;
+
+    res.status(200).json({ ...post, liked });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "게시글 조회에 실패했습니다." });
