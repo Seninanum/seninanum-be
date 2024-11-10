@@ -58,32 +58,48 @@ router.get("/:boardType/:postId/comments", async (req, res) => {
       [boardType, postId]
     );
 
-    // 비밀 댓글 필터링 및 부모-자식 구조 생성
-    const comments = rows.reduce((acc, comment) => {
-      const isOwner = comment.profileId === profileId;
-      // 비밀 댓글 필터링: 게시글 작성자와 댓글 작성자만 내용을 볼 수 있음
-      if (
-        comment.isSecret &&
-        comment.profileId !== profileId &&
-        comment.profileId !== postOwnerId
-      ) {
-        comment.content = "비밀 댓글입니다.";
-      }
-      const commentWithOwnerInfo = { ...comment, isOwner };
+    // 좋아요 여부 확인 및 비밀 댓글 필터링
+    const comments = await Promise.all(
+      rows.map(async (comment) => {
+        const isOwner = comment.profileId === profileId;
 
+        const [likeResult] = await pool.query(
+          "SELECT id FROM likes WHERE targetId = ? AND type = 'comment' AND profileId = ?",
+          [comment.id, profileId]
+        );
+
+        // 비밀 댓글 필터링: 게시글 작성자와 댓글 작성자만 내용을 볼 수 있음
+        if (
+          comment.isSecret &&
+          comment.profileId !== profileId &&
+          comment.profileId !== postOwnerId
+        ) {
+          comment.content = "비밀 댓글입니다.";
+        }
+
+        return {
+          ...comment,
+          isOwner,
+          liked: likeResult.length > 0 ? 1 : 0,
+        };
+      })
+    );
+
+    // 부모-자식 구조로 댓글 정리
+    const formattedComments = comments.reduce((acc, comment) => {
       if (comment.parentId === null) {
-        acc.push({ ...commentWithOwnerInfo, replies: [] });
+        acc.push({ ...comment, replies: [] });
       } else {
         const parent = acc.find((item) => item.id === comment.parentId);
         if (parent) {
-          parent.replies.push(commentWithOwnerInfo);
+          parent.replies.push(comment);
         }
       }
       return acc;
     }, []);
 
     res.status(200).json({
-      comments,
+      comments: formattedComments,
     });
   } catch (error) {
     console.error(error);
