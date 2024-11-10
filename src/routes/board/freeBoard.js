@@ -67,4 +67,42 @@ router.get("/:freeBoardId", async (req, res) => {
   }
 });
 
+// 게시글 좋아요 등록/취소 API
+router.post("/:freeBoardId/like", async (req, res) => {
+  const profileId = req.user.profileId;
+  const { freeBoardId } = req.params;
+
+  try {
+    // 좋아요 여부 확인
+    const [existingLike] = await pool.query(
+      "SELECT id FROM likes WHERE targetId = ? AND type = 'post' AND profileId = ?",
+      [freeBoardId, profileId]
+    );
+
+    if (existingLike.length > 0) {
+      // 좋아요가 이미 존재하면 -> 좋아요 취소
+      await pool.query("DELETE FROM likes WHERE id = ?", [existingLike[0].id]);
+      await pool.query(
+        "UPDATE freeBoard SET likes = likes - 1 WHERE freeBoardId = ?",
+        [freeBoardId]
+      );
+      return res.status(200).json({ message: "좋아요가 취소되었습니다." });
+    } else {
+      // 좋아요 추가
+      await pool.query(
+        "INSERT INTO likes (targetId, type, profileId) VALUES (?, 'post', ?)",
+        [freeBoardId, profileId]
+      );
+      await pool.query(
+        "UPDATE freeBoard SET likes = likes + 1 WHERE freeBoardId = ?",
+        [freeBoardId]
+      );
+      return res.status(201).json({ message: "좋아요가 추가되었습니다." });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "좋아요 처리에 실패했습니다." });
+  }
+});
+
 module.exports = router;
