@@ -12,7 +12,7 @@ router.get("/dong", async (req, res) => {
 
     // 최근 구인글 가져오기
     const [recentRecruit] = await pool.query(
-      "SELECT field, method FROM recruit WHERE profileId = ? ORDER BY createdAt DESC LIMIT 1",
+      "SELECT field, method, region FROM recruit WHERE profileId = ? ORDER BY createdAt DESC LIMIT 1",
       [profileId]
     );
 
@@ -21,7 +21,11 @@ router.get("/dong", async (req, res) => {
       return res.status(200).json({ message: "작성한 구인글이 없습니다." });
     }
 
-    const { field: recruitFields, method: recruitMethod } = recentRecruit[0];
+    const {
+      field: recruitFields,
+      method: recruitMethod,
+      region: recruitRegion,
+    } = recentRecruit[0];
     const fieldsArray = recruitFields.split(",");
 
     // 각 field에 해당하는 careerProfile 조회
