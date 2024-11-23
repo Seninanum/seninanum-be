@@ -79,6 +79,7 @@ router.get("/me", async (req, res) => {
           r.rating2,
           r.content,
           s.date AS scheduleDate,
+          s.time AS scheduleTime,
           p.nickname AS targetNickname
         FROM review r
         LEFT JOIN schedule s ON r.scheduleId = s.scheduleId
@@ -99,6 +100,7 @@ router.get("/me", async (req, res) => {
         targetId: review.targetId,
         targetNickname: review.targetNickname,
         scheduleDate: review.scheduleDate,
+        scheduleTime: review.scheduleTime,
         rating1: review.rating1,
         rating2: review.rating2,
         content: review.content,
