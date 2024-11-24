@@ -155,34 +155,43 @@ router.get("/:profileId", async (req, res) => {
           r.rating2,
           r.content,
           r.isSecret,
-          s.date AS scheduleDate,
           pr.nickname AS reviewerNickname,
           pr.profile AS reviewerProfile
         FROM review r
-        LEFT JOIN schedule s ON r.scheduleId = s.scheduleId
         LEFT JOIN profile pr ON r.reviewerId = pr.profileId
         WHERE r.targetId = ?;
       `;
 
     const [reviews] = await pool.query(sql, [profileId]);
+    const ratingCounts = {
+      // [notgood, good, supergreat]
+      rating1: [0, 0, 0],
+      rating2: [0, 0, 0],
+    };
+    const response = reviews.map((review) => {
+      if (review.rating1 >= 0 && review.rating1 <= 2) {
+        ratingCounts.rating1[review.rating1]++;
+      }
 
-    // 데이터 가공
-    const response = reviews.map((review) => ({
-      reviewId: review.reviewId,
-      scheduleId: review.scheduleId,
-      scheduleDate: review.scheduleDate,
-      reviewerId: review.reviewerId,
-      reviewerNickname: review.reviewerNickname,
-      reviewerProfile: review.reviewerProfile,
-      rating1: review.rating1,
-      rating2: review.rating2,
-      content: review.content,
-      isSecret: review.isSecret,
-    }));
+      if (review.rating2 >= 0 && review.rating2 <= 2) {
+        ratingCounts.rating2[review.rating2]++;
+      }
+      return {
+        reviewId: review.reviewId,
+        scheduleId: review.scheduleId,
+        reviewerId: review.reviewerId,
+        reviewerNickname: review.reviewerNickname,
+        reviewerProfile: review.reviewerProfile,
+        content: review.content,
+        isSecret: review.isSecret,
+      };
+    });
 
     res.status(200).json({
-      message: "특정 사용자의 리뷰 조회 성공",
+      message: "리뷰 조회 성공",
       reviews: response,
+      totalReviews: reviews.length, //총 리뷰 수
+      ratingCounts, //각 평점별 수
     });
   } catch (error) {
     console.error("특정 사용자의 리뷰 조회 오류:", error);
