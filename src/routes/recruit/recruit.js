@@ -413,10 +413,10 @@ router.get("/:recruitId", async (req, res) => {
     } = recruit[0];
 
     const [userInfo] = await pool.query(
-      "SELECT nickname, gender, birthyear FROM profile WHERE profileId=?",
+      "SELECT nickname, gender, birthyear, profile FROM profile WHERE profileId=?",
       [profileId]
     );
-    const { nickname, gender, birthyear } = userInfo[0];
+    const { nickname, gender, birthyear, profile } = userInfo[0];
 
     // 해당 구인글에 대해 사용자가 지원했는지 여부 확인
     const [application] = await pool.query(
@@ -440,6 +440,7 @@ router.get("/:recruitId", async (req, res) => {
       createdAt,
       nickname,
       gender,
+      profile,
       birthyear,
       hasApplied,
     };
