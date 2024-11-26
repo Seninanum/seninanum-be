@@ -139,7 +139,8 @@ router.get("/:profileId", async (req, res) => {
           #swagger.tags = ['Review']
           #swagger.summary = '특정 사용자의 리뷰 조회'
       */
-  const { profileId } = req.params;
+  const { profileId: paramProfileId } = req.params;
+  const profileId = paramProfileId || req.user?.profileId; // params가 없으면 req.user.profileId 사용
 
   if (!profileId) {
     return res.status(400).json({ error: "profileId가 필요합니다." });
