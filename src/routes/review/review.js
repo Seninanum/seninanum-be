@@ -134,7 +134,7 @@ router.get("/me", async (req, res) => {
 });
 
 // 특정 사용자의 리뷰 조회
-router.get("/:profileId", async (req, res) => {
+router.get("/:profileId?", async (req, res) => {
   /**
           #swagger.tags = ['Review']
           #swagger.summary = '특정 사용자의 리뷰 조회'
