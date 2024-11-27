@@ -8,7 +8,7 @@ const upload = multer();
 
 router.post(
   "/",
-  upload.fields([{ name: "pdfFile" }, { name: "profileId" }]),
+  upload.fields([{ name: "pdfFile" }, { name: "careerProfileId" }]),
   async (req, res) => {
     /**
     #swagger.tags = ['CareerCertificate']
@@ -16,7 +16,7 @@ router.post(
    */
 
     const file = req.files["pdfFile"] ? req.files["pdfFile"][0] : null; // multer가 처리한 파일 정보
-    const profileId = req.body.profileId;
+    const careerProfileId = req.body.careerProfileId;
 
     if (!file) {
       return res.status(400).json({ message: "PDF 파일이 없습니다." });
@@ -41,7 +41,7 @@ router.post(
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER,
       subject: "경력 증명서 전송",
-      text: `시니어의 경력 증명서 파일이 수신되었습니다. Profile ID: ${profileId}`,
+      text: `시니어의 경력 증명서 파일이 수신되었습니다. Profile ID: ${careerProfileId}`,
       attachments: [
         {
           filename: fileName,
@@ -54,11 +54,11 @@ router.post(
     try {
       await transporter.sendMail(mailOptions);
       // profileId로 careerProfile에 있는 careerProfileId조회
-      const [careerProfile] = await pool.query(
-        "SELECT careerProfileId FROM careerProfile WHERE profileId = ?",
-        [profileId]
-      );
-      const careerProfileId = careerProfile[0].careerProfileId;
+      // const [careerProfile] = await pool.query(
+      //   "SELECT careerProfileId FROM careerProfile WHERE profileId = ?",
+      //   [profileId]
+      // );
+      // const careerProfileId = careerProfile[0].careerProfileId;
       //db에 파일 이름, 상태 저장
       await pool.query(
         "INSERT INTO careerCertificate (careerProfileId, name, status) VALUES(?,?,?)",
