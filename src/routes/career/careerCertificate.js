@@ -83,13 +83,7 @@ router.delete("/:profileId", async (req, res) => {
     #swagger.tags = ['CareerCertificate']
     #swagger.summary = '경력 증명서 삭제'
    */
-  const profileId = req.params.profileId;
-  // profileId로 careerProfile에 있는 careerProfileId조회
-  const [careerProfile] = await pool.query(
-    "SELECT careerProfileId FROM careerProfile WHERE profileId = ?",
-    [profileId]
-  );
-  const careerProfileId = careerProfile[0].careerProfileId;
+  const careerProfileId = req.params.profileId;
   try {
     const result = await pool.query(
       "DELETE FROM careerCertificate WHERE careerProfileId = ?",
