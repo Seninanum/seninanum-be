@@ -135,10 +135,6 @@ router.get("/me", async (req, res) => {
 
 // 특정 사용자의 리뷰 조회
 router.get("/:profileId?", async (req, res) => {
-  /**
-          #swagger.tags = ['Review']
-          #swagger.summary = '특정 사용자의 리뷰 조회'
-      */
   const { profileId: paramProfileId } = req.params;
   const profileId = paramProfileId || req.user?.profileId; // params가 없으면 req.user.profileId 사용
 
@@ -165,34 +161,38 @@ router.get("/:profileId?", async (req, res) => {
 
     const [reviews] = await pool.query(sql, [profileId]);
     const ratingCounts = {
-      // [notgood, good, supergreat]
-      rating1: [0, 0, 0],
+      rating1: [0, 0, 0], // [notgood, good, supergreat]
       rating2: [0, 0, 0],
     };
-    const response = reviews.map((review) => {
-      if (review.rating1 >= 0 && review.rating1 <= 2) {
-        ratingCounts.rating1[review.rating1]++;
-      }
 
-      if (review.rating2 >= 0 && review.rating2 <= 2) {
-        ratingCounts.rating2[review.rating2]++;
-      }
-      return {
-        reviewId: review.reviewId,
-        scheduleId: review.scheduleId,
-        reviewerId: review.reviewerId,
-        reviewerNickname: review.reviewerNickname,
-        reviewerProfile: review.reviewerProfile,
-        content: review.content,
-        isSecret: review.isSecret,
-      };
-    });
+    // "리뷰 내용 없음" 필터링 및 데이터 가공
+    const response = reviews
+      .filter((review) => review.content && review.content !== "리뷰 내용 없음") // 필터링 조건 추가
+      .map((review) => {
+        if (review.rating1 >= 0 && review.rating1 <= 2) {
+          ratingCounts.rating1[review.rating1]++;
+        }
+
+        if (review.rating2 >= 0 && review.rating2 <= 2) {
+          ratingCounts.rating2[review.rating2]++;
+        }
+
+        return {
+          reviewId: review.reviewId,
+          scheduleId: review.scheduleId,
+          reviewerId: review.reviewerId,
+          reviewerNickname: review.reviewerNickname,
+          reviewerProfile: review.reviewerProfile,
+          content: review.content,
+          isSecret: review.isSecret,
+        };
+      });
 
     res.status(200).json({
       message: "리뷰 조회 성공",
       reviews: response,
-      totalReviews: reviews.length, //총 리뷰 수
-      ratingCounts, //각 평점별 수
+      totalReviews: response.length, // 필터링된 총 리뷰 수
+      ratingCounts, // 각 평점별 수
     });
   } catch (error) {
     console.error("특정 사용자의 리뷰 조회 오류:", error);
