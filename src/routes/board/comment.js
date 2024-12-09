@@ -106,10 +106,12 @@ router.get("/:boardType/:postId/comments", async (req, res) => {
   }
 });
 
+// 댓글 삭제
 router.delete("/:boardType/:postId/comment/:commentId", async (req, res) => {
   const { boardType, postId, commentId } = req.params;
 
   try {
+    // 댓글 ID 확인
     const [commentData] = await pool.query(
       "SELECT id, parentId FROM comment WHERE id = ?",
       [commentId]
@@ -126,7 +128,7 @@ router.delete("/:boardType/:postId/comment/:commentId", async (req, res) => {
       await connection.beginTransaction();
 
       if (parentId === null) {
-        // 부모 댓글 삭제 로직
+        // 부모 댓글 삭제
         const [childComments] = await connection.query(
           "SELECT id FROM comment WHERE parentId = ?",
           [commentId]
@@ -156,23 +158,21 @@ router.delete("/:boardType/:postId/comment/:commentId", async (req, res) => {
         // 부모 댓글 삭제
         await connection.query("DELETE FROM comment WHERE id = ?", [commentId]);
 
-        // 댓글 수 감소
+        // 댓글 수 감소 (부모 + 자식)
         await connection.query(
           `UPDATE ${boardType}Board SET commentCount = commentCount - ? WHERE ${boardType}BoardId = ?`,
           [1 + childCommentIds.length, postId]
         );
       } else {
-        // 자식 댓글 삭제 로직
-        // 자식 댓글 좋아요 삭제
+        // 자식 댓글 삭제
         await connection.query(
           "DELETE FROM likes WHERE targetId = ? AND type = 'comment'",
           [commentId]
         );
 
-        // 자식 댓글 삭제
         await connection.query("DELETE FROM comment WHERE id = ?", [commentId]);
 
-        // 댓글 수 감소
+        // 댓글 수 감소 (자식 댓글 1개)
         await connection.query(
           `UPDATE ${boardType}Board SET commentCount = commentCount - 1 WHERE ${boardType}BoardId = ?`,
           [postId]
