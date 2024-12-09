@@ -106,13 +106,10 @@ router.get("/:boardType/:postId/comments", async (req, res) => {
   }
 });
 
-// 댓글 삭제
 router.delete("/:boardType/:postId/comment/:commentId", async (req, res) => {
   const { boardType, postId, commentId } = req.params;
-  const profileId = req.user.profileId;
 
   try {
-    // 댓글 데이터 확인 (부모 댓글인지 판별)
     const [commentData] = await pool.query(
       "SELECT id, parentId FROM comment WHERE id = ?",
       [commentId]
@@ -128,10 +125,8 @@ router.delete("/:boardType/:postId/comment/:commentId", async (req, res) => {
     try {
       await connection.beginTransaction();
 
-      let totalDeletedComments = 1; // 대상 댓글
-
       if (parentId === null) {
-        // 부모 댓글인 경우: 자식 댓글도 함께 삭제
+        // 부모 댓글 삭제 로직
         const [childComments] = await connection.query(
           "SELECT id FROM comment WHERE parentId = ?",
           [commentId]
@@ -140,9 +135,7 @@ router.delete("/:boardType/:postId/comment/:commentId", async (req, res) => {
         const childCommentIds = childComments.map((child) => child.id);
 
         if (childCommentIds.length > 0) {
-          totalDeletedComments += childCommentIds.length;
-
-          // 자식 댓글의 좋아요 삭제
+          // 자식 댓글 좋아요 삭제
           await connection.query(
             "DELETE FROM likes WHERE targetId IN (?) AND type = 'comment'",
             [childCommentIds]
@@ -153,31 +146,47 @@ router.delete("/:boardType/:postId/comment/:commentId", async (req, res) => {
             childCommentIds,
           ]);
         }
+
+        // 부모 댓글 좋아요 삭제
+        await connection.query(
+          "DELETE FROM likes WHERE targetId = ? AND type = 'comment'",
+          [commentId]
+        );
+
+        // 부모 댓글 삭제
+        await connection.query("DELETE FROM comment WHERE id = ?", [commentId]);
+
+        // 댓글 수 감소
+        await connection.query(
+          `UPDATE ${boardType}Board SET commentCount = commentCount - ? WHERE ${boardType}BoardId = ?`,
+          [1 + childCommentIds.length, postId]
+        );
+      } else {
+        // 자식 댓글 삭제 로직
+        // 자식 댓글 좋아요 삭제
+        await connection.query(
+          "DELETE FROM likes WHERE targetId = ? AND type = 'comment'",
+          [commentId]
+        );
+
+        // 자식 댓글 삭제
+        await connection.query("DELETE FROM comment WHERE id = ?", [commentId]);
+
+        // 댓글 수 감소
+        await connection.query(
+          `UPDATE ${boardType}Board SET commentCount = commentCount - 1 WHERE ${boardType}BoardId = ?`,
+          [postId]
+        );
       }
 
-      // 현재 댓글(부모 또는 답글) 좋아요 삭제
-      await connection.query(
-        "DELETE FROM likes WHERE targetId = ? AND type = 'comment'",
-        [commentId]
-      );
-
-      // 현재 댓글 삭제
-      await connection.query("DELETE FROM comment WHERE id = ?", [commentId]);
-
-      // 게시물의 댓글 수 감소 (삭제된 총 댓글 수만큼)
-      await connection.query(
-        `UPDATE ${boardType}Board SET commentCount = commentCount - ? WHERE ${boardType}BoardId = ?`,
-        [totalDeletedComments, postId]
-      );
-
-      await connection.commit(); // 트랜잭션 커밋
+      await connection.commit();
       res.status(200).json({ message: "댓글이 성공적으로 삭제되었습니다." });
     } catch (error) {
       await connection.rollback();
       console.error("댓글 삭제 중 오류:", error);
       res.status(500).json({ message: "댓글 삭제 중 오류가 발생했습니다." });
     } finally {
-      connection.release(); // 연결 해제
+      connection.release();
     }
   } catch (error) {
     console.error("댓글 삭제 오류:", error);
