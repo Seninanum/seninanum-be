@@ -1,5 +1,20 @@
 const pool = require("../../database/db");
 
+// chatRoomSession안에 상대방이 있는지 확인
+// 내 profileId의 chatRoomId와 같은 chatRoomId가 존재하는지 체크
+
+// 채팅방 들어왔을 때 상대방 이전 메세지는 모두 읽음처리
+const setUnreadToRead = async (roomId, memberId) => {
+  try {
+    await pool.query(
+      "UPDATE chatMessage SET unreadCount = ? WHERE chatRoomId = ? AND senderID != ? ",
+      [0, roomId, memberId]
+    );
+  } catch (error) {
+    console.error("Error while processing connected event: ", error);
+  }
+};
+
 const handleConnected = async (stompServer, sessionId, headers) => {
   try {
     // session 등록하기
@@ -63,7 +78,6 @@ const handleConnected = async (stompServer, sessionId, headers) => {
       );
     }
   } catch (error) {
-    // 에러 발생 시 트랜잭션 롤백
     console.error("Error while processing connected event: ", error);
   }
 };
