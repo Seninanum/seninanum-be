@@ -8,7 +8,7 @@ const isBothInSession = async (roomId) => {
       [roomId]
     );
     console.log("session result>>>>>>>>>>>", result);
-    return rows.length === 2 ? 0 : 1;
+    return result.length === 2 ? 0 : 1;
   } catch (error) {
     console.error("Error while processing connected event: ", error);
   }
