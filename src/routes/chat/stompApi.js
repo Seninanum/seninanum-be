@@ -3,13 +3,12 @@ const pool = require("../../database/db");
 // 둘 다 chatRoomSession안에 있을 때 읽음처리
 const isBothInSession = async (roomId) => {
   try {
-    const result = await pool.query(
+    const [result] = await pool.query(
       "SELECT profileId FROM chatRoomSession WHERE chatRoomId = ?",
       [roomId]
     );
     console.log("session result>>>>>>>>>>>", result);
-    if (result.length === 2) return 0;
-    else return 1;
+    return rows.length === 2 ? 0 : 1;
   } catch (error) {
     console.error("Error while processing connected event: ", error);
   }
