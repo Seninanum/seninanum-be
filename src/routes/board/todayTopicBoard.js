@@ -41,6 +41,49 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {});
+// 게시글 목록 조회 API
+router.get("/", async (req, res) => {
+  try {
+    // topicBoard 테이블의 모든 데이터 조회
+    const [rows] = await pool.query(
+      "SELECT topicBoardId, question, date FROM topicBoard ORDER BY date DESC"
+    );
+
+    res.status(200).json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "게시글 목록 조회에 실패했습니다.",
+    });
+  }
+});
+
+// 게시글 삭제 API
+router.delete("/:topicBoardId", async (req, res) => {
+  const { topicBoardId } = req.params;
+
+  try {
+    // topicBoard 테이블에서 해당 ID의 행 삭제
+    const [result] = await pool.query(
+      "DELETE FROM topicBoard WHERE topicBoardId = ?",
+      [topicBoardId]
+    );
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({
+        message: "게시글이 성공적으로 삭제되었습니다.",
+      });
+    } else {
+      res.status(404).json({
+        message: "해당 ID의 게시글을 찾을 수 없습니다.",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "게시글 삭제에 실패했습니다.",
+    });
+  }
+});
 
 module.exports = router;
