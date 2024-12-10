@@ -1,5 +1,32 @@
 const pool = require("../../database/db");
 
+// 둘 다 chatRoomSession안에 있을 때 읽음처리
+const isBothInSession = async (roomId) => {
+  try {
+    const result = await pool.query(
+      "SELECT profileId FROM chatRoomSession WHERE chatRoomId = ?",
+      [roomId]
+    );
+    console.log("session result>>>>>>>>>>>", result);
+    if (result.length === 2) return 0;
+    else return 1;
+  } catch (error) {
+    console.error("Error while processing connected event: ", error);
+  }
+};
+
+// 채팅방 들어왔을 때 상대방 이전 메세지는 모두 읽음처리
+const setUnreadToRead = async (roomId, memberId) => {
+  try {
+    await pool.query(
+      "UPDATE chatMessage SET unreadCount = ? WHERE chatRoomId = ? AND senderID != ?",
+      [0, roomId, memberId] // 마지막 ?에 unreadCount != 0 조건 추가
+    );
+  } catch (error) {
+    console.error("Error while processing connected event: ", error);
+  }
+};
+
 const handleConnected = async (stompServer, sessionId, headers) => {
   try {
     // session 등록하기
@@ -8,13 +35,22 @@ const handleConnected = async (stompServer, sessionId, headers) => {
       [sessionId, headers.memberId, headers.chatRoomId]
     );
 
+    // 읽음 처리
+    setUnreadToRead(headers.chatRoomId, headers.memberId);
+
+    /*
+      방을 나갔다가
+      다시 들어온
+      경우
+    */
+
     // id가 마이너스인 chatRoom 정보 가져오기
     const [existingChatroom] = await pool.query(
       "SELECT * FROM chatRoom WHERE ABS(memberId) = ABS(?) AND memberId < 0 OR ABS(opponentId) = ABS(?) AND opponentId < 0",
       [headers.memberId, headers.memberId]
     );
 
-    // 나갔다 들어온 방
+    // 나갔다 다시 들어온 방인 경우
     if (existingChatroom.length > 0) {
       // chatRoom 사용자 id값 양수로 변경
       if (existingChatroom[0].memberId < 0) {
@@ -63,12 +99,13 @@ const handleConnected = async (stompServer, sessionId, headers) => {
       );
     }
   } catch (error) {
-    // 에러 발생 시 트랜잭션 롤백
     console.error("Error while processing connected event: ", error);
   }
 };
 
 const handleSendMessage = async (stompServer, messageBody, roomId) => {
+  let UNREAD_COUNT = 1;
+
   try {
     // 메시지 디코딩
     const binaryMessage = new Uint8Array(
@@ -76,10 +113,18 @@ const handleSendMessage = async (stompServer, messageBody, roomId) => {
     );
     const decodedMessage = new TextDecoder().decode(binaryMessage);
 
+    UNREAD_COUNT = isBothInSession(roomId);
+
     // DB에 메시지 저장
     const [result] = await pool.query(
       "INSERT INTO chatMessage (chatRoomId, senderId, chatMessage, senderType, unreadCount) VALUES (?, ?, ?, ?, ?)",
-      [roomId, messageBody.senderId, decodedMessage, messageBody.senderType, 1]
+      [
+        roomId,
+        messageBody.senderId,
+        decodedMessage,
+        messageBody.senderType,
+        UNREAD_COUNT,
+      ]
     );
 
     if (!result || !result.insertId) {
@@ -97,7 +142,7 @@ const handleSendMessage = async (stompServer, messageBody, roomId) => {
     const createdAt = new Date(createdAtResult[0].createdAt);
     messageBody.createdAt = createdAt.toISOString().split(".")[0];
     messageBody.chatMessageId = result.insertId;
-    messageBody.unreadCount = 1;
+    messageBody.unreadCount = UNREAD_COUNT;
     messageBody.chatRoomId = roomId;
     delete messageBody.receiverId;
 
