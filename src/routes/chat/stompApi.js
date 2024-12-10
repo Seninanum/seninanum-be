@@ -103,16 +103,14 @@ const handleConnected = async (stompServer, sessionId, headers) => {
 };
 
 const handleSendMessage = async (stompServer, messageBody, roomId) => {
-  let UNREAD_COUNT = 1;
-
   try {
+    const UNREAD_COUNT = await isBothInSession(roomId);
+
     // 메시지 디코딩
     const binaryMessage = new Uint8Array(
       Object.values(messageBody.chatMessage)
     );
     const decodedMessage = new TextDecoder().decode(binaryMessage);
-
-    UNREAD_COUNT = isBothInSession(roomId);
 
     // DB에 메시지 저장
     const [result] = await pool.query(
