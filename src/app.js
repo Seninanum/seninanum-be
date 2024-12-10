@@ -27,6 +27,8 @@ const freeBoardRouter = require("./routes/board/freeBoard");
 const adviceBoardRouter = require("./routes/board/adviceBoard");
 const imageRouter = require("./routes/aws/s3Image");
 const commentRouter = require("./routes/board/comment");
+const scheduleRouter = require("./routes/review/schedule");
+const reviewRouter = require("./routes/review/review");
 
 // swagger
 const swaggerUi = require("swagger-ui-express");
@@ -75,6 +77,8 @@ app.use("/board/advice", verifyToken, adviceBoardRouter);
 app.use("/board/free", verifyToken, freeBoardRouter);
 app.use("/", verifyToken, imageRouter);
 app.use("/board", verifyToken, commentRouter);
+app.use("/schedule", verifyToken, scheduleRouter);
+app.use("/review", verifyToken, reviewRouter);
 
 app.use(
   "/api-docs",

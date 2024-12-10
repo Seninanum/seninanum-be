@@ -47,6 +47,8 @@ module.exports = function (server) {
         case "USER":
         case "IMAGE":
         case "SCHEDULE":
+        case "PAY_REQUEST":
+        case "PAY_RESPONSE":
           await handleSendMessage(stompServer, messageBody, roomId);
           break;
 
