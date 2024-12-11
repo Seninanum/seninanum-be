@@ -12,17 +12,26 @@ router.post("/signup", async (req, res) => {
     #swagger.summary = '회원가입'
    */
 
-  const { userId, userType, nickname, gender, birthYear, profile } = req.body;
+  const { userId, userType, nickname, gender, birthYear, profile, telNum } =
+    req.body;
 
-  if (!userId || !userType || !nickname || !gender || !birthYear || !profile) {
+  if (
+    !userId ||
+    !userType ||
+    !nickname ||
+    !gender ||
+    !birthYear ||
+    !profile ||
+    !telNum
+  ) {
     return res.status(400).json({ error: "모든 body값이 존재해야 합니다." });
   }
 
   try {
     // 기본 프로필 정보 저장
     await pool.query(
-      "INSERT INTO profile (userId, userType, nickname, gender, birthYear, profile) VALUES (?, ?, ?, ?, ?, ?)",
-      [userId, userType, nickname, gender, birthYear, profile]
+      "INSERT INTO profile (userId, userType, nickname, gender, birthYear, profile, telNum) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [userId, userType, nickname, gender, birthYear, profile, telNum]
     );
 
     // 토큰 생성
